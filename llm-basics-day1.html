@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：LLM 基础 — Day 1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：LLM 基础</h1>
+  <div class="meta">Day 1 · 2026-05-19</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 1. Transformer 架构 -->
+<div class="card">
+  <h2>Transformer 架构<span class="en">Transformer Architecture</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">理论</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像把"逐字读"的串行流水线换成了"全员同时开会"的并行架构 —— 每个 token 一次性看到全文，再决定自己要表达什么。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>2017 年之前，处理文本主流是 RNN/LSTM，本质是个 for 循环：必须先算完第 t 个词，才能算第 t+1 个。这导致两个痛点：(1) 训练不能并行，慢；(2) 长距离依赖容易"遗忘"（梯度消失）。Transformer 用"自注意力"一次性建立任意两个位置的连接，于是 GPU 可以满负载并行，长依赖也不丢。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>把每个 token 想象成一个对象，它有三个属性：Query（我想找什么）、Key（我能提供什么）、Value（我实际的内容）。每一层的逻辑大致是：</p>
+<pre><span class="cmt"># 伪代码：一层 Transformer block</span>
+<span class="kw">for</span> token <span class="kw">in</span> sequence:
+    <span class="cmt"># 1. 和全文每个 token 做 Q·K 相似度匹配（像数据库 JOIN）</span>
+    scores = token.Q @ all_tokens.K.T
+    weights = softmax(scores)
+    <span class="cmt"># 2. 按权重把别人的 Value 取过来做加权和</span>
+    token.new = weights @ all_tokens.V
+    <span class="cmt"># 3. 再过一个前馈网络（相当于一个非线性映射）</span>
+    token.out = FFN(token.new + token)  <span class="cmt"># 残差连接</span></pre>
+    <p>这样的 block 堆 12~96 层，每层都让 token 重新"问一遍全文"，表示就越来越丰富。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 用 transformers 库加载一个 Transformer 模型，10 行看到全貌</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModel
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"bert-base-uncased"</span>)
+model = AutoModel.from_pretrained(<span class="str">"bert-base-uncased"</span>)
+
+inputs = tok(<span class="str">"Transformers changed NLP."</span>, return_tensors=<span class="str">"pt"</span>)
+<span class="kw">with</span> torch.no_grad():
+    out = model(**inputs)
+
+<span class="cmt"># out.last_hidden_state 形状：[batch, seq_len, hidden_dim]</span>
+<span class="cmt"># 每个 token 都被编码成一个 768 维向量，含了它在上下文中的"含义"</span>
+<span class="fn">print</span>(out.last_hidden_state.shape)  <span class="cmt"># torch.Size([1, 6, 768])</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区："Transformer = ChatGPT"。其实 Transformer 只是骨架，原始论文是给翻译做的（Encoder-Decoder）。GPT 用的是只取 Decoder 的变体，BERT 用的是只取 Encoder 的变体。架构是地基，行为靠训练目标和数据塑造。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li><a href="https://jalammar.github.io/illustrated-transformer/">Jay Alammar — The Illustrated Transformer</a>（图解，最经典入门）</li>
+      <li><a href="https://www.youtube.com/watch?v=kCc8FmEb1nY">Karpathy — Let's build GPT from scratch</a>（2 小时跟着写）</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p><b>经典：</b>所有现代 LLM（GPT、Claude、Gemini、Llama）都是 Transformer。<b>你的场景：</b>当你用 Claude 写每日总结，它把你贴进去的 5000 字会议笔记一次性"扫"成一个语义向量，再生成摘要 —— 这是 Transformer 的并行注意力在帮你省时间。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Transformers replaced recurrent loops with parallel self-attention, letting every token attend to every other token in one pass. This unlocked GPU-scale training and is the backbone of all modern LLMs (GPT, Claude, Llama).</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">在 Colab 或本地跑上面的 10 行代码，把句子换成中文 "我爱机器学习"，观察输出 shape。然后试着用 <code>tok.tokenize(...)</code> 看看每个中文字符被切成了几个 token，体会"看上去 1 个字 ≠ 1 个 token"。</div>
+  </div>
+</div>
+
+<!-- 2. Attention 机制 -->
+<div class="card">
+  <h2>Attention 机制<span class="en">Attention Mechanism</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">核心</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像 SQL 的 JOIN —— 每个词都拿着自己的"查询条件"去全文里匹配，找出最相关的词，然后把它们的内容加权拷过来一份。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>"The cat sat on the mat because it was warm." 这里的 it 指 mat 还是 cat？传统模型只能按距离猜，而 Attention 让 it 这个位置主动去问全文："谁和我最相关？" 然后把 mat 的向量按高权重拿过来，自己的表示里就编码了"它指 mat"。本质：解决长距离指代和上下文聚焦。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心公式 <code>Attention(Q,K,V) = softmax(Q·Kᵀ / √d) · V</code>。白话翻译："拿查询 Q 和所有 Key 做点积算相似度，归一化成权重，再去加权求和所有 Value。" 就是带权查表。</p>
+<pre><span class="cmt"># 4 行 numpy 看懂 attention</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">def</span> <span class="fn">attention</span>(Q, K, V):
+    scores = Q @ K.T / np.sqrt(K.shape[-1])  <span class="cmt"># 相似度</span>
+    weights = np.exp(scores) / np.exp(scores).sum(axis=-1, keepdims=<span class="kw">True</span>)
+    <span class="kw">return</span> weights @ V                        <span class="cmt"># 加权求和</span></pre>
+    <p>Multi-Head Attention = 同时开多个"独立查询通道"，每个 head 关注不同维度（句法/语义/指代…）的关系。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 看看 GPT-2 实际在"关注"哪些词</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> GPT2Tokenizer, GPT2Model
+tok = GPT2Tokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = GPT2Model.from_pretrained(<span class="str">"gpt2"</span>, output_attentions=<span class="kw">True</span>)
+
+inputs = tok(<span class="str">"The cat sat on the mat"</span>, return_tensors=<span class="str">"pt"</span>)
+out = model(**inputs)
+<span class="cmt"># out.attentions[layer][batch, head, query_pos, key_pos]</span>
+attn = out.attentions[-1][0, 0]   <span class="cmt"># 最后一层第 0 个 head</span>
+<span class="fn">print</span>(attn.shape)  <span class="cmt"># [6, 6]，每个词对其他词的注意力权重矩阵</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区："Attention 就是加权平均"。区别是权重由输入动态算出来的，不是固定参数。每来一句新话，权重就重新分配 —— 这才是它能"理解上下文"的根本。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li><a href="https://jalammar.github.io/illustrated-transformer/">Illustrated Transformer — Attention 部分</a></li>
+      <li><a href="https://distill.pub/2016/augmented-rnns/">Distill — Attention and Augmented RNNs</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p><b>经典：</b>机器翻译时，目标语每个词都通过 attention 去"看"源语对应的词。<b>你的场景：</b>给孩子讲故事时，Claude 之所以能记住第一段提到的"小狐狸"在第三段还是同一只狐狸，靠的就是 attention 跨段建立指代连接。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Attention computes a weighted sum of values, where weights come from query-key similarity. It lets each token dynamically pull context from any position, replacing fixed locality with content-based routing.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">用 <a href="https://github.com/jessevig/bertviz">BertViz</a> 在浏览器里可视化一句歧义句（"它"指代不明）的 attention 矩阵，看看模型把代词的注意力分给了哪几个名词。</div>
+  </div>
+</div>
+
+<!-- 3. Tokenization -->
+<div class="card">
+  <h2>Tokenization 分词<span class="en">Tokenization</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">工程</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像编译器把源码切成 token —— LLM 处理文本前必须先把字符流切成"词块"，每个词块映射成一个整数 ID，模型其实只看 ID 不看字。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>词表不能太大（每个词单独编号 → 几百万词表 → 矩阵爆炸），也不能太小（按字母切 → 序列太长，模型记不住语义）。解决方案：BPE / WordPiece / SentencePiece —— 按"高频字节组合"自动学习一个 5 万左右的子词表。常见词整词留下，生僻词拆成几片。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>BPE 训练过程像"贪心压缩"：从单字符开始，反复把出现频率最高的相邻字符对合并成一个新 token，直到词表达到目标大小。</p>
+<pre><span class="cmt"># BPE 直觉</span>
+<span class="cmt"># 初始: ['l','o','w','e','r']</span>
+<span class="cmt"># 发现 'l'+'o' 频次最高 → 合并 → ['lo','w','e','r']</span>
+<span class="cmt"># 再发现 'lo'+'w' 频次最高 → 合并 → ['low','e','r']</span>
+<span class="cmt"># 最终高频整词留下，低频词被拆成子词片段</span>
+<span class="cmt"># "tokenization" 可能被切成 ["token", "ization"]</span></pre>
+    <p>结果：英文 1 token ≈ 4 字符 ≈ 0.75 词；中文 1 个汉字常占 2-3 个 token。这直接影响你的账单和上下文长度。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> tiktoken  <span class="cmt"># OpenAI 官方分词器</span>
+
+enc = tiktoken.get_encoding(<span class="str">"cl100k_base"</span>)  <span class="cmt"># GPT-4 用的</span>
+
+text_en = <span class="str">"Tokenization is fun!"</span>
+text_zh = <span class="str">"分词其实很有意思！"</span>
+
+<span class="fn">print</span>(enc.encode(text_en))         <span class="cmt"># [3404, 2065, 374, 2523, 0]</span>
+<span class="fn">print</span>(<span class="fn">len</span>(enc.encode(text_en)))    <span class="cmt"># 5 tokens</span>
+<span class="fn">print</span>(<span class="fn">len</span>(enc.encode(text_zh)))    <span class="cmt"># 11 tokens（中文更贵！）</span>
+
+<span class="cmt"># 解码回去</span>
+<span class="fn">print</span>(enc.decode([3404, 2065]))   <span class="cmt"># "Tokeniz"  ← 不是完整词</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区："1 token = 1 个词"。错。"strawberry" 在 GPT 里被切成 ["straw","berry"] 三段，这也是为什么早期 GPT 数不清 "strawberry 里有几个 r" —— 它根本看不到字母 r，只看到 token 块。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li><a href="https://platform.openai.com/tokenizer">OpenAI Tokenizer 在线工具</a>（贴文本看 token 切分）</li>
+      <li><a href="https://www.youtube.com/watch?v=zduSFxRajkE">Karpathy — Let's build the GPT Tokenizer</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p><b>经典：</b>评估 API 成本（OpenAI 按 token 收费）。<b>你的场景：</b>同样一段会议笔记，用中文写比用英文写贵 2-3 倍。如果是高频自动化任务（如每天总结新闻），用英文 prompt + 中文输出能省钱。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Tokenization splits text into subword units (via BPE/WordPiece) so the vocabulary stays manageable while rare words remain encodable. Token counts drive both context limits and API pricing.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">在 OpenAI Tokenizer 网页上贴一段你昨天的 Claude 对话，看 prompt 和 response 各占多少 token。再算一下：如果按 GPT-4 价格，你这次对话花了多少美分？</div>
+  </div>
+</div>
+
+<!-- 4. 位置编码 -->
+<div class="card">
+  <h2>位置编码<span class="en">Positional Encoding</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">理论</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>Attention 本身是"无序集合"操作（像 Python 的 set），不知道谁在前谁在后。位置编码就像给每个 token 戳上一个"位置 ID"，让模型分得清"狗咬人"和"人咬狗"。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>self-attention 计算 Q·Kᵀ 时，词的顺序完全没参与运算 —— 把句子打乱再算，结果不变。这显然不行。解决方案：在 token 的 embedding 里"注入"位置信息，让位置 0 和位置 5 有不同的初始向量。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>三代演进：</p>
+    <ul>
+      <li><b>Sinusoidal（原版 Transformer）</b>：用不同频率的 sin/cos 给每个位置生成一个独特向量，加到 token embedding 上。优点：能外推到训练时没见过的长度。</li>
+      <li><b>Learned（GPT-2/BERT）</b>：直接学一个 [max_len, dim] 的查表矩阵，简单但不能外推。</li>
+      <li><b>RoPE 旋转位置编码（Llama/Qwen/现代主流）</b>：把位置变成"旋转角度"，token 在高维空间里按位置转一定角度。两个 token 做 Q·K 点积时，自然就编码了"相对距离"。这是当下长上下文模型的标配。</li>
+    </ul>
+<pre><span class="cmt"># 直觉伪代码：RoPE 给位置 m 的向量旋转 m·θ 角度</span>
+<span class="kw">def</span> <span class="fn">rope</span>(x, pos):
+    <span class="cmt"># x 是 token 的 Q 或 K 向量，按对划分</span>
+    <span class="kw">for</span> i, (a, b) <span class="kw">in</span> <span class="fn">enumerate</span>(pairs(x)):
+        theta = pos / 10000 ** (2*i / dim)
+        a_new = a * cos(theta) - b * sin(theta)
+        b_new = a * sin(theta) + b * cos(theta)
+    <span class="kw">return</span> rotated_x</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 观察位置编码对结果的影响</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.from_pretrained(<span class="str">"gpt2"</span>)
+
+<span class="cmt"># 同样的 token，不同位置 → 不同的隐藏状态</span>
+ids_a = tok(<span class="str">"dog bites man"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+ids_b = tok(<span class="str">"man bites dog"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+
+<span class="kw">with</span> torch.no_grad():
+    h_a = model.transformer(ids_a).last_hidden_state
+    h_b = model.transformer(ids_b).last_hidden_state
+
+<span class="cmt"># 即使是同样的 3 个 token，因为位置不同，最后表征完全不一样</span>
+<span class="fn">print</span>(torch.allclose(h_a, h_b))   <span class="cmt"># False</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区："位置编码就是把 1, 2, 3 加到 embedding 上"。这样会让位置数值压倒语义。真实做法是用高维度的周期函数或旋转，让"相对距离"在向量空间里有几何意义 —— 这是 RoPE 能支持 128K 长上下文的关键。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li><a href="https://huggingface.co/blog/designing-positional-encoding">HuggingFace — Designing Positional Encoding</a></li>
+      <li><a href="https://blog.eleuther.ai/rotary-embeddings/">EleutherAI — Rotary Embeddings 详解</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <p><b>经典：</b>所有需要顺序敏感的任务（翻译、代码生成、推理链）。<b>你的场景：</b>当你让 Claude 做"分析这 50 页 PDF 报告"，模型必须分得清第 3 页和第 47 页的内容 —— 这就靠位置编码（RoPE）在长上下文中保持位置感。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Self-attention is permutation-invariant, so positional encodings inject order information into token embeddings. Modern LLMs use Rotary Position Embedding (RoPE), which encodes relative positions via rotation, enabling long-context extrapolation.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">5 分钟动手</div>
+    <div class="exercise">跑上面那段代码，验证 "dog bites man" 和 "man bites dog" 的隐藏状态不同。然后注释掉 GPT-2 的位置编码层（<code>model.transformer.wpe</code>），重跑一次 —— 你会看到结果几乎一样，亲眼验证"没有位置编码 = 词袋模型"。</div>
+  </div>
+</div>
+
+<a href="index.html" class="back">← 回到首页</a>
+
+<footer>BigCat · AI &amp; ML Daily · Day 1</footer>
+</div>
+</body>
+</html>
