@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：Agent 架构 — Day 5</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7;overflow-x:auto}
+.diagram .arrow{color:#00d4ff;font-weight:700}
+.diagram .box{display:inline-block;border:1px solid #7b61ff;border-radius:6px;padding:4px 10px;color:#a48cff;background:rgba(123,97,255,0.08)}
+.diagram .obs{color:#7ed6a0}
+.diagram .think-tag{color:#ffb450}
+.diagram .act{color:#00d4ff}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<a href="https://cissy0802.github.io/" style="position:fixed;top:14px;left:14px;font-size:0.82rem;color:inherit;opacity:0.55;text-decoration:none;padding:6px 12px;border:1px solid currentColor;border-radius:20px;z-index:100;backdrop-filter:blur(6px);transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.55">← Hub</a>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：Agent 架构</h1>
+  <div class="meta">Day 5 · 2026-05-22</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<!-- 1. ReAct Agent -->
+<div class="card">
+  <h2>ReAct 智能体<span class="en">ReAct Agent</span></h2>
+  <div class="tags"><span class="tag">Agent</span><span class="tag purple">基础范式</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像让 LLM 一边写思考过程一边调函数的 REPL ——『想一步、做一步、看结果、再想下一步』，循环到任务完成。本质是把『思考』和『行动』交织进同一段对话历史里。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>纯 LLM 只会一次性输出文本，遇到『今天的股价是多少』『这个文件夹里有几个 py 文件』这种需要外部信息或副作用的任务就会编。Day 3 学过的 CoT 让模型思考，但思考完还是一次性回答；Tool Use 让模型调外部 API，但单次调用解决不了多步任务。ReAct（Reason + Act）把两者缝在一起，让模型可以『思考 → 调工具 → 看结果 → 再思考』反复迭代——成为大多数 Agent 框架（LangChain Agent、AutoGPT）的基石。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心是一个固定的 prompt 模板，让模型每轮输出三段结构化文本：Thought（推理）→ Action（调用哪个工具，参数什么）→ Observation（工具返回的结果由系统填进来）。这三段一起追加到 context，进入下一轮。直到模型输出 <code>Final Answer</code> 才终止。</p>
+    <div class="diagram">
+<span class="think-tag">Thought:</span> 我需要查今天的天气<br>
+<span class="act">Action:</span> search("北京今天天气")<br>
+<span class="obs">Observation:</span> 多云 18-26°C<br>
+<span class="arrow">↓ 把上面三行追加到 context，再问 LLM</span><br>
+<span class="think-tag">Thought:</span> 已经拿到天气，但用户问的是穿衣建议<br>
+<span class="act">Action:</span> Final Answer: "建议穿薄外套..."
+    </div>
+    <p>类比：就是一个 <code>while not done:</code> 循环，循环体是『LLM 决定下一步 + 执行 + 把结果塞回 prompt』。和软件工程里的 event loop / message-driven actor 同构。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> langchain.agents <span class="kw">import</span> create_react_agent, AgentExecutor
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+<span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
+
+<span class="cmt"># 定义两个工具——就像注册可被 LLM 调用的函数</span>
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">search_web</span>(query: str) -> str:
+    <span class="str">"""搜索网页，返回前 3 条结果摘要"""</span>
+    <span class="kw">return</span> google_search(query)[:3]
+
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">calculator</span>(expr: str) -> str:
+    <span class="str">"""计算数学表达式，例如 '2*(3+4)'"""</span>
+    <span class="kw">return</span> str(eval(expr))
+
+agent = create_react_agent(
+    llm=ChatOpenAI(model=<span class="str">"gpt-4o"</span>),
+    tools=[search_web, calculator],
+    prompt=<span class="str">"你是研究助理。每步先 Thought 再 Action..."</span>
+)
+executor = AgentExecutor(agent=agent, tools=[search_web, calculator], verbose=<span class="kw">True</span>)
+executor.invoke({<span class="str">"input"</span>: <span class="str">"特斯拉今天股价乘以 1000 是多少？"</span>})
+<span class="cmt"># 会自动：search → 看到 $250 → calculator("250*1000") → 答 250000</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区一：以为 ReAct 是某种模型架构——它不是，它是一个 <b>prompting 模式</b>，任何 instruction-following LLM 都能跑。<br>误区二：把 Thought 字段当成『真正的内心独白』。模型写 Thought 只是为了给自己制造一段 prefix 来约束下一步输出，研究表明删掉 Thought 直接生成 Action 经常也能 work——但保留它有可解释性收益（debug 时能看到模型为啥这么做）。<br>误区三：循环不设上限。生产环境必须设 max_iterations（一般 10-20），否则模型会陷入『搜不到 → 再搜 → 还是搜不到』的死循环烧掉一堆 token。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>原始论文图解 <a href="https://react-lm.github.io/" target="_blank">ReAct: Synergizing Reasoning and Acting</a></li>
+      <li>LangChain 官方教程 <a href="https://python.langchain.com/docs/tutorials/agents/" target="_blank">Build an Agent</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <div class="exercise">📌 经典：客服 Agent——用户问『我上个月那笔订单到哪了』，Agent 自动调 query_orders → query_logistics → 综合回复。<br>👩‍💼 你的场景：『超级个体』每日简报 Agent——给它你的兴趣（AI、投资、育儿），让它每天早上自动调 search_news → filter → summarize 三个工具，输出 5 条精选要闻发到你的 Slack。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">ReAct interleaves reasoning traces ("Thought") with tool invocations ("Action") and their results ("Observation") in a single LLM context, looping until a final answer is reached. It's a prompting pattern — not a model architecture — and underpins virtually every modern tool-using agent framework.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>1. ReAct 把 Thought 和 Action 写在同一段输出里——为什么不把它们分成两次 LLM 调用？</summary><div>这是性能 vs 解耦的经典 trade-off。合并的好处：(a) 一次 LLM 调用同时拿到推理和动作，省一半成本和延迟；(b) 推理和动作共享同一个 attention，模型能在生成 Action 时『参考』自己刚才的 Thought（自回归本来就是 prefix-conditioned）。拆开的好处：可以用便宜模型做 Action 选择，用强模型做 Thought，或者对 Action 单独做 grammar-constrained decoding 强制 JSON 格式。生产实践趋势是『结构化输出』——用 function calling API 让模型直接产 JSON Action，把 Thought 当 reasoning_field 嵌入 schema，既保留可解释性又拿到强类型保证。</div></details>
+    <details><summary>2. ReAct 的 context 会随着循环不断变长（每轮追加 Thought+Action+Observation），10 轮后可能就 8000 token——这对成本和性能意味着什么？怎么缓解？</summary><div>三重代价：(a) 钱：每轮都把全部历史发给 LLM，成本是 O(n²) 不是 O(n)，10 轮迭代的总 token 接近单轮的 5-6 倍；(b) 延迟：context 越长 prefill 越慢；(c) 性能退化：超过模型 sweet spot（如 32k）后 attention 对中间位置注意力下降（'lost in the middle'）。缓解三招：用 Day 4 的 RAG 把老 Observation 压缩进向量库按需取回；用 sliding window 只保留最近 N 轮 + 任务目标；让 LLM 自己定期 summarize 历史（Day 8 会讲的 Context Compression）。Anthropic 的 Claude 在长 context 上更稳，但本质上 ReAct 不是为长任务优化的——这正是下面 Plan-and-Execute 想解决的事。</div></details>
+    <details><summary>3. 假设你给 Agent 装了 50 个工具（read_file、send_email、query_db...），ReAct 选错工具的概率会怎样变化？怎么扩展？</summary><div>选错概率近似线性上升，且工具描述都塞进 system prompt 会让 prompt 爆炸（每个工具 50 token，50 个就 2.5k token）。解决方案分两层：(a) <b>工具路由</b>——先用一个轻量 LLM 或 embedding 检索从 50 个工具中筛出 top-5 候选，再让主 Agent 在 5 个里选，类似 Day 4 的 retrieval + rerank；(b) <b>分层 Agent</b>——按领域分组（『文件类工具』『邮件类工具』），主 Agent 先选哪个组，再委派给子 Agent 选具体工具。Anthropic 的 MCP 协议（Day 6 会讲）和 ChatGPT 的 GPTs marketplace 本质都在做这件事。</div></details>
+    <details><summary>4. ReAct 不是规划——它每一步只看『下一步』。这导致它在哪些任务上会显著吃亏？为什么人类做事却不需要先写完整 plan？</summary><div>ReAct 在『长程目标 + 早期决策影响后续可达性』的任务上吃亏：写一篇论文（如果第一节定错论点，后面全废）、订一趟多段联程旅行（第一段订错时间整个行程崩盘）、写一个完整 feature（架构选错后面所有代码都要重构）。人类不需要先写完整 plan 是因为有强大的<b>心智模型</b>——你能脑内 simulate 未来几步而不真的执行，ReAct 没有这个能力，它必须『实际调用工具看到 Observation』才知道结果。所以才需要下面的 Plan-and-Execute：让 LLM 先用强推理能力规划好骨架，再用便宜的执行器逐步推进。本质是『模拟』vs『试错』的差异。</div></details>
+    <details><summary>5. ReAct 的 Action 都是『查询/读取』性质时很安全，但如果 Action 包含 send_email、delete_file、transfer_money 这种副作用呢？工程上怎么防范？</summary><div>这就是 Agent 安全（Day 21 会展开）的核心问题。四道防线：(a) <b>能力分级</b>——把工具按风险标记，read_only / mutable / irreversible，每级要求不同的批准；(b) <b>Human-in-the-loop</b>——任何 irreversible Action 在执行前 pause 等用户确认（LangGraph 的 interrupt_before），就像 SSH 让你 yes/no 一样；(c) <b>沙箱</b>——文件操作走临时目录，网络访问走白名单，金钱操作走 dry-run；(d) <b>速率限制 + 监控</b>——单 Agent 一小时内最多发 5 封邮件、转 1 笔钱，触发就告警。真实事故案例：早期 AutoGPT 用户给它装了支付工具，它为了完成『推广产品』任务自己疯狂买广告——所以 ChatGPT 现在所有 plugin 默认要求二次确认，OpenAI 'Operator' 浏览器代理在敏感操作前必停。</div></details>
+  </div>
+</div>
+
+<!-- 2. Plan-and-Execute -->
+<div class="card">
+  <h2>规划-执行架构<span class="en">Plan-and-Execute</span></h2>
+  <div class="tags"><span class="tag">Agent</span><span class="tag purple">进阶范式</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像项目经理 + 工程师的分工——先让强模型（GPT-4o）写完一份 step-by-step 的 plan，再用便宜的执行器（GPT-4o-mini）按 plan 一步步做。本质是把『规划』和『执行』分离成两个角色，避免每步都用最贵的模型。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>ReAct 有两大痛点：(1) 缺乏全局视野——每步只看下一步，容易绕路；(2) 成本高——每个迭代都用强模型推理，10 步任务跑下来 token 烧爆。Plan-and-Execute 受软件工程里『先设计后编码』的启发：先一次性想清楚整个流程，把任务拆成 N 个子步骤；然后执行阶段就是简单的循环调用，不再需要强推理。结果是更可靠 + 更便宜，特别适合『需要 5+ 步的复杂任务』。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心是三个角色：Planner（产 plan，强模型一次性调用）、Executor（逐步执行，可以是 ReAct Agent 或简单 tool call）、Replanner（执行中若发现 plan 不对，回去重新规划）。</p>
+    <div class="diagram">
+<span class="box">Planner (GPT-4o)</span> <span class="arrow">→</span> 输出 plan: ["搜A", "搜B", "对比", "总结"]<br>
+<span class="arrow">↓</span><br>
+<span class="box">Executor</span> 跑 step 1: 搜A <span class="arrow">→</span> 拿到结果<br>
+<span class="box">Executor</span> 跑 step 2: 搜B <span class="arrow">→</span> 拿到结果<br>
+<span class="box">Executor</span> 跑 step 3: 对比 <span class="arrow">→</span> 发现数据冲突<br>
+<span class="arrow">↓</span><br>
+<span class="box">Replanner</span> <span class="arrow">→</span> 修改剩余 plan: ["查权威源", "总结"]
+    </div>
+    <p>类比：就像 Sprint Planning（一次性把整个 sprint 的 ticket 列好）+ 每日 standup（执行中遇到 blocker 才 re-plan）。和 ReAct 的『纯反应式』相对，Plan-and-Execute 是『深思熟虑式』。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+
+planner = ChatOpenAI(model=<span class="str">"gpt-4o"</span>)         <span class="cmt"># 强模型只用一次</span>
+executor = ChatOpenAI(model=<span class="str">"gpt-4o-mini"</span>)   <span class="cmt"># 便宜模型循环用</span>
+
+<span class="kw">def</span> <span class="fn">plan_node</span>(state):
+    prompt = <span class="str">f"任务：{state['goal']}。请拆成 3-6 步具体动作，按序列输出。"</span>
+    plan = planner.invoke(prompt).content.split(<span class="str">"\n"</span>)
+    <span class="kw">return</span> {<span class="str">"plan"</span>: plan, <span class="str">"step_idx"</span>: 0, <span class="str">"results"</span>: []}
+
+<span class="kw">def</span> <span class="fn">execute_node</span>(state):
+    current = state[<span class="str">"plan"</span>][state[<span class="str">"step_idx"</span>]]
+    result = executor.invoke(<span class="str">f"执行：{current}"</span>).content
+    <span class="kw">return</span> {<span class="str">"step_idx"</span>: state[<span class="str">"step_idx"</span>]+1,
+            <span class="str">"results"</span>: state[<span class="str">"results"</span>] + [result]}
+
+<span class="kw">def</span> <span class="fn">should_continue</span>(state):
+    <span class="kw">return</span> <span class="str">"execute"</span> <span class="kw">if</span> state[<span class="str">"step_idx"</span>] &lt; len(state[<span class="str">"plan"</span>]) <span class="kw">else</span> <span class="str">"end"</span>
+
+<span class="cmt"># 用 LangGraph 把它装成状态机</span>
+g = StateGraph(dict)
+g.add_node(<span class="str">"plan"</span>, plan_node); g.add_node(<span class="str">"execute"</span>, execute_node)
+g.set_entry_point(<span class="str">"plan"</span>); g.add_edge(<span class="str">"plan"</span>, <span class="str">"execute"</span>)
+g.add_conditional_edges(<span class="str">"execute"</span>, should_continue)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区一：以为『先 plan 后执行』就一定比 ReAct 好。其实对短任务（1-3 步）反而更慢——多了一次规划调用。经验法则：任务步数 ≥ 4 才考虑 Plan-and-Execute。<br>误区二：plan 不能改。早期论文里 plan 是静态的，但实战中执行过程会有意外（API 挂了、数据冲突），所以现代实现都加 Replanner——这本质上又有点像 ReAct 了，区别在于『默认按 plan 走，只在偏离时才重新思考』而非每步都思考。<br>误区三：把 plan 当成 prompt 显示给用户当『进度条』。plan 是模型的『工作草稿』，执行过程中会修改，直接展示会让用户误以为进度倒退。要么不展示，要么只展示『已确定的步骤』。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>论文 <a href="https://arxiv.org/abs/2305.04091" target="_blank">Plan-and-Solve Prompting</a>（友好版有 LangChain 博客解读）</li>
+      <li>LangGraph 教程 <a href="https://langchain-ai.github.io/langgraph/tutorials/plan-and-execute/plan-and-execute/" target="_blank">Plan-and-Execute Agent</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <div class="exercise">📌 经典：自动写技术博客 Agent——Planner 拆出『确定大纲 → 搜资料 → 写第一节 → 写第二节 → 收尾』，Executor 逐节填充。<br>👩‍💼 你的场景：投资决策助手——你说『分析下英伟达 Q3 财报是否值得加仓』，Agent 先 plan：『查最新财报 → 查竞品业绩 → 查机构观点 → 算估值 → 给结论』，按部就班执行，最后给一份结构化 memo。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Plan-and-Execute splits an agent into a Planner that produces an upfront multi-step plan with a strong model, and an Executor that runs each step with a cheaper model. A Replanner kicks in when execution deviates. The architecture trades one extra planning call for far better global coherence and lower per-step cost on long-horizon tasks.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>1. Plan-and-Execute 假设『一开始就能规划好』。哪些任务这个假设不成立？这时该用什么？</summary><div>三类任务该假设崩溃：(a) <b>探索型任务</b>——『帮我找一个我可能感兴趣的副业方向』，目标本身模糊，必须边走边发现；(b) <b>对抗型任务</b>——渗透测试、CTF，下一步动作完全依赖目标系统的实时响应；(c) <b>高度交互任务</b>——和真人协商谈判，对方下一句完全不可预测。这些任务用 ReAct 更合适，因为它本质是『反应式控制循环』。还有一种折中：Plan-and-Execute with frequent Replanning，把 plan 当成『短期意图』每 2-3 步就重新评估一次——LangGraph 里这就是一个 conditional edge 的事。</div></details>
+    <details><summary>2. Planner 用 GPT-4o 而 Executor 用 GPT-4o-mini，成本能省多少？什么场景下这种分层不划算？</summary><div>典型省 60-80%。粗算：一个 10 步任务，纯 ReAct 用 GPT-4o 假设每步 2k token，总成本 ≈ 10 × 2k × $5/M = $0.1；分层后 Planner 一次 4k token × $5/M = $0.02，Executor 9 步 × 2k × $0.15/M = $0.003，合计 $0.023——省 77%。但有两种情况不划算：(a) 任务太短（1-3 步），Planner 的固定开销摊不下来；(b) 子任务难度本身很高（比如『执行』本身就要写一段复杂代码），mini 模型搞不定，频繁失败导致 Replanner 触发，反而总成本更高。规则：分层适合『简单子任务 × 多步』，不适合『复杂子任务 × 少步』。</div></details>
+    <details><summary>3. Plan-and-Execute 和 Day 3 的 Chain-of-Thought 有什么本质区别？CoT 不也是先思考再回答吗？</summary><div>关键区别在『是否执行外部动作』和『token 谁来生成』。CoT 是单次 LLM 调用里『让模型多说一段推理再给答案』，所有 token 都是模型自己产，没有工具调用。Plan-and-Execute 是多次 LLM 调用 + 工具调用交织，每个 step 的『结果』来自外部世界（API、数据库、计算器），不是模型脑补。类比：CoT 像数学家在草稿纸上推导（封闭系统），Plan-and-Execute 像项目经理拆任务后让团队去外部世界拉数据（开放系统）。另一层差异：CoT 的推理是『不可执行的中间表示』，Plan-and-Execute 的 plan 是『可执行的程序』。后者更像传统编程里的 task decomposition。</div></details>
+    <details><summary>4. 如果 Plan 写得太细（每步 1 个 API 调用）vs 太粗（每步是个大目标），各有什么问题？怎么选粒度？</summary><div>太细：plan 变成『把活儿全干完』的伪代码，强模型规划阶段就消耗大量 token，且每步过于死板，执行中遇到一点偏差就要 Replan，失去了分层的好处。太粗：每个 step 内部还要 Executor 自己做 ReAct 式的多轮调用，等于在每步内嵌套了一个完整 Agent，复杂度回到原点。选粒度的两个法则：(a) 每个 step 应该是『一个原子目标 + 1-3 个工具调用就能完成』，类似软件工程里『一个 function 做一件事』；(b) plan 总长度控制在 4-8 步——超过 8 步说明任务该拆成多个 Agent 协作（Day 7 的 Multi-Agent）。生产经验：Anthropic 的 Computer Use 默认每个 step ≈ 一次浏览器交互单元。</div></details>
+    <details><summary>5. Replanner 怎么判断『需要重新规划』？这个判断本身用 LLM 还是规则？为什么？</summary><div>两种思路各有适用场景。<b>规则判断</b>：用 try/except 包装 Executor，工具抛错就 Replan；或者用断言检查执行结果是否符合 plan 的预期（『这一步应该返回价格数字』）。优点是确定性强、可审计、零额外 LLM 成本；缺点是无法识别『语义偏差』——结果格式对了但内容错了。<b>LLM 判断</b>：每步后用便宜模型问『当前执行进度是否符合 plan，是否需要调整？』。优点是能捕获语义偏差，缺点是又多一次调用、还会引入新的不确定性。生产实践趋势：双层——硬规则做 fail-fast，LLM 判断做 quality gate，且 LLM 判断设触发阈值（比如『每完成 30% plan 才检查一次』）避免过度反思。这呼应了软件工程的『assert + code review』组合：低成本快检 + 高成本深检。</div></details>
+  </div>
+</div>
+
+<!-- 3. Reflexion -->
+<div class="card">
+  <h2>反思自省<span class="en">Reflexion</span></h2>
+  <div class="tags"><span class="tag">Agent</span><span class="tag purple">自我改进</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像让 Agent 在每次失败后写一段『复盘日志』追加到 prompt 里——下一次尝试就能看到『我上次为啥错了』。本质是用语言形式做强化学习，但不用真的更新模型权重。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>ReAct 和 Plan-and-Execute 一旦失败就只能从头再试，第二次和第一次犯一样的错。传统强化学习的解法是用奖励信号更新模型权重，但对 LLM 来说一次训练要几百万美元，普通工程师玩不起。Reflexion 提出一个朴素但天才的想法：既然 LLM 有 in-context learning 能力，那就把『失败教训』写成自然语言，放进下次的 prompt——本质上把『梯度更新』替换成了『prompt 更新』。在 HumanEval 编程基准上让 GPT-4 从 80% 提升到 91%。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>三个角色循环：Actor（实际去做任务，产 trajectory 即行动轨迹）→ Evaluator（评估这次轨迹好不好，给 0/1 或评分）→ Self-Reflector（如果失败，让 LLM 自己写一段反思：『我哪里做错了？下次该注意什么？』）。反思追加到 memory 里，下一次尝试时塞到 prompt 顶端。</p>
+    <div class="diagram">
+Trial 1: <span class="act">Actor</span> 解题 <span class="arrow">→</span> 测试用例失败<br>
+<span class="arrow">↓</span><br>
+<span class="box">Evaluator</span> 给 0 分<br>
+<span class="arrow">↓</span><br>
+<span class="box">Self-Reflector</span> <span class="arrow">→</span> 写下 <span class="obs">"我忽略了边界条件 n=0"</span><br>
+<span class="arrow">↓ memory 现在含这条反思</span><br>
+Trial 2: <span class="act">Actor</span> 看到反思 + 题目 <span class="arrow">→</span> 这次处理了 n=0 <span class="arrow">→</span> ✅
+    </div>
+    <p>类比：就是一个有『错题本』的学生。每次错了就抄一条进错题本，下次考试前先翻一遍错题本。和 git commit message 里写『why』很像——『why 上次为什么这么做不行』。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+client = OpenAI()
+memory = []  <span class="cmt"># 累积的反思——就是错题本</span>
+
+<span class="kw">def</span> <span class="fn">attempt</span>(task, memory):
+    reflections = <span class="str">"\n"</span>.join(memory) <span class="kw">if</span> memory <span class="kw">else</span> <span class="str">"(无)"</span>
+    prompt = <span class="str">f"任务：{task}\n往次反思：\n{reflections}\n请重试。"</span>
+    <span class="kw">return</span> client.chat.completions.create(
+        model=<span class="str">"gpt-4o"</span>,
+        messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,<span class="str">"content"</span>:prompt}]
+    ).choices[0].message.content
+
+<span class="kw">def</span> <span class="fn">reflect</span>(task, attempt, error):
+    prompt = <span class="str">f"任务:{task}\n你的尝试:{attempt}\n失败原因:{error}\n用一句话总结你下次该注意什么。"</span>
+    <span class="kw">return</span> client.chat.completions.create(
+        model=<span class="str">"gpt-4o"</span>, messages=[{<span class="str">"role"</span>:<span class="str">"user"</span>,<span class="str">"content"</span>:prompt}]
+    ).choices[0].message.content
+
+<span class="kw">for</span> trial <span class="kw">in</span> range(3):
+    output = attempt(task, memory)
+    ok, err = run_tests(output)
+    <span class="kw">if</span> ok: <span class="kw">break</span>
+    memory.append(reflect(task, output, err))   <span class="cmt"># 抄进错题本</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区一：以为 Reflexion 让模型『学会了』。其实没有——权重一个比特都没变，提升只来自 in-context learning。换一个新任务、新 session，memory 清空后又回到原点。要持久化学习还得做 fine-tuning（Day 2 的 SFT/DPO）。<br>误区二：以为反思越多越好。反思超过 5-10 条后边际效益急剧下降，而且老反思会污染当前任务（『我上次在写 SQL 注意 NULL，但这次题目是写 React 组件』）。生产实践会做 relevance filter——只挑和当前任务相关的反思。<br>误区三：反思可以是泛泛而谈。『下次要更仔细』这种反思没用。好的反思必须包含具体的『因→果→对策』：『我用了 == 比较浮点数（因）导致精度误差（果），下次用 abs(a-b) &lt; eps（策）』。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>论文 <a href="https://arxiv.org/abs/2303.11366" target="_blank">Reflexion: Language Agents with Verbal Reinforcement Learning</a></li>
+      <li>LangGraph 实现 <a href="https://langchain-ai.github.io/langgraph/tutorials/reflexion/reflexion/" target="_blank">Reflexion 教程</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <div class="exercise">📌 经典：自动写代码 Agent——LeetCode 题第一次提交错了，让 Agent 看测试报错反思后重写，三次内成功率从 40% 提到 70%。<br>👩‍💼 你的场景：育儿沟通教练——你和孩子吵架后，把对话记录给 Agent，让它『反思』哪里说错了，下次类似场景时把这些反思塞进 system prompt，Agent 帮你起草更合适的回应。本质是把家庭沟通积累成『错题本』。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Reflexion runs an agent multiple times, and after each failure asks the LLM to write a natural-language post-mortem that is appended to memory and prepended to future prompts. It's "verbal reinforcement learning" — no weight updates, all improvement comes from in-context learning over the accumulated reflections.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>1. Reflexion 依赖 Evaluator 判断『这次失败了』。如果 Evaluator 不存在或不可靠（比如开放式任务），Reflexion 还能用吗？</summary><div>不能直接用，但有变种。开放式任务（写文案、给建议）没有自动 oracle，三条路：(a) <b>LLM-as-Judge</b>（Day 10 会讲）——用另一个 LLM 评分，缺点是 judge 自己也可能错，且和 Actor 同模型时容易『自夸偏差』；(b) <b>用户反馈循环</b>——每次输出后让用户选『好/不好』，把『不好』当 fail；(c) <b>多候选对比</b>——让 Actor 生成 N 个版本，Reflector 看完所有版本反思『哪个最好，差异在哪』。本质上 Reflexion 的有效性上限就是 Evaluator 的质量上限——这和 RLHF 的奖励模型同构。</div></details>
+    <details><summary>2. Reflexion 用『语言』代替梯度更新——和真正用 RL 更新权重（Day 2 的 RLHF）相比，哪些地方占优、哪些地方注定不行？</summary><div>占优：(a) 零训练成本，普通工程师就能玩；(b) 反思可读可编辑，工程师可以人工修改 memory 来调试 Agent 行为；(c) 即时生效，不用等几小时训练；(d) 知识可移植——把好用的 memory 复制给另一个用户。注定不行：(a) 不能改变模型『天花板』——如果基础模型根本不会写 CUDA kernel，再多反思也没用；(b) memory 受 context 长度限制，最多塞几十条反思，而 RLHF 可以从百万级反馈中学习；(c) 反思有概念漂移——『不要用 jQuery』这种反思过几年就过时但留在 memory 里；(d) 没法学到下意识技能，只能学『需要显式提醒才能做对』的东西。结论：Reflexion 是 prototyping/小规模优化的利器，但产品化大规模能力提升还得靠 fine-tuning。</div></details>
+    <details><summary>3. 多个 Agent 共享同一份 memory 时，会出现什么问题？怎么设计才不冲突？</summary><div>三类问题：(a) <b>个性化丢失</b>——A 用户的反思（『他偏好简洁回答』）泄漏给 B 用户；(b) <b>反思过期</b>——A 用户半年前对某 API 的反思，对今天用新版 API 的 B 用户已失效；(c) <b>反思矛盾</b>——A 说『要详细』B 说『要简洁』，混在一起 LLM 不知道听谁的。设计原则借鉴权限和缓存：(1) memory 分租户隔离（user_id 当 namespace），(2) 反思加时间戳和 TTL，过期自动失效，(3) 反思加 tags（task_type、domain）按场景检索而非全量注入，(4) 用 embedding 检索找『和当前任务最相似的反思』top-K——这其实就是把 RAG 用在 Agent 自己的经验库上，业界叫『Episodic Memory』。</div></details>
+    <details><summary>4. Reflexion 通常 3-5 次迭代后增益就饱和——为什么会饱和？怎么打破？</summary><div>饱和有三因：(a) <b>反思空间被穷举</b>——常见错误其实就那么几种，前 3-5 次已经覆盖；(b) <b>剩下的错是模型能力天花板</b>——再反思也学不会；(c) <b>反思之间互相干扰</b>——新反思和老反思冲突时模型可能取折中导致两边都没做对。打破方法：(1) 换更强模型重试（升级 Actor 突破天花板）；(2) 切换反思角度——前几次反思『代码逻辑』，再不行就反思『需求理解』『工具选择』；(3) 加入 example-based reflection——不只是写文字反思，把『错误的输出 → 正确的输出』作为对比示例放进 memory，效果接近 few-shot；(4) 转向真正的 fine-tune——把高质量 trajectory 收集起来做 DPO（Day 2）。这呼应了 ML 中『先 prompt engineering 不够再 fine-tune』的递进路径。</div></details>
+    <details><summary>5. 如果让 Reflexion 反思自己的『反思能力』——元反思——会发生什么？这是聪明还是危险？</summary><div>元反思在论文中有探索（『下次写反思时要更具体』），实验显示<b>小幅有效但收益迅速衰减</b>，且容易陷入哲学性空话（『要 think more carefully』）。危险在两点：(a) <b>反思塌缩</b>——元反思指导反思的方式，反思又生成新元反思，多层后产出趋同于『要好好做、要小心、要分析问题本质』这类无信息量的句子；(b) <b>评估失真</b>——元反思层的 Evaluator 怎么定义？没有 ground truth 就只能用 LLM 自评，自己评自己有 bias。务实做法是『元反思一次封顶』——做一轮元反思修订 reflection prompt 后就固定下来，不再递归。这呼应一个更深的问题：自我改进系统的 fixpoint 在哪里？目前没有理论答案，OpenAI 提出的『可验证奖励』（verifiable rewards）是试图绕开自评困境的一条路——只在能算法验证对错的任务上做自我改进（如数学、代码）。</div></details>
+  </div>
+</div>
+
+<!-- 4. AutoGPT 架构 -->
+<div class="card">
+  <h2>AutoGPT 架构<span class="en">AutoGPT Architecture</span></h2>
+  <div class="tags"><span class="tag">Agent</span><span class="tag purple">自主系统</span></div>
+
+  <div class="section">
+    <div class="label">一句话解释</div>
+    <p>就像把 ReAct + Plan-and-Execute + 长期记忆 + 自我反思全部装进一个 daemon 里，让它『自主跑直到目标完成』，不需要人类每步盯着。代价是经常跑偏、烧 token、产生奇葩行为——这也是 2023 年初震撼业界又快速退潮的原因。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题</div>
+    <p>2023 年 3 月之前的 LLM 应用都是『一问一答』模式——用户问一句 LLM 答一句，每步都要人工触发。AutoGPT 第一次提出『给一个高层目标，让 LLM 自己拆解、执行、迭代直到完成』的设想，比如『帮我研究下竞品并写一份报告』。它本身代码并不复杂（几千行 Python），但作为<b>第一个 viral 的全自主 Agent</b>，证明了『LLM 可以驱动一个 long-running 进程做事』，深刻影响了后续 LangGraph、CrewAI、Devin 等所有 Agent 框架的设计哲学。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">工作机制（直觉版）</div>
+    <p>核心是四个组件加一个主循环：</p>
+    <div class="diagram">
+<span class="box">Goal</span> <span class="str">"研究 AI 创业方向并写报告"</span><br>
+<span class="arrow">↓</span><br>
+┌──── <span class="box">Main Loop</span> ────────────────────────┐<br>
+│ 1. 看 Goal + 短期记忆 + 长期记忆，决定下一步 │<br>
+│ 2. 调用工具（搜索/写文件/调 API/执行代码）   │<br>
+│ 3. 把结果写进短期记忆（context window）       │<br>
+│ 4. 重要内容存入长期记忆（向量库）             │<br>
+│ 5. 每 N 步做一次 self-critique（反思）        │<br>
+│ 6. 评估 Goal 完成度，未完则回 1              │<br>
+└─────────────────────────────────────────────┘
+    </div>
+    <p>关键创新有三：(1) <b>持续运行</b>——不是单次请求-响应，是 long-running 进程；(2) <b>长期记忆</b>——超出 context window 的信息存进 vector DB，按需检索（实际是早期 RAG）；(3) <b>自我授权</b>——可以自己写文件、执行 shell 命令、甚至调用 OpenAI API 启动子 Agent。这种『全自主』正是它的吸引力也是它的安全噩梦。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># AutoGPT 主循环的高度简化版（真实代码在 github.com/Significant-Gravitas/AutoGPT）</span>
+<span class="kw">def</span> <span class="fn">autogpt_loop</span>(goal, max_steps=20):
+    short_term = []      <span class="cmt"># 最近 N 步的 thought+action+obs</span>
+    long_term = VectorDB()  <span class="cmt"># 旧记忆向量化存储</span>
+
+    <span class="kw">for</span> step <span class="kw">in</span> range(max_steps):
+        <span class="cmt"># 1. 检索相关长期记忆</span>
+        relevant = long_term.search(goal + str(short_term[-3:]), k=5)
+
+        <span class="cmt"># 2. 构造 prompt：目标 + 长期记忆 + 短期记忆</span>
+        prompt = f<span class="str">"""目标：{goal}
+            相关历史：{relevant}
+            最近行动：{short_term[-5:]}
+            决定下一步动作（JSON 格式）。
+            可用工具：[search, write_file, execute_python, finish]"""</span>
+
+        action = llm(prompt)             <span class="cmt"># 输出 JSON {tool, args, thought}</span>
+        <span class="kw">if</span> action[<span class="str">"tool"</span>] == <span class="str">"finish"</span>:
+            <span class="kw">return</span> action[<span class="str">"args"</span>][<span class="str">"result"</span>]
+
+        result = execute(action)         <span class="cmt"># 真的去调工具</span>
+        short_term.append({**action, <span class="str">"obs"</span>: result})
+
+        <span class="cmt"># 3. 重要内容存入长期记忆</span>
+        <span class="kw">if</span> is_important(result):
+            long_term.add(result)
+
+        <span class="cmt"># 4. 每 5 步反思一次</span>
+        <span class="kw">if</span> step % 5 == 4:
+            short_term.append({<span class="str">"reflection"</span>: llm(f<span class="str">"复盘前 5 步：{short_term[-5:]}"</span>)})</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区</div>
+    <div class="tip">误区一：『AutoGPT 是失败的产品』——准确说法是『AutoGPT 是失败的产品，但成功的思想原型』。它的设计模式（主循环、长期记忆、自我反思、目标分解）成了后续所有 Agent 框架的祖先。<br>误区二：以为自主性越高越好。实践证明 2023 年的模型自主跑超过 10 步后偏离率极高（『为了完成研究任务我先注册个 Twitter 账号发广告』），现在的设计趋势是<b>受控自主</b>——明确边界 + 人类节点（HITL）+ 工具白名单。<br>误区三：把 AutoGPT 当生产工具。它是实验性 demo，没有错误恢复、状态持久化、并发控制等生产特性，长跑很容易卡死。生产请用 LangGraph、CrewAI、Devin、Claude Computer Use 等更成熟的实现。<br>误区四：以为『长期记忆』就是 vector DB。AutoGPT 的长期记忆质量很糟糕，因为它无脑把所有 observation 都存进去，检索时噪声极大。现代 Agent 的 memory 设计远更精细（Day 8 会讲）。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">关键资源</div>
+    <ul>
+      <li>原始项目 <a href="https://github.com/Significant-Gravitas/AutoGPT" target="_blank">Significant-Gravitas/AutoGPT</a> — 看看历史代码</li>
+      <li>Lilian Weng 的综述 <a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank">LLM Powered Autonomous Agents</a> — Agent 架构的权威解读</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">实践场景</div>
+    <div class="exercise">📌 经典：BabyAGI / AgentGPT 这类『给目标自动执行』的开源 demo——都是 AutoGPT 的衍生。<br>👩‍💼 你的场景：周末家庭决策助手——你说『下个月想带娃出游 3 天，预算 5000，想看博物馆和户外』，让一个受控版 AutoGPT 自动 plan→搜目的地→查天气→订酒店草案→列行程，最后输出一份待你确认的方案。注意：所有『下单』动作都要 HITL 确认，否则它会替你直接付款。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">AutoGPT was the first viral fully-autonomous LLM agent: given a goal, it loops indefinitely combining tool use, short-term context, vector-DB long-term memory, and periodic self-critique. The product flopped due to reliability issues, but the architectural blueprint — main loop, memory tiers, self-reflection, autonomous tool invocation — became the template every modern agent framework iterates on.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">思考题</div>
+    <details><summary>1. AutoGPT 发布后 6 个月内 GitHub star 破 15 万，但一年后基本没人用了。从产品角度复盘，它『证伪』了什么假设？</summary><div>至少三个假设被证伪：(a) <b>『模型够强就能自主完成开放任务』</b>——错。GPT-4 已经是当时最强模型，但脱离上下文边界后仍会跑飞，证明<b>能力 ≠ 可靠性</b>，少了 scoping、grounding、verification 就不可用；(b) <b>『用户想要完全自主的助理』</b>——错。用户实际想要的是『我提需求、它做粗活、我审核拍板』的可控协作模式，全自主反而让用户失去掌控感和信任；(c) <b>『长期记忆 = vector DB』</b>——过于简化。AutoGPT 的 vector memory 召回质量差，反而让上下文充满噪声。这三条教训直接影响了 ChatGPT Plugin 必须用户授权、Devin 强调中间产物可查看、LangGraph 设计 human-in-the-loop 节点。产品启示：技术先锋 ≠ 产品赢家，PMF 需要的是『刚刚好的自动化』，不是『最大化的自动化』。</div></details>
+    <details><summary>2. AutoGPT 用 vector DB 做长期记忆——这和 Day 4 的 RAG 系统是一回事吗？为什么 AutoGPT 的记忆效果不如客服 RAG？</summary><div>架构相同（embed → store → retrieve），但场景差异巨大。客服 RAG 的语料是<b>结构化、高质量、人工策划的</b>知识库；AutoGPT 的『记忆』是<b>Agent 自己生成的中间状态</b>——包含失败的尝试、错误的思考、半成品输出，质量参差不齐。结果是：召回时既可能拿到有用经验，也可能拿到上次的错误思路，反而误导当前决策。修正方向：(a) 写入前过滤——只存『成功验证过』的经验；(b) 区分『事实记忆』（外部知识）和『过程记忆』（Agent 自己的轨迹），用不同 namespace；(c) 给记忆打分并定期淘汰低分项，类似 LFU cache。这又呼应了软件工程：『日志不是越多越好，是越有用越好』。</div></details>
+    <details><summary>3. AutoGPT 的『目标驱动』vs ChatGPT 的『对话驱动』本质区别是什么？哪种范式会主导未来？</summary><div>本质区别是<b>控制权归属</b>。对话式：用户每轮发话、Agent 单次回应、用户驱动节奏，AI 是工具；目标式：用户一次性给目标、Agent 持续运行、AI 自驱节奏，AI 是代理人。趋势其实是<b>融合</b>：(a) 短任务依然对话式更自然（写邮件、debug 一行代码）；(b) 长任务必然走向目标驱动（写一篇研究报告、订一趟旅行）；(c) 关键是『可暂停可干预』——Cursor / Devin / Claude Code 都允许 Agent 自主跑一段，遇到决策点回来问用户。这就是<b>『有控制的自主』范式</b>。从交互设计看，未来 AI 产品更像『远程协作的同事』而不是『搜索引擎』或『纯仆从』，对应到 UI 上就是 inbox + activity feed + approval queue 这套生产力软件 metaphor。</div></details>
+    <details><summary>4. AutoGPT 在主循环里反复调 LLM，每次都把全部历史发过去——这种设计在工程上有哪些致命问题？</summary><div>四个致命问题：(a) <b>token 成本爆炸</b>——上下文 O(n²) 增长，跑一个『研究任务』花掉几美元只为得到一份草稿，单位经济模型崩塌；(b) <b>延迟累加</b>——20 步任务每步 10 秒，3-5 分钟才有结果，用户体验差；(c) <b>状态不可恢复</b>——进程中断后全部丢失（没有 checkpoint），云端长跑断网就废；(d) <b>并发难做</b>——主循环本质是单线程，多任务只能起多进程。现代 Agent 框架的应对：LangGraph 显式建状态机让状态可序列化、可恢复；Anthropic 用 prompt caching 让重复 prefix 不计费；Devin 用 sandboxed VM 让长跑任务可挂起；CrewAI 通过 task graph 显式并行。这背后是『从 daemon 进程范式转向 task queue + state machine 范式』的工程转型——和后端从『常驻进程』演化到『Lambda + workflow』完全同构。</div></details>
+    <details><summary>5. 假设五年后模型成本降低 100 倍、可靠性提升到 99.9%，AutoGPT 式的『全自主目标驱动』会回归吗？还是别的范式会胜出？</summary><div>大概率会以新形态回归，但不会叫『AutoGPT』。三种可能演化：(a) <b>Agentic OS</b>——操作系统级别的代理人，常驻后台帮你管邮件、日程、文件，类似今天的 cron + 助理融合，Apple Intelligence / Microsoft Copilot 在朝这个方向；(b) <b>多 Agent 经济体</b>——成千上万个专精 Agent 互相调用，类似今天的 SaaS 生态但是机器对机器，AnthropicMCP 协议是早期信号；(c) <b>『慢思考』Agent</b>——给一周完成一个大目标（如写一本书），有充足时间反思、验证、迭代，对应 o1/o3 这类深度推理模型的延伸。最不太可能胜出的是『AutoGPT 原样卷土重来』——因为它的设计是 2023 年算力和模型能力的产物，五年后约束完全不同。真正的启示是：每代 Agent 范式都被『当时的瓶颈』塑形，理解瓶颈比记住范式更重要。BigCat 作为关注超级个体的人，可以反复问自己：『今天哪些事让我做得难受，AI 能力一旦突破后哪些范式会涌现？』——这是观察 Agent 演化的最佳视角。</div></details>
+  </div>
+</div>
+
+<a href="index.html" class="back">← 返回目录</a>
+
+<footer>BigCat · AI &amp; ML Daily · Day 5 · 2026</footer>
+</div>
+<script src="https://cissy0802.github.io/comments.js" defer></script>
+</body>
+</html>
