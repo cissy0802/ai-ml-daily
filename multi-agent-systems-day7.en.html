@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Multi-Agent Systems — Day 7</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Multi-Agent Systems</h1>
+  <div class="meta">Day 7 · 2026-05-25</div>
+  <div class="audience">For engineers experienced in coding but new to AI/ML</div>
+</header>
+
+<!-- 1. AutoGen -->
+<div class="card">
+  <h2>AutoGen<span class="en">Microsoft AutoGen</span></h2>
+  <div class="tags"><span class="tag">Framework</span><span class="tag purple">Conversational</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Think of multi-agent systems as an <b>internal Slack channel</b> — each Agent is a channel member and all collaboration happens via <b>messages</b>. You don't write state machines or explicit control flow; you define who can join, who initiates, who's allowed to reply, and let the conversation evolve toward a result. Backend analogy: trade orchestrated RPC for an <b>event-driven message bus</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>A single Agent has limited context and limited skills. For a task like "read code + write tests + run tests + fix bug," you <b>can</b> stuff it all into one Agent, but the prompt swells and attention dilutes. AutoGen (Microsoft, open-sourced 2023, rewritten as v0.4 in 2024) splits the task across <b>specialized Agents</b> that collaborate through conversation. Two core abstractions only:</p>
+    <ul>
+      <li><code>ConversableAgent</code> — a node that can receive, send, and call tools; under the hood it's just LLM + tools + memory;</li>
+      <li><code>GroupChat</code> + <code>GroupChatManager</code> — the "moderator" that picks who speaks next. Common strategies: round-robin, let the LLM choose, or rule-based by role.</li>
+    </ul>
+    <p>The whole system is essentially the actor model — each Agent is an actor, messages are the only coupling. v0.4 takes this further with a real async message bus and distributed runtime.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span class="box p">User Proxy</span> <span class="arrow">→</span> <span class="box o">Manager (picks speaker)</span><br>
+<span class="arrow">&nbsp;&nbsp;&nbsp;&nbsp;↓ routes to</span><br>
+<span class="box">Coder Agent</span> <span class="box">Tester Agent</span> <span class="box">Reviewer Agent</span><br>
+<span class="arrow">↑ all messages enter the same GroupChat history ↑</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> autogen_agentchat.agents <span class="kw">import</span> AssistantAgent
+<span class="kw">from</span> autogen_agentchat.teams <span class="kw">import</span> RoundRobinGroupChat
+<span class="kw">from</span> autogen_ext.models.openai <span class="kw">import</span> OpenAIChatCompletionClient
+
+model = OpenAIChatCompletionClient(model=<span class="str">"gpt-4o"</span>)
+
+<span class="cmt"># Each Agent does one thing — the system prompt defines its "persona"</span>
+coder = AssistantAgent(<span class="str">"coder"</span>, model_client=model,
+    system_message=<span class="str">"You are a Python engineer. Output runnable code only, no prose."</span>)
+
+reviewer = AssistantAgent(<span class="str">"reviewer"</span>, model_client=model,
+    system_message=<span class="str">"You are a code reviewer. Point out bugs/improvements; reply 'APPROVED' when satisfied."</span>)
+
+<span class="cmt"># Group chat: take turns until reviewer says APPROVED</span>
+team = RoundRobinGroupChat([coder, reviewer],
+    termination_condition=<span class="kw">lambda</span> msgs: <span class="str">"APPROVED"</span> <span class="kw">in</span> msgs[-1].content)
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    <span class="kw">async for</span> msg <span class="kw">in</span> team.run_stream(task=<span class="str">"Write binary search that handles empty arrays."</span>):
+        <span class="fn">print</span>(<span class="str">f"[{msg.source}] {msg.content}"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"More agents = smarter system" — wrong. AutoGen testing shows that groups of 4-5+ agents easily fall into <b>mutual flattery loops</b> or <b>silent deadlock</b> (everyone assumes someone else will respond), with token costs exploding and zero progress. Production lesson: start with 2 agents (executor + critic), add roles only as needed, and always set <code>max_turns</code> as a safety net.</div>
+    <div class="exercise" style="margin-top:8px">📌 Your scenario: your "investment research desk" — three Agents play <b>bull analyst</b>, <b>bear analyst</b>, and <b>risk manager</b>, each arguing about the same stock; you (User Proxy) make the final call. Instead of a single "objective but bland" report, you watch a <b>structured debate</b>.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 AutoGen reduces multi-agent to two things: a message bus and roles. Don't write workflows — write conversation rules.<br>🤔 In the workflows you currently orchestrate by hand, which steps are <b>essentially conversations</b> rather than flowcharts?</div>
+  </div>
+</div>
+
+<!-- 2. CrewAI -->
+<div class="card">
+  <h2>CrewAI<span class="en">Role-based Agent Orchestration</span></h2>
+  <div class="tags"><span class="tag">Framework</span><span class="tag orange">Workflow</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>If AutoGen is a "Slack channel," CrewAI is a "<b>project team with a PM</b>" — each Agent has a clear <b>Role</b>, <b>Goal</b>, and <b>Backstory</b>; Tasks are explicitly assigned to specific Agents; execution can be <b>Sequential</b> or <b>Hierarchical</b> (with a Manager Agent). Backend analogy: shift from "message-driven" back to an <b>explicit workflow engine</b> — more like Airflow + Slack mixed together.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>AutoGen's conversational style is flexible but <b>unpredictable</b> — the same task may take wildly different conversational paths across runs, which is hostile to production. CrewAI (open-sourced 2024, now one of the most popular multi-agent frameworks) takes the opposite philosophy: <b>make the flow explicit, keep the roles stable</b>. You define "3 Agents + 5 Tasks as a directed graph" upfront, then run it. Two execution modes:</p>
+    <ul>
+      <li><b>Sequential</b>: Task1 → Task2 → Task3; previous Task's output feeds the next (pipeline-style);</li>
+      <li><b>Hierarchical</b>: a Manager Agent (auto-generated, uses a stronger model) breaks down, dispatches, and reviews; worker Agents do the actual work — like a corporate hierarchy.</li>
+    </ul>
+    <p>"Backstory" isn't decoration — it materially shapes the model's tone and decisions. Writing "you are a senior financial analyst with 15 years of experience, known for being rigorous and conservative" produces noticeably better output than "you are an analyst" (replicated across multiple benchmarks).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> crewai <span class="kw">import</span> Agent, Task, Crew, Process
+
+researcher = Agent(
+    role=<span class="str">"Market Researcher"</span>,
+    goal=<span class="str">"Find 3 latest trends for {topic} with sources"</span>,
+    backstory=<span class="str">"Industry analyst with 10 years of primary-source research experience"</span>,
+    tools=[search_tool])
+
+writer = Agent(
+    role=<span class="str">"Content Editor"</span>,
+    goal=<span class="str">"Rewrite the research into a tight 800-word brief"</span>,
+    backstory=<span class="str">"Ex-Economist editor; prizes fact density and readability"</span>)
+
+<span class="cmt"># Tasks are explicitly bound to Agents; `context` declares dependencies</span>
+research = Task(description=<span class="str">"Research AI Agent trends for 2026"</span>, agent=researcher,
+                expected_output=<span class="str">"3 trends + citation links"</span>)
+write    = Task(description=<span class="str">"Rewrite as a brief"</span>, agent=writer,
+                context=[research],   <span class="cmt"># waits for research to finish</span>
+                expected_output=<span class="str">"800-word markdown"</span>)
+
+crew = Crew(agents=[researcher, writer], tasks=[research, write],
+            process=Process.sequential)
+result = crew.kickoff(inputs={<span class="str">"topic"</span>: <span class="str">"AI Agent"</span>})</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"Longer Role/Backstory = better" — wrong. Backstories over ~200 words crowd out tool descriptions and task context in the attention budget, often hurting performance. Best practice: one-sentence role, a goal with a <b>verifiable output</b> (not "do good analysis" but "output 3 trends with citations"), and a backstory that highlights <b>1-2 character traits</b>.</p></div>
+    <div class="exercise" style="margin-top:8px">📌 Your scenario: a Sunday-night "<b>Family Weekly Crew</b>" — 4 Agents: schedule aggregator (next week's calendar), nutrition planner (meal plan), kids' homework tracker, and family CFO (bills/budget). Run them Sequentially and you get a single family brief — far fewer errors than one generalist Agent.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 CrewAI picks predictability via "roles + flow"; AutoGen picks flexibility via "conversation." Different trade-offs, not better/worse.<br>🤔 For your workflow: which matters more — <b>stable structure</b> or <b>exploratory flexibility</b>? Your answer picks the framework.</div>
+  </div>
+</div>
+
+<!-- 3. Role Specialization -->
+<div class="card">
+  <h2>Role Specialization<span class="en">Why Narrow Agents Beat Generalists</span></h2>
+  <div class="tags"><span class="tag">Design</span><span class="tag purple">Cognition</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Splitting one Agent into several roles is the backend world's "<b>monolith → microservices</b>" move — not because "division of labor" is virtuous, but because <b>small context + focused prompt + restricted toolset</b> together cut a single Agent's cognitive load, making each inference sharper. The costs mirror microservices too: communication, debugging, and overall consistency all get harder.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Hang 20 tools + 5 paragraphs of system prompt + full task context on one Agent and you get <b>intent drift</b>: it starts writing code, switches to explaining architecture, then begins interrogating the user. Anthropic's "Constitutional AI" work in 2024 and OpenAI's "Specialized Agents" experiments both confirmed the same finding: <b>narrowing role scope significantly boosts task completion</b>. Three mechanisms behind it:</p>
+    <ul>
+      <li><b>Attention focus</b> — short prompt + few tools means every token "knows what it's doing," similar to RAG narrowing retrieval (Day 4);</li>
+      <li><b>Failure isolation</b> — one Agent's failure doesn't pollute the entire chain's conversation history;</li>
+      <li><b>Independent optimization</b> — give critical roles a stronger model (Opus), auxiliary roles a cheaper one (Haiku) — better cost/quality on both axes.</li>
+    </ul>
+    <p>Simple heuristic for "should I split this?": when an Agent's <b>failures</b> cluster around "did the wrong kind of thing" (wrote code when it should advise, summarized when it should expand) rather than "didn't do it well enough," it's time to split.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Anti-pattern: a generalist Agent that writes, reviews, and runs</span>
+generalist = AssistantAgent(<span class="str">"engineer"</span>,
+    system_message=<span class="str">"You are an engineer. You write code, review code, run tests, fix bugs, write docs..."</span>,
+    tools=[write_code, run_tests, lint, format, git, search_docs])
+
+<span class="cmt"># Better: three specialized roles, each with short prompt and tight tools</span>
+coder = AssistantAgent(<span class="str">"coder"</span>, model_client=opus,
+    system_message=<span class="str">"Write the implementation only. No tests, no docs."</span>,
+    tools=[write_code, search_docs])
+
+tester = AssistantAgent(<span class="str">"tester"</span>, model_client=haiku,  <span class="cmt"># cheaper model</span>
+    system_message=<span class="str">"Write pytest cases and run them. Report pass/fail."</span>,
+    tools=[run_tests])
+
+reviewer = AssistantAgent(<span class="str">"reviewer"</span>, model_client=opus,
+    system_message=<span class="str">"Review code. List the 1-3 most serious issues. Don't rewrite."</span>,
+    tools=[lint])</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"The finer the split, the better" — wrong. Each additional Agent adds another LLM call and another lossy context handoff; over-splitting causes information loss, latency bloat, and debugging hell. Empirical thresholds: when an Agent's tool count is under 5-7 and its system prompt is under 100-200 words, it's already focused enough — don't keep splitting. Microservices have "<b>right-sized</b>" granularity; Agents do too.</div>
+    <div class="exercise" style="margin-top:8px">📌 Your scenario: a "<b>cross-disciplinary learning assistant</b>" for reading papers — split into a <b>translation Agent</b> (Chinese↔English), an <b>analogy Agent</b> (relate to familiar fields), and a <b>devil's-advocate Agent</b> (find weak points). Each Agent has a tiny prompt and tightly scoped output — information density is much higher than a single "help me read this paper" generalist.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The point of role specialization isn't "simulating human teams" — it's offloading the LLM so each inference only carries necessary context.<br>🤔 Take that 1000+ word prompt you've fed a single LLM in the past — can you split it into three 300-word roles? After splitting, what are you most worried about losing?</div>
+  </div>
+</div>
+
+<!-- 4. Collaboration Protocols -->
+<div class="card">
+  <h2>Collaboration Protocols<span class="en">Coordinating Multiple Agents</span></h2>
+  <div class="tags"><span class="tag">Distributed</span><span class="tag purple">Patterns</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>How multiple Agents "<b>exchange info and reach agreement</b>" is the LLM-era version of classic <b>distributed systems coordination</b> — Paxos, leader election, gossip, blackboard pattern all have analogs here. Today's multi-agent frameworks are essentially combinations of these few patterns.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>With N Agents, you have two questions to answer: (1) <b>Who speaks/acts when?</b> (control flow) (2) <b>How is shared state managed?</b> (data flow). Four mainstream protocols:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">① Hierarchical (Manager-Worker)</b><br>
+<span class="box o">Manager</span> <span class="arrow">→</span> decompose <span class="arrow">→</span> <span class="box">A</span> <span class="box">B</span> <span class="box">C</span> <span class="arrow">→</span> aggregate<br>
+<span style="color:#5a6378">Analogy: CTO + engineers; matches CrewAI Hierarchical</span><br><br>
+
+<b style="color:#7b61ff">② Sequential / Pipeline</b><br>
+<span class="box">A</span> <span class="arrow">→ output →</span> <span class="box">B</span> <span class="arrow">→ output →</span> <span class="box">C</span><br>
+<span style="color:#5a6378">Analogy: CI/CD pipeline; CrewAI Sequential default</span><br><br>
+
+<b style="color:#7b61ff">③ Debate / Group Chat</b><br>
+<span class="box">A</span> ⇄ <span class="box">B</span> ⇄ <span class="box">C</span> (shared conversation history, take turns)<br>
+<span style="color:#5a6378">Analogy: meetings; AutoGen GroupChat, Multi-Agent Debate (Du et al. 2023)</span><br><br>
+
+<b style="color:#7b61ff">④ Blackboard / Shared Memory</b><br>
+<span class="box g">shared state (DB/KV)</span> ⇄ <span class="box">A</span> <span class="box">B</span> <span class="box">C</span> (independent read/write)<br>
+<span style="color:#5a6378">Analogy: actors + Redis; LangGraph State, Letta, and Google's A2A protocol are standardizing this</span>
+</div>
+
+    <p style="margin-top:14px">Which to use depends on the task: <b>splittable + mergeable</b> → Hierarchical; <b>clear order dependency</b> → Sequential; <b>multi-perspective debate</b> → Debate; <b>any subset needs any intermediate result</b> → Blackboard. Production systems typically mix — outer Sequential, with Debate inside one step.</p>
+
+    <p style="margin-top:10px">2024-2025 also brought new protocol layers: Google's <b>A2A (Agent-to-Agent)</b> standardizes cross-vendor Agent interop (like Day 6's MCP did for tools); Anthropic Claude's <b>Computer Use + sub-agents</b> lets an Agent spawn sub-Agents. Both are still engineering iterations on these four patterns.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># LangGraph: graph + shared state to implement hybrid protocols (production favorite)</span>
+<span class="kw">from</span> langgraph.graph <span class="kw">import</span> StateGraph, END
+<span class="kw">from</span> typing <span class="kw">import</span> TypedDict, Annotated
+<span class="kw">import</span> operator
+
+<span class="kw">class</span> <span class="fn">State</span>(TypedDict):
+    question: str
+    research: Annotated[list, operator.add]   <span class="cmt"># blackboard shared region</span>
+    answer: str
+
+<span class="kw">def</span> <span class="fn">researcher</span>(s): <span class="kw">return</span> {<span class="str">"research"</span>: [search_web(s[<span class="str">"question"</span>])]}
+<span class="kw">def</span> <span class="fn">critic</span>(s):     <span class="kw">return</span> {<span class="str">"research"</span>: [critique(s[<span class="str">"research"</span>])]}
+<span class="kw">def</span> <span class="fn">writer</span>(s):     <span class="kw">return</span> {<span class="str">"answer"</span>: synthesize(s[<span class="str">"research"</span>])}
+
+g = StateGraph(State)
+g.add_node(<span class="str">"research"</span>, researcher); g.add_node(<span class="str">"critic"</span>, critic)
+g.add_node(<span class="str">"writer"</span>, writer)
+g.add_edge(<span class="str">"research"</span>, <span class="str">"critic"</span>)        <span class="cmt"># sequential</span>
+g.add_conditional_edges(<span class="str">"critic"</span>,            <span class="cmt"># conditional routing</span>
+    <span class="kw">lambda</span> s: <span class="str">"writer"</span> <span class="kw">if</span> <span class="fn">good_enough</span>(s) <span class="kw">else</span> <span class="str">"research"</span>)
+g.add_edge(<span class="str">"writer"</span>, END)
+g.set_entry_point(<span class="str">"research"</span>)
+app = g.compile()
+result = app.invoke({<span class="str">"question"</span>: <span class="str">"AI Agent trends in 2026?"</span>, <span class="str">"research"</span>: []})</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"Use Debate so N agents can vote out hallucinations" — only half-true. Research (Du et al. 2023) shows Debate improves <b>factual reasoning</b> accuracy by ~5-15%, but is nearly useless on <b>knowledge-heavy</b> questions — all Agents share the same base model, so errors are <b>correlated</b> and voting can't fix systematic bias. To actually reduce hallucinations, adding RAG beats adding Agent votes.</div>
+    <div class="exercise" style="margin-top:8px">📌 Your scenario: a "<b>family decision assistant</b>" in LangGraph — the blackboard holds the family calendar, budget, and recent mood logs for the kids; three Agents read/write independently (schedule planning / financial impact / family-time score) and produce a multi-dimensional recommendation on "should we add a tutoring session this weekend." Shared state is more suitable than multi-turn conversation when family decisions need factual consistency.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 The heart of multi-agent protocol design isn't "AI collaboration" — it's distributed systems coordination. Your distributed background <b>is</b> the core leverage.<br>🤔 If you view N Agents as N microservices, how do their failure modes match (and differ from) classical distributed systems? (Hint: think about what <b>idempotency</b> and <b>causal consistency</b> mean when outputs come from LLMs.)</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Resources</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://microsoft.github.io/autogen/" target="_blank">AutoGen official docs (v0.4)</a> — async message bus version; concepts much cleaner than v0.2</li>
+      <li><a href="https://docs.crewai.com/" target="_blank">CrewAI official docs</a> — Role / Task / Process abstractions; productive in half a day</li>
+      <li><a href="https://langchain-ai.github.io/langgraph/" target="_blank">LangGraph docs</a> — production favorite; blackboard + explicit graph; best debugging experience</li>
+      <li><a href="https://arxiv.org/abs/2305.14325" target="_blank">Du et al. 2023 — Improving Factuality and Reasoning via Multi-Agent Debate</a> — classic paper; commendably honest about limitations</li>
+      <li><a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">Anthropic — Building Effective Agents</a> — sober "most tasks don't need multi-agent" stance; must-read</li>
+      <li><a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank">Lilian Weng — LLM Powered Autonomous Agents</a> — broad survey of agents, includes multi-agent considerations</li>
+      <li><a href="https://google.github.io/A2A/" target="_blank">Google A2A Protocol</a> — cross-vendor Agent interop standard (launched 2024)</li>
+      <li><a href="https://arxiv.org/abs/2402.01680" target="_blank">Multi-Agent Collaboration Survey (2024)</a> — academic survey covering frameworks, protocols, and evaluation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Reflection</span></h2>
+  <div class="section">
+    <details><summary>1. Anthropic's "Building Effective Agents" explicitly says "use workflows before multi-agent" — why? When is multi-agent truly <b>irreplaceable</b>?</summary><div>Core argument: multi-agent introduces <b>extra failure surface (each added Agent adds another LLM failure probability) + communication cost (token waste in message passing) + debugging difficulty (non-determinism compounds)</b>. Most "multi-agent" tasks can be solved with <b>explicit workflow + single Agent</b> more reliably and cheaply. Truly irreplaceable scenarios: (a) <b>strong task parallelism</b> — 10 independent subproblems, single Agent takes 10× time serially, 10 Agents in parallel take 1×; (b) <b>need for adversarial perspectives</b> — red/blue debate, generate-vs-judge; one Agent playing both roles will "self-comfort"; (c) <b>hard role/permission isolation</b> — customer-service Agent must not see financial Agent's data, security mandates process separation; (d) <b>long task wants different models</b> — cheap model for bulk filtering, strong model for final decision. Otherwise prefer workflows. Same engineering wisdom as "monolith first, microservices later."</div></details>
+
+    <details><summary>2. Where does multi-agent's <b>non-determinism</b> come from? How do you make outputs reproducible and testable in production?</summary><div>Three layers of randomness: (a) LLM sampling at temperature &gt; 0; (b) Agent message order is unfixed under async; (c) tool calls (external APIs) are themselves unstable. Mitigations: (1) <b>temperature=0 + fixed seed</b> — OpenAI/Anthropic both support seed; eliminates LLM-side randomness; (2) <b>explicit flow (CrewAI Sequential / LangGraph) over free-form conversation (AutoGen GroupChat)</b> — moves "who speaks" from LLM decision to code decision; (3) <b>mock external tools</b> — replace search/DB calls with fixtures during eval; strip out external noise; (4) <b>evaluate via distributions, not single runs</b> — run the same task N times and record pass rate, not "did this one run pass"; closer to ML-model evaluation thinking; (5) <b>structured output</b> — force each Agent to output JSON Schema so intermediate state is diffable. The whole approach reduces multi-agent from "magic" to "testable system."</div></details>
+
+    <details><summary>3. Pricing multi-agent: how do you estimate the <b>per-task cost</b> of a 5-agent crew? Which hidden costs are most often underestimated?</summary><div>Baseline formula: <code>total tokens = Σ (each Agent's system_prompt + cumulative conversation history + tool descriptions) × times that Agent is invoked</code>. Most underestimated hidden costs: (a) <b>conversation history bloat</b> — AutoGen GroupChat by default has <b>all Agents share the full history</b>; 5 Agents × 10 rounds = 50 LLM calls each carrying full history, tokens grow O(N²); (b) <b>tool description duplication</b> — one tool used by 3 Agents has its schema in each Agent's prompt; (c) <b>retry on failure</b> — Agent output rejected for format errors, tokens double; (d) <b>unnecessary "polite check-ins"</b> — Agents acknowledging each other ("got it, starting now") burn 5-10% of tokens. Cost-cutting moves: prompt caching (mentioned Day 6), periodic summarization of history into memory, kill politeness prompts ("deliver result directly, no acknowledgement"), prefer Hierarchical over Debate (former is O(N) communication, latter O(N²)). A typical 5-agent task going from 50K tokens to 8K tokens is common — single-task cost drops 80%.</div></details>
+
+    <details><summary>4. Compare "multi-Agent collaboration" with the <b>distributed consensus algorithms (Paxos / Raft)</b> you know: what's the same, what's different? What does that teach about multi-agent design?</summary><div>Same: both solve "<b>how do multiple unreliable nodes agree on a value</b>" — LLMs, like distributed nodes, can "fail" (wrong output), "partition" (inconsistent context), and behave "Byzantine" (malicious / prompt-injected). Different: (a) Paxos/Raft assume node failures are <b>independent</b>, but multiple Agents on the same base model fail in <b>highly correlated</b> ways (same biases, same blind spots) — voting consensus is weak; (b) Paxos optimizes for <b>correctness + latency</b>; multi-agent optimizes for <b>correctness + creativity</b> — the former eliminates disagreement, the latter exploits it; (c) distributed consensus has <b>formal proofs</b> (safety/liveness), multi-agent has essentially none. Lessons: (1) multi-agent voting must use <b>different base models</b> (Opus + GPT-4 + Gemini) to decorrelate; (2) inject <b>external ground truth</b> (RAG, tools) to break "group hallucination"; (3) critical nodes need <b>veto power</b> (human-in-the-loop = veto); (4) accept that multi-agent "liveness" can't be guaranteed — always have timeouts and fallbacks. Carrying distributed systems' pessimistic assumptions into multi-agent design avoids 80% of pitfalls.</div></details>
+
+    <details><summary>5. Multi-agent seems to simulate "organizations" — but human organizations are inefficient and politically draining. If we treat multi-agent as a "<b>sandbox for new organizational designs</b>," what can it teach human management?</summary><div>Interesting reverse direction. Several findings repeatedly verified in multi-agent experiments hold for human organizations too: (a) <b>clearer role boundaries → more efficient collaboration</b> — 80% of multi-agent failures are "unclear responsibility"; humans the same; (b) <b>explicit process beats flexible negotiation</b> — AutoGen GroupChat deadlocks easily, CrewAI explicit Tasks are stable; mirrors "meeting culture vs async-doc culture"; (c) <b>specialized + short context &gt; generalist + long context</b> — generalists coordinate, specialists go deep, same principle; (d) <b>critics are cheaper than executors</b> — using a cheap model for the reviewer works fine; mirrors "good code review doesn't need the most senior person, just someone with clear rules"; (e) <b>hierarchy (Manager) beats pure democracy (Debate) for getting results</b> — but the Manager must have a higher-quality "brain" (stronger model / broader vision). Conversely, multi-agent reminds us: organizational design isn't "add more people, get smarter," it's "in what context does structured division of labor's benefit outweigh coordination cost." Which loops back to the sober Anthropic line — if a single Agent / single person can solve it, don't pile on people. Complexity always has a price. This kind of cross-disciplinary mapping is exactly your strongest mode of thinking.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 7 · 2026-05-25</footer>
+
+</div>
+
+</body>
+</html>
