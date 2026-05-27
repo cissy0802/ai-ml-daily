@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Prompt Engineering — Day 3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Prompt Engineering</h1>
+  <div class="meta">Day 3 · 2026-05-20</div>
+  <div class="audience">For: engineers with coding experience but no AI background</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/prompt-eng-week1.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual W1: Prompt Engineering（系统 prompt 架构、四层结构）
+  </a>
+</div>
+
+
+<!-- 1. Zero/Few-shot -->
+<div class="card">
+  <h2>Zero-shot / Few-shot Prompting<span class="en">Zero-shot / Few-shot Prompting</span></h2>
+  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">Basics</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>It's like writing unit tests: drop a few "input → output" examples into the prompt and the model generalizes to new inputs by analogy — no retraining, just an ad-hoc lesson delivered through examples.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Traditional ML for a new task ("is this comment sarcastic?") meant labeling thousands of examples and training a model. Few-shot prompting collapses that pipeline into "write 3-5 examples in the prompt." Zero-shot goes further still — give zero examples, just describe the task. Both leverage the pattern-completion capacity from pre-training, shifting "training" from a separate step to runtime.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>The model does one thing: continue text. Zero-shot phrases the task as a natural-language instruction; few-shot constructs a "Q-and-A" pattern that the model then extends. The <b>order, format, and wording</b> of examples noticeably shape the output — that's the core idea that "prompt form is model behavior."</p>
+<pre><span class="cmt"># Zero-shot: only the task description</span>
+"Classify sentiment (positive/negative): 'The service was terrible' →"
+
+<span class="cmt"># Few-shot: show 3 examples first, the model continues the pattern</span>
+"Input: Weather is lovely today → positive
+Input: Battery dies in a day → negative
+Input: Support patiently solved my problem → positive
+Input: The service was terrible →"</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()
+
+<span class="cmt"># Few-shot: teach the model "extract company name" by example</span>
+prompt = <span class="str">"""Extract company names from sentences. Output the company name only.
+
+Sentence: Apple launched a new iPhone today.
+Company: Apple
+
+Sentence: Tesla's stock surged last night.
+Company: Tesla
+
+Sentence: NVIDIA is partnering with TSMC to build a new fab.
+Company:"""</span>
+
+resp = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=50,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}]
+)
+<span class="fn">print</span>(resp.content[0].text)  <span class="cmt"># Expected: NVIDIA, TSMC</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">"More examples is better" — wrong. Three to five high-quality examples that cover edge cases usually beat twenty look-alike ones, and excess examples eat your context window and bill. Another myth: thinking few-shot is "training." It's not — the model's parameters don't change, and the model "forgets" your examples on the next call.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li><a href="https://www.promptingguide.ai/" target="_blank">Prompt Engineering Guide</a> — systematic, example-heavy, bilingual</li>
+      <li>Anthropic's official <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank">Prompt Engineering docs</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: few-shot to coerce a fixed JSON output (instead of writing regex parsers).<br>Closer to home: photograph your kid's homework, OCR the text, then few-shot the model to organize it into a three-column "problem / topic / difficulty" review sheet you can skim in minutes.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Zero-shot prompting describes the task in natural language; few-shot prompting includes a handful of input-output examples in the prompt to demonstrate the desired pattern. No weights are updated — the model simply continues the pattern it sees, leveraging in-context learning from pre-training.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. Why does the order of examples in few-shot affect output? How does it tie back to Day 1's attention?</summary><div>The model is fundamentally "predict the next token given everything seen." Attention lets later positions see all prior tokens, but examples close to the end usually dominate attention weight and "recent pattern" — that's recency bias. Studies show the last few-shot example acts as the strongest signal. So put the example "most similar to the target input" last, put simple/typical cases first, and edge cases at the end to "leave a deeper impression."</div></details>
+    <details><summary>2. If a task already works reliably zero-shot, is few-shot still useful?</summary><div>Yes, but the value shifts from "lifting capability" to "constraining output format." When zero-shot capability suffices, the model often pads with explanations ("Sure, let me analyze…"). Few-shot examples lock the format more reliably than a wall of "output X only, no explanation" rules, because models imitate examples better than they obey prohibitions. Cost: small bump in tokens and latency. For high-QPS production traffic, consider zero-shot + structured output APIs.</div></details>
+    <details><summary>3. Is LLM few-shot the same thing as ML's "K-shot learning"?</summary><div>Same name, different beast. Classic K-shot learning updates parameters from K labeled samples (meta-learning paradigm). LLM few-shot updates nothing — examples are pure context. The more accurate name is "in-context learning." Consequence: LLM few-shot has near-zero training cost but every inference pays per-token; classic K-shot trains once and inference is cheap, but the training pipeline is complex.</div></details>
+    <details><summary>4. When does few-shot make the model dumber?</summary><div>Three classic traps: (a) errors or biases in examples — the model imitates them faithfully ("garbage in, garbage out," amplified); (b) examples from a domain too far from the target — the model force-fits the wrong pattern; (c) example format too complex (nested JSON + mixed languages) — confuses the model into format drift. Diagnostic: run a zero-shot baseline first, then add few-shot, and confirm it's a real lift rather than added noise.</div></details>
+    <details><summary>5. From a product perspective, how do you choose between few-shot and "fine-tuning a model"?</summary><div>Four axes: traffic volume, stability needs, privacy, iteration speed. Low traffic (under 10K/day), frequently changing requirements → few-shot wins outright (ship by editing a prompt). Extremely high traffic where long prompts blow up cost and latency → fine-tuning "bakes the examples into weights." Strict stability requirements (finance, medical) → fine-tuning + an eval set is more controllable. Sensitive data that can't leave the network → fine-tune a small model on-prem. In practice: ship few-shot to find PMF, fine-tune only after volume justifies it.</div></details>
+  </div>
+</div>
+
+<!-- 2. Chain-of-Thought -->
+<div class="card">
+  <h2>Chain-of-Thought<span class="en">Chain-of-Thought (CoT)</span></h2>
+  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">Reasoning</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like enforcing "write the comment explaining your approach before the code" in code review — make the model "think out loud" before giving the final answer, and accuracy jumps a tier.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>For word problems, multi-step reasoning, and logic tasks, asking the model for the answer directly often fails. The reason: per-token compute is constant, and "compute the final answer in one step" is too tight a budget for hard problems. CoT's insight: <b>letting the model emit more intermediate tokens effectively gives it more "thinking time."</b> The model breaks reasoning into small steps, each built on the previous result, and error rates drop sharply.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Triggering it is absurdly simple: add "Let's think step by step." at the end of the prompt, or include reasoning in your few-shot examples. The model writes out reasoning first, then the answer.</p>
+<pre><span class="cmt"># Without CoT</span>
+"Mike has 5 apples. He eats 2, then buys 3 times as many as he ate. How many does he have now?"
+→ "9"  <span class="cmt">(wrong!)</span>
+
+<span class="cmt"># With CoT</span>
+"... Let's think step by step."
+→ "Mike started with 5, ate 2 leaving 3;
+   bought 3 × 2 = 6 more;
+   total = 3 + 6 = 9.
+   Wait — recheck: 3 × (apples eaten = 2) = 6, plus remaining 3 = 9. Answer: 9."  <span class="cmt">(correct reasoning made explicit)</span></pre>
+    <p>Analogy: your brain does 23 × 47 by mentally splitting into 20 × 47 + 3 × 47 first. CoT forces the model to do that explicitly.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = Anthropic()
+
+question = <span class="str">"A car drives 2.5 hours at 60 km/h, then 1.5 hours at 80 km/h. What's the average speed?"</span>
+
+<span class="cmt"># Trigger CoT: write "reason first, answer second" into the system prompt</span>
+resp = client.messages.create(
+    model=<span class="str">"claude-opus-4-7"</span>,
+    max_tokens=500,
+    system=<span class="str">"Write your reasoning steps inside &lt;thinking&gt; tags, then give the final number inside &lt;answer&gt; tags."</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question}]
+)
+<span class="fn">print</span>(resp.content[0].text)
+<span class="cmt"># Model will compute total distance = 60×2.5 + 80×1.5 = 270, then the average</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">The "reasoning" CoT writes out isn't necessarily the model's <i>actual</i> internal computation. It's just more generated tokens, which do raise accuracy, but intermediate steps may be confabulated (plausible-looking but disconnected from the final answer). Don't treat CoT output as the model's honest thought process — interpretability research has shown the two are not equivalent.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Original paper (Wei et al., 2022): <a href="https://arxiv.org/abs/2201.11903" target="_blank">Chain-of-Thought Prompting</a> — clear in 4 pages</li>
+      <li><a href="https://www.promptingguide.ai/techniques/cot" target="_blank">Prompting Guide: CoT chapter</a> with many examples</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: math, logic puzzles, SQL derivation.<br>Closer to home: for investment analysis, prompt the model to "first analyze the moat, then break down revenue, then value the company, then give a buy/sell recommendation" — encode the research framework into the prompt to avoid gut-call conclusions.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Chain-of-Thought prompting elicits intermediate reasoning steps before the final answer, dramatically improving performance on multi-step problems. It works because extra tokens give the model more "compute budget" per query. Note that the verbalized reasoning is not guaranteed to reflect the model's internal mechanics — it is a behavioral trick, not introspection.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. Why does CoT barely help small models and only "emerge" in large ones?</summary><div>Researchers observed that under ~10B parameters, CoT can hurt — small models "think but miscalculate," and a single error in the chain amplifies through later steps, leaving the final answer worse than direct guessing. Big models have low per-step error rates, so the chain holds together. This is why the GPT-3 paper barely showed CoT effects, but GPT-3.5/4 surfaced them dramatically — capability needs to clear a threshold before CoT "unlocks." Engineering implication: if you must use CoT on small models, pair it with Self-Consistency or tool calls for error correction.</div></details>
+    <details><summary>2. CoT multiplies token count and latency. When is that cost not worth it?</summary><div>Three scenarios to skip CoT: (a) tasks that are classification, extraction, or translation — pattern matching, where CoT may make the model overthink; (b) high-QPS real-time services (search suggestions, chat completion) — a 200 ms budget won't fit CoT; (c) the model is natively a reasoning model (e.g. o1, Claude with extended thinking) — it already runs implicit CoT, so adding explicit CoT just burns tokens. Principle: CoT is for reasoning tasks, not a default toggle.</div></details>
+    <details><summary>3. CoT can confabulate. What does this share with human "post-hoc rationalization"?</summary><div>A lot. Psychology has shown humans often decide first and rationalize afterward (self-justification). CoT models do similar: researchers have edited the model's final answer while keeping the chain, and the chain still "argues coherently" toward the swapped answer. A warning for interpretability — "the model explained" is not "the model understood." In high-stakes settings (medical advice, credit decisions), use tool calls or external verifiers to cross-check, not the model's self-reported chain.</div></details>
+    <details><summary>4. Designing a CoT prompt — compare "Let's think step by step" vs "Please analyze using these steps: 1. ... 2. ... 3. ..."</summary><div>The first is zero-shot CoT — generalizes well but the reasoning is unconstrained and quality fluctuates. The second is structured CoT — domain knowledge (SWOT, the five-step valuation framework) is encoded into the prompt, giving more stable output, easier audit, and cleaner downstream parsing. In practice: use zero-shot CoT during exploration to validate whether the LLM can do the task at all; switch to structured CoT when productionizing, with an eval set. Or combine: first "Let's plan the steps for this problem" then "Execute step by step according to the plan."</div></details>
+    <details><summary>5. Tie this back to Day 2's RLHF — is CoT a pre-training capability or an RLHF artifact?</summary><div>Pre-training already exposed the model to mountains of human text in "reason first, conclude after" form (papers, tutorials, Stack Overflow answers), so the raw capability comes from pre-training. But RLHF/SFT reinforces the tendency to deploy reasoning at the right time: when annotators prefer explained answers, the reward model encourages CoT-style output by default. That's why base models (e.g. GPT-3 base) need explicit CoT triggers, while chat-tuned models (ChatGPT, Claude) often step through automatically — "can but doesn't volunteer" vs "trained to prefer it."</div></details>
+  </div>
+</div>
+
+<!-- 3. ReAct -->
+<div class="card">
+  <h2>ReAct (Reason + Act)<span class="en">ReAct (Reason + Act)</span></h2>
+  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">Agent</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like REPL debugging: instead of emitting the full answer at once, the model "thinks one step → calls a tool → reads the result → thinks another step," looping until done. CoT is pure mental reasoning; ReAct is reasoning plus actually going out to fetch data or execute commands.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Pure CoT reasons only over what the model already knows. Ask "what's today's stock price?" or "how many stars does this GitHub repo have?" and it will hallucinate. ReAct weaves reasoning with action: the model first thinks about what information it lacks, then acts by calling a tool, observes the result, and resumes thinking — looping toward the answer. This is the conceptual backbone of nearly every modern agent framework.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>It's a Thought → Action → Observation → Thought ... loop. Each round the model emits a short segment; an outer runtime parses the Action portion, executes the real tool, then splices the result back into the prompt as Observation so the model can continue.</p>
+<pre><span class="cmt"># Typical ReAct conversation format</span>
+User: How many stars does BigCat's ai-ml-daily GitHub repo have?
+
+Thought: I don't have real-time data; I need the GitHub API.
+Action:  http_get("https://api.github.com/repos/cissy0802/ai-ml-daily")
+Observation: {"stargazers_count": 42, ...}
+Thought: I have the data now, I can answer.
+Answer:  42 stars.</pre>
+    <p>Essentially: ReAct = CoT + tool use + loop. Day 6 covers Function Calling, which is ReAct's industrialized form.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> langchain.agents <span class="kw">import</span> create_react_agent, AgentExecutor
+<span class="kw">from</span> langchain_anthropic <span class="kw">import</span> ChatAnthropic
+<span class="kw">from</span> langchain.tools <span class="kw">import</span> Tool
+
+<span class="cmt"># 1) Define tools — the things the model can actually do</span>
+tools = [
+    Tool(name=<span class="str">"calculator"</span>,
+         func=<span class="kw">lambda</span> x: <span class="fn">str</span>(<span class="fn">eval</span>(x)),
+         description=<span class="str">"Evaluate a math expression"</span>),
+    Tool(name=<span class="str">"search"</span>,
+         func=my_search_api,           <span class="cmt"># your search endpoint</span>
+         description=<span class="str">"Search real-time web information"</span>),
+]
+
+<span class="cmt"># 2) Let LangChain assemble the ReAct prompt + parsing loop</span>
+agent = create_react_agent(ChatAnthropic(model=<span class="str">"claude-opus-4-7"</span>),
+                           tools, prompt=react_prompt_template)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=<span class="kw">True</span>)
+
+executor.invoke({<span class="str">"input"</span>: <span class="str">"Today's Shanghai Composite move × my 500k position = ?"</span>})
+<span class="cmt"># You'll see the full Thought → Action → Observation trace</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">ReAct doesn't give the model "thinking ability" — it gives the model an outer loop. Each round is still one forward pass; "it's thinking" is really the runtime parsing output, executing tools, splicing results back, and asking again. This matters for debugging: ReAct bugs usually live in "Action parsing" or "fuzzy tool schemas," not in the model itself.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Original paper <a href="https://arxiv.org/abs/2210.03629" target="_blank">ReAct: Synergizing Reasoning and Acting (Yao et al., 2022)</a></li>
+      <li><a href="https://python.langchain.com/docs/how_to/agent_executor/" target="_blank">LangChain Agent tutorial</a> — run it to get the intuition</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: agents that browse the web + compute + write code to complete end-to-end tasks (booking flights, drafting market reports).<br>Closer to home: a morning-standup helper — the agent checks today's calendar, searches your inbox for action items, queries Notion for OKR progress, then outputs a five-minute briefing.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">ReAct interleaves reasoning traces (Thought) and tool actions (Act) in a loop, using tool observations to ground further reasoning. It transforms a static LLM into an interactive agent that can fetch real-world data. ReAct is the conceptual backbone of most modern agent frameworks (LangChain, OpenAI Assistants, Anthropic tool use).</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. A ReAct loop can run away — the model keeps "thinking" and never answers. What guardrails would you add?</summary><div>The standard set: (a) a max-iteration cap (e.g. max_iterations=10); on hit, force a "based on what I have" answer or return an error; (b) duplicate detection: if two consecutive Actions are identical, declare a loop and abort; (c) budget control: cumulative tokens, time, or cost over threshold triggers a circuit breaker. Production also needs observability (log every Thought/Action), schema validation on the final answer, and human-in-the-loop confirmation for "high-risk actions" (delete, payment).</div></details>
+    <details><summary>2. Compared to plain Function Calling, is the explicit "Thought" step in ReAct necessary?</summary><div>Not always. Modern APIs (OpenAI tool calling, Anthropic tool use) implicitize Thought — the model emits a tool_use block directly, the runtime executes, then feeds the result back. This implicit ReAct has lower latency and more robust parsing. Explicit ReAct still has two upsides: (a) observability — you see what the model was reasoning when it chose a tool; (b) training scaffolding for weak (small) models — forcing "think before act" lifts accuracy. Rule of thumb: use native tool use when you can; switch to explicit ReAct when you need audit or debugging.</div></details>
+    <details><summary>3. How is ReAct structurally similar to an "event loop" (Node.js / Python asyncio)?</summary><div>Strikingly similar: an outer runtime schedules; a "task" yields an intention (Promise / Action); the runtime performs I/O; the result wakes the task. Two differences: (a) the "task" is a text-generation model with all state encoded in the prompt (no memory pointer), so each wake-up must re-paste the full history — that's why ReAct context grows and token cost rises with each step; (b) the next move is non-deterministic — the model may change its mind, so debugging looks more like LLM debugging than state-machine debugging.</div></details>
+    <details><summary>4. What are the typical failure modes of ReAct?</summary><div>(a) Wrong tool: vague description leads the model to use the calculator for date parsing; (b) wrong arguments: it passes "2026-05-20" as a string to a tool expecting Unix timestamp; (c) tool addiction: searches before every question even when it already knows the answer ("tool abuse"); (d) tool distrust: the tool returned correct data but the model "feels off" and confabulates ("tool bias"); (e) context explosion: each observation is huge (a full webpage), filling the context in a few rounds. Each maps to an engineering fix: clearer descriptions, strict argument schemas, "only call when needed" in the prompt, observation length limits, and summarization.</div></details>
+    <details><summary>5. If you could only teach one non-AI colleague one prompting trick, would it be CoT or ReAct? Why?</summary><div>CoT. It's zero-cost and immediately effective — add "please think step by step" and they can use it today; no tools, no framework, no loop management. It covers 95% of daily uses (email drafting, data analysis, document writing). ReAct is more powerful but has higher entry cost: tool definition, parsing, error handling. Teaching order should be: start with CoT to win them over, introduce ReAct/Function Calling once they hit the "model hallucinates real-time info" wall. Lessons land better with a felt pain point. That's exactly why Day 3 puts CoT before ReAct.</div></details>
+  </div>
+</div>
+
+<!-- 4. Self-Consistency -->
+<div class="card">
+  <h2>Self-Consistency<span class="en">Self-Consistency</span></h2>
+  <div class="tags"><span class="tag">Prompt</span><span class="tag purple">Reasoning</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like asking several engineers to solve the same problem independently and then voting: sample the model multiple times at non-zero temperature, run CoT each time, take the most frequent answer. The majority is usually right. It's a statistical "wisdom of crowds" that trades compute for accuracy.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>A single CoT chain can still slip on one step, and one mistake cascades. Self-Consistency's insight: <b>correct reasoning paths tend to converge to the same answer, while errors scatter</b>. Sample N times (say N=10), majority-vote the answers, and robustness climbs steeply. On math and logic tasks this often adds 10-20 accuracy points.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Three steps: (1) sample N times at temperature &gt; 0 (e.g. 0.7) so the same prompt produces different CoT chains; (2) extract the final answer from each chain; (3) majority-vote.</p>
+<pre><span class="cmt"># Pseudocode: Self-Consistency</span>
+question = "If 3x + 7 = 22, x = ?"
+answers = []
+<span class="kw">for</span> _ <span class="kw">in</span> range(10):
+    cot = llm(question, temperature=0.7)   <span class="cmt"># different chain each time</span>
+    answers.append(extract_final(cot))      <span class="cmt"># pull out the final number</span>
+final = mode(answers)                       <span class="cmt"># vote: [5,5,5,5,4,5,5,6,5,5] → 5</span></pre>
+    <p>Analogy: a single CoT is one student doing the problem; Self-Consistency hands the problem to ten students independently and tallies their answers. The price is ~10x tokens.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+<span class="kw">import</span> re
+
+client = Anthropic()
+question = <span class="str">"Anna has 3 apples. Mom gives her twice as many more, then she shares half with her brother. How many does she have left?"</span>
+
+answers = []
+<span class="kw">for</span> _ <span class="kw">in</span> range(10):                          <span class="cmt"># sample 10 independent chains</span>
+    resp = client.messages.create(
+        model=<span class="str">"claude-opus-4-7"</span>,
+        max_tokens=300,
+        temperature=0.7,                       <span class="cmt"># key: temperature for diversity</span>
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+                   <span class="str">"content"</span>: question + <span class="str">"\nReason step by step, then give the number."</span>}]
+    )
+    <span class="cmt"># Take the last number as the answer</span>
+    nums = re.findall(<span class="str">r"\d+"</span>, resp.content[0].text)
+    <span class="kw">if</span> nums: answers.append(nums[-1])
+
+<span class="fn">print</span>(Counter(answers).most_common(1))      <span class="cmt"># the most frequent answer wins</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Self-Consistency <b>only works when there's a clear, single answer</b> (math, multiple choice, extraction). For open-ended tasks (essay writing, planning) you can't vote — "the most common creative idea" isn't "the best one." Another myth: thinking Self-Consistency works at temperature 0. It doesn't — you must use non-zero temperature for sampling diversity, otherwise 10 runs are identical and the vote is meaningless.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Original paper <a href="https://arxiv.org/abs/2203.11171" target="_blank">Self-Consistency Improves CoT (Wang et al., 2022)</a></li>
+      <li><a href="https://www.promptingguide.ai/techniques/consistency" target="_blank">Prompting Guide: Self-Consistency section</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: high-accuracy math and logic, medical diagnostics, contract clause extraction.<br>Closer to home: estimating a company's intrinsic value — run the model N times with different assumption combinations (discount rate, growth rate, terminal value), then look at the valuation distribution. Tight distribution = robust conclusion; wide distribution = highly assumption-sensitive, so don't overweight.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Self-Consistency samples multiple CoT reasoning paths at non-zero temperature and takes the majority-vote answer. The intuition: correct reasoning paths tend to converge, while errors scatter. It trades compute for accuracy and works best on tasks with a unique, extractable final answer.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. How does Self-Consistency relate to classical ML ensemble (bagging) ideas?</summary><div>Common ground: both use "several slightly-different predictors voting" to reduce single-point errors. Differences: bagging draws diversity from bootstrapped training data with different model weights; Self-Consistency draws diversity from one model's stochastic sampling at temperature &gt; 0 — weights identical, only generation paths differ. Cost shape differs too: bagging trains expensive but infers cheap; Self-Consistency doesn't train but pays N× at inference. It's "bagging at inference time" — a uniquely LLM-era pattern.</div></details>
+    <details><summary>2. With only 3× budget (sample 3, not 10), is Self-Consistency still worth it?</summary><div>Probably yes, but with sharper diminishing returns. Research shows the biggest jump is N=1→5, marginal returns from 5→20, near saturation from 20→40. Real N=3 gain depends on problem difficulty: (a) easy problems already correct random slips by N=3; (b) hard problems need at least N=10 for a stable majority. Cheaper variants exist: use a small model to generate N chains then a large model as "judge" to pick the best — that's LLM-as-Judge (Day 10), often cheaper than N runs of the big model.</div></details>
+    <details><summary>3. Self-Consistency assumes "the correct answer is the mode." When does that assumption fail?</summary><div>Three classic failures: (a) systematic bias — when the model holds a shared bias on a problem (e.g. mass misinformation in training data), all 10 chains agree wrongly, and the majority reinforces the error; (b) long-tail correctness — some problems need a rare insight the model finds only 1 in 10 times, smothered by 9 plausible-but-wrong runs; (c) too-large answer space — an open numeric problem ("how much is this company worth?") rarely returns the same number twice, and voting degrades to random. Mitigations: (a) switch model or add a verifier; (b) move to Best-of-N + Reward Model; (c) bucket the answers before voting.</div></details>
+    <details><summary>4. What happens if you combine Self-Consistency with ReAct?</summary><div>You get "N independent agents each running the full tool-use loop." Upside: corrects accidental wrong tools / wrong arguments by individual agents — the final conclusion is more robust. Cost: each agent makes 5-10 tool calls; N=10 means 100 tool calls + 100× LLM tokens. Latency and cost are brutal. The common compromise: only apply Self-Consistency at "critical decision points" (the final conclusion), keep intermediate tool calls single-path. This is the seed of Day 7's multi-agent systems — promote "independent sampling" into "role-divided multi-agent collaboration."</div></details>
+    <details><summary>5. From a product perspective, how do you explain to users "this answer was slower but more accurate"?</summary><div>This is a UX design problem worth solving deliberately. Three angles: (a) progress bar: "verifying using 5 independent approaches…" — visualize multi-sampling as "rigor," making the cost feel justified; (b) comparison view: collapse 5 chains so users can see them converge — builds trust; (c) tiered options: default fast mode (single sample); add a "deep analysis" button for high-value tasks (investment decisions, medical) that triggers Self-Consistency, letting the user make the trade. The essence: translate "compute traded for accuracy" into user-perceptible value. Day 29's AI product design covers "latency budget" and "user trust" in depth.</div></details>
+  </div>
+</div>
+
+<a class="back" href="index.en.html">← Back to home</a>
+
+<footer>BigCat · AI &amp; ML Daily · Day 3 · 2026</footer>
+</div>
+</body>
+</html>

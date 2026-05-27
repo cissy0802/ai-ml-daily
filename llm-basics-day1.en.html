@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: LLM Foundations — Day 1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: LLM Foundations</h1>
+  <div class="meta">Day 1 · 2026-05-19</div>
+  <div class="audience">For: engineers with coding experience but no AI background</div>
+</header>
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/context-eng-week2.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual W2: Context Engineering（Attention 在 context window 中的工程应用）
+  </a>
+</div>
+
+
+<!-- 1. Transformer Architecture -->
+<div class="card">
+  <h2>Transformer Architecture<span class="en">Transformer Architecture</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Theory</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Trade the "read one word at a time" serial pipeline for a "whole-team-in-one-meeting" parallel architecture — every token sees the full text at once before deciding what to say.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Before 2017, RNN/LSTM dominated text processing. They were essentially a for-loop: you couldn't compute token t+1 until you finished token t. Two pain points followed: (1) training couldn't be parallelized, so it was slow; (2) long-range dependencies tended to fade away (vanishing gradients). The Transformer uses self-attention to directly connect any two positions in one shot — GPUs run at full utilization in parallel, and long-range signal no longer gets lost.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Picture each token as an object with three properties: Query (what I'm looking for), Key (what I can offer), Value (what I actually carry). Each layer roughly does this:</p>
+<pre><span class="cmt"># Pseudocode: one Transformer block</span>
+<span class="kw">for</span> token <span class="kw">in</span> sequence:
+    <span class="cmt"># 1. Score Q against every Key in the sequence (like a database JOIN)</span>
+    scores = token.Q @ all_tokens.K.T
+    weights = softmax(scores)
+    <span class="cmt"># 2. Pull others' Value vectors back, weighted</span>
+    token.new = weights @ all_tokens.V
+    <span class="cmt"># 3. Pass through a feed-forward layer (a nonlinear projection)</span>
+    token.out = FFN(token.new + token)  <span class="cmt"># residual connection</span></pre>
+    <p>Stack 12 to 96 of these blocks. Each layer lets every token "re-ask the whole sequence," and the representation gets richer with every pass.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Load a Transformer with the transformers library — the whole picture in 10 lines</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModel
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"bert-base-uncased"</span>)
+model = AutoModel.from_pretrained(<span class="str">"bert-base-uncased"</span>)
+
+inputs = tok(<span class="str">"Transformers changed NLP."</span>, return_tensors=<span class="str">"pt"</span>)
+<span class="kw">with</span> torch.no_grad():
+    out = model(**inputs)
+
+<span class="cmt"># out.last_hidden_state shape: [batch, seq_len, hidden_dim]</span>
+<span class="cmt"># Each token is now a 768-dim vector encoding its meaning in context</span>
+<span class="fn">print</span>(out.last_hidden_state.shape)  <span class="cmt"># torch.Size([1, 6, 768])</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Myth: "Transformer = ChatGPT." Not quite. The Transformer is just the skeleton. The original paper targeted translation (Encoder-Decoder). GPT uses a Decoder-only variant; BERT uses Encoder-only. Architecture is the foundation — behavior comes from training objective and data.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li><a href="https://jalammar.github.io/illustrated-transformer/">Jay Alammar — The Illustrated Transformer</a> (the classic visual intro)</li>
+      <li><a href="https://www.youtube.com/watch?v=kCc8FmEb1nY">Karpathy — Let's build GPT from scratch</a> (2-hour live coding)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p><b>Canonical:</b> every modern LLM (GPT, Claude, Gemini, Llama) is a Transformer. <b>Your day-to-day:</b> when you paste a 5,000-word meeting transcript into Claude and ask for a summary, the Transformer's parallel attention is what lets the model scan the whole document in one pass instead of word by word.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Transformers replaced recurrent loops with parallel self-attention, letting every token attend to every other token in one pass. This unlocked GPU-scale training and is the backbone of all modern LLMs (GPT, Claude, Llama).</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>Transformers beat RNNs because of parallelism — clearly true at training time. But at inference time (autoregressive generation), can they still parallelize? Why or why not?</summary><div>Not really. Generating token N+1 requires token N first, so inference collapses back into a serial loop — that's why LLM inference is slow and needs KV Cache and Speculative Decoding to claw performance back. But there's a key nuance: at training time, gradients for all N tokens are computed in parallel, so training is O(n); at inference, even though the outer loop is serial, the attention inside each step is still parallel, so it stays faster than an RNN. The takeaway: modern inference optimization isn't about "parallelizing tokens," it's about "shrinking the cost per step" — reuse KV cache, reorder matmuls with FlashAttention, etc.</div></details>
+    <details><summary>If attention can connect any two positions, why stack 96 layers? Wouldn't one suffice? Compare it to chained SQL JOINs.</summary><div>One layer isn't enough. A single attention layer does a one-hop lookup: A queries B, B queries C, but A still can't directly use C's information. Multiple layers diffuse signal: at layer 2, B has already absorbed C, so A can pull C through B; at layer 3, A reaches even further. It's like chained SQL JOINs — a single JOIN connects two tables, but "what does my friend's friend's friend like" requires recursion. Depth promotes the model from "matching" to "reasoning chains." There are diminishing returns: past ~100 layers, gains drop sharply because information is already well-mixed and extra depth mostly adds noise. That's why Llama-3 405B uses only 126 layers instead of stacking forever.</div></details>
+    <details><summary>Transformer's O(n²) cost is original sin — what application boundaries does it set? How does GPT-4 still serve 128K context?</summary><div>Naive Transformers struggle with long sequences: double the length, quadruple the compute and memory. That barred whole-genome analysis or full-book modeling. 128K context works thanks to engineering stacks: (1) FlashAttention removes memory-traffic bottlenecks so attention is affordable; (2) GQA/MQA share KV across heads to cut memory pressure; (3) RoPE allows positional extrapolation; (4) chunked prefill and KV-cache reuse at inference time. Caveat: "fits in 128K" is not "uses 128K well" — many models lose retrieval accuracy mid-context (the lost-in-the-middle problem). When engineering bypasses an architectural bottleneck, it usually introduces new capability traps.</div></details>
+    <details><summary>BERT (Encoder-only), GPT (Decoder-only), T5 (Encoder-Decoder) — why is Decoder-only the only survivor by 2024?</summary><div>The win comes from task unification. Decoder-only uses next-token prediction as a single universal interface — translation, QA, summarization, classification all become "continue the text." That unification compounds best with scale. Encoder-only (BERT) understands but can't generate, so its surface area is narrow. Encoder-Decoder (T5) doubles parameter count for limited gain. There's also infrastructure pull: KV-cache-friendly autoregressive inference has a mature stack. But post-2024, small specialist models (embeddings, rerankers) are returning to Encoder designs — architecture choice is task-driven, and "winner takes all" isn't the final word. See Hyung Won Chung's "Decoder-only is all you need" talk.</div></details>
+    <details><summary>Residual connections + LayerNorm look like engineering trivia, but remove them and training collapses. What does this reveal about why deep learning can scale at all?</summary><div>They're the gradient highway. Residuals let gradients flow across layers without multiplicative decay; LayerNorm keeps per-layer input distributions stable. Without them, a 96-layer network's gradients either vanish or explode — it simply can't converge. The deeper insight: deep learning scales not because "deeper networks are stronger," but because "we can train deeper networks stably." That's a subtle shift — the Transformer's success is half thanks to its auxiliary plumbing (Norm + Residual). Analogous to distributed systems: they scale not because "more machines," but because of invisible infrastructure like consensus protocols, heartbeats, and failover.</div></details>
+  </div>
+</div>
+
+<!-- 2. Attention Mechanism -->
+<div class="card">
+  <h2>Attention Mechanism<span class="en">Attention Mechanism</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Core</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like a SQL JOIN — every word carries its own "query," matches it against the full text, finds the most relevant terms, and pulls a weighted copy of their content back.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>"The cat sat on the mat because it was warm." Does "it" refer to the mat or the cat? Traditional models could only guess by proximity. Attention lets the position holding "it" actively poll the whole sentence: who is most relevant to me? It then pulls in the mat's vector with high weight, baking "it = mat" into its own representation. The essence: solving long-range coreference and contextual focus.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>The core formula: <code>Attention(Q,K,V) = softmax(Q·Kᵀ / √d) · V</code>. In plain English: take dot products between Q and every Key to get similarity, normalize into weights, then take a weighted sum of all Values. A weighted lookup, nothing more.</p>
+<pre><span class="cmt"># Attention in 4 lines of numpy</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">def</span> <span class="fn">attention</span>(Q, K, V):
+    scores = Q @ K.T / np.sqrt(K.shape[-1])  <span class="cmt"># similarity</span>
+    weights = np.exp(scores) / np.exp(scores).sum(axis=-1, keepdims=<span class="kw">True</span>)
+    <span class="kw">return</span> weights @ V                        <span class="cmt"># weighted sum</span></pre>
+    <p>Multi-Head Attention = running several independent query channels in parallel, each head focusing on a different dimension of relation (syntax, semantics, coreference, etc.).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># See what GPT-2 is actually attending to</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> GPT2Tokenizer, GPT2Model
+tok = GPT2Tokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = GPT2Model.from_pretrained(<span class="str">"gpt2"</span>, output_attentions=<span class="kw">True</span>)
+
+inputs = tok(<span class="str">"The cat sat on the mat"</span>, return_tensors=<span class="str">"pt"</span>)
+out = model(**inputs)
+<span class="cmt"># out.attentions[layer][batch, head, query_pos, key_pos]</span>
+attn = out.attentions[-1][0, 0]   <span class="cmt"># last layer, head 0</span>
+<span class="fn">print</span>(attn.shape)  <span class="cmt"># [6, 6] — attention weights from each token to every other</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Myth: "Attention is just a weighted average." The difference is that the weights are computed dynamically from the input — they're not fixed parameters. Every new sentence reshuffles them. That's exactly what lets the model "understand context."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li><a href="https://jalammar.github.io/illustrated-transformer/">Illustrated Transformer — Attention section</a></li>
+      <li><a href="https://distill.pub/2016/augmented-rnns/">Distill — Attention and Augmented RNNs</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p><b>Canonical:</b> in machine translation, each target word uses attention to look at the corresponding source words. <b>Your day-to-day:</b> when you read a bedtime story to your kid through Claude, the reason the model remembers that "little fox" from paragraph 1 is still the same fox in paragraph 3 is attention building coreference links across paragraphs.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Attention computes a weighted sum of values, where weights come from query-key similarity. It lets each token dynamically pull context from any position, replacing fixed locality with content-based routing.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>Comparing attention to a SQL JOIN — where does the analogy break? And what does KV Cache correspond to in this analogy?</summary><div>It breaks in three places: (1) SQL JOIN does discrete equality/range matching, while attention does continuous similarity weighting — every Key participates, just at different weights; (2) JOIN returns a table, attention returns an aggregated vector; (3) JOIN happens once, attention re-runs across many stacked layers. KV Cache corresponds to a materialized view: cache previously computed K and V, and new tokens only do incremental updates instead of recomputing the whole table. The value of the analogy isn't precision — it's building the intuition of content routing. Like grep or JOIN, attention is "look up things by content" at a different granularity and a different math.</div></details>
+    <details><summary>Q, K, V are all linear projections of the token embedding. Why not just have the embedding attend to itself? What's the essential payoff of training three separate matrices?</summary><div>Role separation. The features a word wants when querying are usually different from the features it offers when being queried. "It" as Q cares about "who am I referring to?"; "it" as K cares about "am I a candidate antecedent?" If a single vector served both, the model would have to compromise between asking and answering. Three matrices grant the freedom to learn asymmetric relations — A attending to B doesn't imply B attends to A. Same idea as separating primary keys, foreign keys, and business columns in database design: physically they could be merged, but separation lets indexing, querying, and modification each optimize independently. Note: later architectures (MQA/GQA) share K and V partially to save memory — an engineering trade in the other direction.</div></details>
+    <details><summary>Why divide by √d? What happens if you skip it? How does this mirror normalization in database index design?</summary><div>Without it, dot product magnitude grows with dimension d (the expected value scales like √d for high-dim vectors). softmax inputs blow up → output collapses to one-hot → gradients vanish → no training. Dividing by √d normalizes score variance to ~1 so softmax stays meaningfully "soft." Analogous to balancing hash buckets in databases: skewed distributions overload one bucket (softmax collapsing to one-hot is "all queries hit one bucket"). Deeper lesson: many "incidental" details in deep learning (the √d divide, LayerNorm's ε, Adam's β1=0.9) are really about managing numerical distributions — an engineering craft, not a mathematical necessity.</div></details>
+    <details><summary>Multi-Head with 8 heads beats one big head at roughly equal parameter count. Why does it work better? How does it relate to ensemble learning?</summary><div>It enforces diversity. One large head only learns one optimal attention pattern in training; splitting into 8 smaller heads forces each to look at a different subspace, naturally specializing in different relations (syntax, semantics, coreference, local neighbors). Same family as bagging and ensembles: use structural constraints to force diversity, then merge. The difference: Multi-Head is trained end-to-end, and diversity emerges as a byproduct rather than being hand-engineered. Mechanistic interpretability has indeed found heads specialized as induction heads, name movers, duplicate-token detectors, and so on — so "multi-head" isn't marketing, it reflects genuine functional division.</div></details>
+    <details><summary>Linear/Sparse Attention tries to drop O(n²) to O(n) — why hasn't either replaced standard attention? What do they sacrifice?</summary><div>They sacrifice global, exact matching. Standard attention gives every token an exact weight against every other token. Linear Attention approximates with kernel tricks (sacrificing precision); Sparse Attention restricts to windows or fixed patterns (sacrificing global reach). At short and medium context (under 32K), the precision loss visibly degrades capability — industry prefers squeezing the constant with FlashAttention over switching. At ultra-long context (1M+), O(n²) becomes infeasible, and Mamba/SSM-style linear methods are an active frontier. Algorithmic complexity isn't a standalone metric — constants, precision loss, and hardware fit all play. The likely future is hybrid: early Attention layers for global structure, later linear/SSM layers for local details.</div></details>
+  </div>
+</div>
+
+<!-- 3. Tokenization -->
+<div class="card">
+  <h2>Tokenization<span class="en">Tokenization</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Engineering</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like a compiler lexing source code into tokens, an LLM must first slice a character stream into chunks and map each chunk to an integer ID. The model never sees characters — only IDs.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Vocabularies can't be too big (one ID per word → millions of entries → exploding matrices) nor too small (one ID per letter → sequences too long, semantics lost). The fix: BPE / WordPiece / SentencePiece automatically learn a vocabulary of around 50K subwords from high-frequency byte combinations. Common words stay whole; rare words get split into pieces.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>BPE training is greedy compression: start from single characters, repeatedly merge the most frequent adjacent pair into a new token, and stop when the vocabulary hits target size.</p>
+<pre><span class="cmt"># BPE intuition</span>
+<span class="cmt"># Start: ['l','o','w','e','r']</span>
+<span class="cmt"># 'l'+'o' is most frequent → merge → ['lo','w','e','r']</span>
+<span class="cmt"># 'lo'+'w' is most frequent → merge → ['low','e','r']</span>
+<span class="cmt"># High-frequency whole words survive; rare words break into subword pieces</span>
+<span class="cmt"># "tokenization" might become ["token", "ization"]</span></pre>
+    <p>Result: in English, 1 token ≈ 4 characters ≈ 0.75 words; in Chinese, one character often costs 2-3 tokens. This directly drives your bill and your context budget.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> tiktoken  <span class="cmt"># OpenAI's official tokenizer</span>
+
+enc = tiktoken.get_encoding(<span class="str">"cl100k_base"</span>)  <span class="cmt"># used by GPT-4</span>
+
+text_en = <span class="str">"Tokenization is fun!"</span>
+text_zh = <span class="str">"分词其实很有意思！"</span>
+
+<span class="fn">print</span>(enc.encode(text_en))         <span class="cmt"># [3404, 2065, 374, 2523, 0]</span>
+<span class="fn">print</span>(<span class="fn">len</span>(enc.encode(text_en)))    <span class="cmt"># 5 tokens</span>
+<span class="fn">print</span>(<span class="fn">len</span>(enc.encode(text_zh)))    <span class="cmt"># 11 tokens (Chinese is pricier!)</span>
+
+<span class="cmt"># Decode back</span>
+<span class="fn">print</span>(enc.decode([3404, 2065]))   <span class="cmt"># "Tokeniz" — not a complete word</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Myth: "1 token = 1 word." Wrong. "strawberry" splits into ["straw","berry"] inside GPT. That's exactly why early GPT models couldn't count the r's in "strawberry" — they never saw the letter r, only token chunks.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li><a href="https://platform.openai.com/tokenizer">OpenAI Tokenizer playground</a> (paste text and watch the split)</li>
+      <li><a href="https://www.youtube.com/watch?v=zduSFxRajkE">Karpathy — Let's build the GPT Tokenizer</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p><b>Canonical:</b> evaluating API cost (OpenAI bills by token). <b>Your day-to-day:</b> the same meeting transcript costs 2-3x more in Chinese than in English. For high-frequency automation tasks (daily news summarization), writing the prompt in English while letting the model reply in Chinese saves money.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Tokenization splits text into subword units (via BPE/WordPiece) so the vocabulary stays manageable while rare words remain encodable. Token counts drive both context limits and API pricing.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>GPT can't count the r's in strawberry. Beyond the tokenization root cause, what prompt engineering tricks sidestep it? And what does this teach you about "systemic bugs"?</summary><div>Workarounds: (1) ask the model to list each letter first (once characters are explicit, counting works); (2) call a Python code interpreter; (3) ask the model to space the letters apart before processing. Systemic-bug lesson: the root cause lives in a low-level abstraction (token representations) invisible from the high-level interface. The right fix is to bypass the abstraction layer, not to patch within it. Like software: you can't fix SQL injection at the ORM layer — you go down to SQL; same here, you can't fix token blindness at the text layer, you reshape the task into a token-friendly form. That's why prompt engineering is fundamentally about identifying the model's blind spots and routing around them.</div></details>
+    <details><summary>Chinese tokenization costs 2-3x English. Is that a technical issue or a commercial one? If you had to design a tokenizer with equal efficiency for both, how would you do it?</summary><div>Mostly technical: BPE training data is unbalanced (GPT-4's pretraining corpus is 90%+ English), so English averages 1 token per word while Chinese needs 2-3 bytes per character. There's commercial inertia too — OpenAI has no incentive to optimize for Chinese. Design approach: (1) force balanced language proportions in the training corpus; (2) use SentencePiece + Unigram LM instead of BPE — it handles whitespace-free languages better; (3) seed the vocabulary with a curated set (e.g. 8,000 common Chinese characters as standalone tokens). DeepSeek and Qwen's tokenizers do handle Chinese far better than GPT's. Deeper point: this exposes the language inequality hidden inside "neutral" technical decisions — the same flavor of bias as "UTF-8 favors ASCII over CJK."</div></details>
+    <details><summary>What's wrong with a vocabulary of 256 (too small) vs 500K (too large)? Compare it to choosing hash-table bucket counts.</summary><div>Too small (256, essentially byte-level): one token per character makes sequences extremely long, the model spends compute building "letters → words," and long-range learning is harder. Upside: nearly no OOV (out-of-vocabulary). Too large (500K): every common word gets its own ID, sequences shrink, but the embedding matrix balloons (500K × 4096 ≈ 2B parameters spent on the vocabulary), training is inefficient, and rare words don't learn well. The sweet spot sits between 32K and 128K. Hash buckets: too many wastes memory and causes cache misses; too few causes heavy collisions and O(n) lookups. Vocabulary size is essentially the discretization granularity of your frequency distribution — like hashing, it has to match the data.</div></details>
+    <details><summary>Different vendors use incompatible tokenizers. How is this similar to the character-encoding wars (UTF-8 vs UTF-16)?</summary><div>Four parallels: (1) no enforced standard — each vendor picks based on training data and engineering preference; (2) high switching cost — model weights are bound to a particular tokenizer, so swapping it is essentially retraining; (3) first-mover lock-in — GPT-2's BPE has been reused for years, just as UTF-8 came to dominate the web through ASCII compatibility; (4) invisible costs — you pay per token, but the token count for the same text differs across vendors, similar to UTF-8 vs UTF-16 storage differences for Chinese. The difference: character sets eventually converged on Unicode, but tokenizers likely won't, because they're tightly coupled to model weights. Standardization requires interfaces that can evolve independently — tokenizers lack that property.</div></details>
+    <details><summary>If byte-level tokenization (one token per byte) takes over, where does it win? What does it sacrifice?</summary><div>Wins: (1) multilingual / low-resource languages — no per-language tokenizer tuning; (2) code and binary data — character-level handling is more precise; (3) letter-level tasks (spelling, counting r's) — no more strawberry problem; (4) robustness — better tolerance for typos and informal input. Sacrifices: (1) sequence length explodes 4-8x, O(n²) becomes unbearable; (2) long-range dependencies get harder (the model has to rebuild the concept of "word"); (3) training data efficiency drops. Meta's BLT (Byte Latent Transformer, 2024) uses dynamic patching — fine-split where entropy is high, merge where it's low — trying to have it both ways. If hardware continues to crack O(n²) (linear attention, Mamba), byte-level may well become the default.</div></details>
+  </div>
+</div>
+
+<!-- 4. Positional Encoding -->
+<div class="card">
+  <h2>Positional Encoding<span class="en">Positional Encoding</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Theory</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Attention is an unordered-set operation (like a Python set) — it has no idea which token comes first. Positional encoding stamps each token with a "position ID" so the model can tell "dog bites man" from "man bites dog."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>The Q·Kᵀ computation in self-attention is completely permutation-invariant — shuffle the sentence, recompute, and you get the same answer. Obviously unacceptable. The fix: inject position information into the token embeddings so position 0 and position 5 start from different vectors.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Three generations of design:</p>
+    <ul>
+      <li><b>Sinusoidal (original Transformer):</b> use sin/cos at different frequencies to generate a unique vector per position, added to the token embedding. Upside: can extrapolate to lengths never seen in training.</li>
+      <li><b>Learned (GPT-2 / BERT):</b> simply learn a [max_len, dim] lookup matrix. Simple, but no extrapolation.</li>
+      <li><b>RoPE — Rotary Position Embedding (Llama / Qwen / today's standard):</b> turn position into a rotation angle. Each token rotates by a position-dependent angle in a high-dimensional space, so the Q·K dot product naturally encodes relative distance. This is the de facto standard for long-context models.</li>
+    </ul>
+<pre><span class="cmt"># Intuition: RoPE rotates position-m vectors by m·θ</span>
+<span class="kw">def</span> <span class="fn">rope</span>(x, pos):
+    <span class="cmt"># x is the token's Q or K vector, processed in pairs</span>
+    <span class="kw">for</span> i, (a, b) <span class="kw">in</span> <span class="fn">enumerate</span>(pairs(x)):
+        theta = pos / 10000 ** (2*i / dim)
+        a_new = a * cos(theta) - b * sin(theta)
+        b_new = a * sin(theta) + b * cos(theta)
+    <span class="kw">return</span> rotated_x</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Watch how positional encoding changes the output</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.from_pretrained(<span class="str">"gpt2"</span>)
+
+<span class="cmt"># Same tokens, different positions → different hidden states</span>
+ids_a = tok(<span class="str">"dog bites man"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+ids_b = tok(<span class="str">"man bites dog"</span>, return_tensors=<span class="str">"pt"</span>).input_ids
+
+<span class="kw">with</span> torch.no_grad():
+    h_a = model.transformer(ids_a).last_hidden_state
+    h_b = model.transformer(ids_b).last_hidden_state
+
+<span class="cmt"># Same three tokens, but the representations diverge because of position</span>
+<span class="fn">print</span>(torch.allclose(h_a, h_b))   <span class="cmt"># False</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Myth: "Positional encoding just adds 1, 2, 3 to the embedding." That would let position magnitudes overwhelm semantics. Real approaches use high-dimensional periodic functions or rotations so that "relative distance" has geometric meaning in vector space — that's how RoPE supports 128K context.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li><a href="https://huggingface.co/blog/designing-positional-encoding">HuggingFace — Designing Positional Encoding</a></li>
+      <li><a href="https://blog.eleuther.ai/rotary-embeddings/">EleutherAI — Rotary Embeddings explained</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p><b>Canonical:</b> any order-sensitive task (translation, code generation, reasoning chains). <b>Your day-to-day:</b> when you ask Claude to analyze a 50-page PDF report, the model has to keep page 3 distinct from page 47 — that's positional encoding (RoPE) maintaining positional awareness across a long context.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Self-attention is permutation-invariant, so positional encodings inject order information into token embeddings. Modern LLMs use Rotary Position Embedding (RoPE), which encodes relative positions via rotation, enabling long-context extrapolation.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>RoPE can extrapolate past the training length — but performance collapses past roughly 2-4x. Why? What deeper challenge of "positional extrapolation" does this expose?</summary><div>The collapse comes from frequency-coverage blind spots: RoPE assigns different sinusoidal periods to different dimensions, and during training the model only sees phase combinations within a certain range. When extrapolating, high-frequency dimensions rotate into phase regions the model has never seen, and the resulting Q·K patterns are unfamiliar. The deeper challenge: positional encoding is a prior injection, but the model only learns specific behaviors against that prior — it doesn't generalize across unseen priors. Mitigations: (1) YaRN / NTK Scaling use interpolation to compress phases so extrapolation looks more like interpolation; (2) deliberately mix in very long sequences during continual pretraining. Lesson: neural networks extrapolate poorly. "Theoretically extrapolable" and "practically extrapolable" are different worlds — that's why long context is an engineering problem, not an algorithmic one.</div></details>
+    <details><summary>Across three generations (Sinusoidal / Learned / RoPE), what's the underlying evolution? Why is "relative position" better than "absolute"? Compare git relative paths vs absolute paths.</summary><div>The trajectory: from explicit position labels (Sinusoidal, Learned, each token tagged with an absolute number) to implicit relative encoding (RoPE makes dot products naturally reflect relative distance). Why relative is better: (1) language rules are relative — "distance between subject and predicate" matters more than "subject is at index 5"; (2) the same phrase shifts position across contexts without changing meaning, and relative encoding stays invariant; (3) extrapolation is easier. Git analogy: a commit hash is an absolute reference (precise but rigid), while HEAD~3 is relative (semantically clear, portable). Same as using ../config in code instead of hard-coded /Users/cissy/.... A recurring design philosophy: prefer relations over identifiers.</div></details>
+    <details><summary>Adding positional encoding to the embedding — doesn't it pollute semantics? How does the model separate "position" from "meaning"?</summary><div>There's interference, but the model learns to separate. Two reasons: (1) the embedding space is large enough (768–4096 dims) that position signals and semantic signals can occupy different subspaces; (2) training itself sorts which dimensions hold which information — the model maps positional cues into whichever subspace is useful. RoPE goes further: it doesn't add position in, it multiplies it through rotation on Q and K — a multiplicative injection that pollutes less than addition. A real side effect remains: shallow layers tend to learn positional patterns first; you can literally see attention maps in the first layer dominated by diagonal "look-at-nearby-tokens" patterns, while deeper layers do semantic work.</div></details>
+    <details><summary>Three bottlenecks for long context — positional encoding, attention complexity, KV cache memory. Which gets cracked first, and why?</summary><div>My bet: KV cache memory. It's the most direct engineering pressure with the most active mitigation paths: (1) GQA/MQA sharing KV across heads; (2) KV quantization compressing fp16 to int8/int4; (3) PagedAttention (vLLM) treating KV like virtual-memory paging; (4) sliding-window or recurrent designs dropping distant KV entries. Attention complexity needs an algorithmic breakthrough (Mamba-class), and the precision cost makes full replacement hard. Positional extrapolation is fundamentally a generalization problem, the hardest of all. Priority: memory (engineering) > complexity (algorithm + hardware) > extrapolation (theory). Lesson: when assessing bottlenecks, the existence of a clear engineering path is a powerful heuristic — pure algorithmic or theoretical problems usually move slowest.</div></details>
+    <details><summary>For video frame sequences or code AST trees, is 1D RoPE still sufficient? What hidden assumption about "position" does this expose?</summary><div>No. Video is a time × space × channel 3D structure; an AST is a tree. 1D positional encoding assumes "positions are linearly comparable," which loses dimensional information for these structures. Retrofits: (1) video uses 2D/3D RoPE with independent rotations per axis — Sora uses spatiotemporal joint encoding; (2) AST and graph use Graph Positional Encoding (graph Laplacian eigenvectors, shortest-path distance). Hidden assumption exposed: when we say "position," we really mean "coordinates in some metric space." Text happens to be a 1D time series, so 1D is enough; once data has richer structure, "position" must be redefined. That's a core difficulty in multimodal models — unifying positional encoding so image patches, video frames, text tokens, and audio segments live in one comparable space.</div></details>
+  </div>
+</div>
+
+<a href="index.en.html" class="back">← Back to home</a>
+
+<footer>BigCat · AI &amp; ML Daily · Day 1</footer>
+</div>
+</body>
+</html>

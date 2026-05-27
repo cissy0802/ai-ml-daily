@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: RAG Systems — Day 4</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: RAG Systems</h1>
+  <div class="meta">Day 4 · 2026-05-21</div>
+  <div class="audience">For: engineers with coding experience but no AI background</div>
+</header>
+
+<!-- 1. Embedding -->
+<div class="card">
+  <h2>Embedding<span class="en">Embedding</span></h2>
+  <div class="tags"><span class="tag">RAG</span><span class="tag purple">Basics</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Think of it as hashing a sentence into a 1,536-dimensional space — except this hash doesn't aim to minimize collisions; it aims to put semantically close sentences at close coordinates. The cosine distance between two vectors <i>is</i> their semantic similarity.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Traditional full-text search (grep, ElasticSearch) only matches the literal characters — search "car" and you miss "automobile"; search "how to save money" and you miss "personal finance tips." Once you encode meaning as a numeric vector, "find documents with similar meaning" becomes "find points with similar coordinates" — a database problem. This is the foundation of every RAG (Retrieval-Augmented Generation) system.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Training uses massive "sentence pair + similar/not-similar label" data to learn a mapping f(text) → vector where "semantically similar → vectors near each other." Common dimensions are 384 / 768 / 1536 / 3072. At runtime, one API call turns any string into a vector.</p>
+<pre><span class="cmt"># Intuition: similarity ≈ cosine of the angle between vectors</span>
+"The cat loves fish"          → [0.12, -0.34, 0.88, ...]   ┐
+"My cat loves canned tuna"    → [0.15, -0.30, 0.91, ...]   ├ small angle ⇒ similarity ≈ 0.92
+"Rate hikes hit the housing"  → [0.71, 0.05, -0.42, ...]   ┘ large angle vs above ⇒ similarity ≈ 0.08</pre>
+    <p>Analogy: the classic Word2Vec example — <code>king - man + woman ≈ queen</code>. Semantic relations get encoded as directions in vector space.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+client = OpenAI()
+
+<span class="kw">def</span> <span class="fn">embed</span>(text):
+    <span class="cmt"># One-liner: string → 1536-dim vector</span>
+    r = client.embeddings.create(model=<span class="str">"text-embedding-3-small"</span>, input=text)
+    <span class="kw">return</span> np.array(r.data[0].embedding)
+
+<span class="kw">def</span> <span class="fn">cos_sim</span>(a, b):
+    <span class="kw">return</span> np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+a = embed(<span class="str">"How to limit my child's screen time"</span>)
+b = embed(<span class="str">"Strategies for managing kids' device usage"</span>)
+c = embed(<span class="str">"How Fed rate hikes affect the stock market"</span>)
+
+<span class="fn">print</span>(cos_sim(a, b))  <span class="cmt"># ~0.85 high</span>
+<span class="fn">print</span>(cos_sim(a, c))  <span class="cmt"># ~0.12 low</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Embedding ≠ understanding. What it encodes is "statistical patterns of co-occurring meanings," so "praising X" and "ridiculing X" land close (both discuss X). When your RAG returns "right topic, wrong stance," that's the inherent limit of embeddings — fix it with re-ranking or a follow-up classifier, not by swapping embedding models.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Jay Alammar's <a href="https://jalammar.github.io/illustrated-word2vec/" target="_blank">Illustrated Word2Vec</a> — the classic visual intro</li>
+      <li>OpenAI's official <a href="https://platform.openai.com/docs/guides/embeddings" target="_blank">Embeddings docs</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: an internal knowledge base searched by meaning — an employee searches "how do I request PTO" and finds a document titled "Leave Management Policy."<br>Closer to home: embed three years of your WeChat saves and Notes into a vector store, and when you later want "that article about compounding I read once," a vague description recalls it.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">An embedding maps text into a high-dimensional vector such that semantically similar texts land near each other. It turns "find similar meaning" into a geometry problem — typically cosine similarity between vectors — and is the foundation layer of every modern semantic search and RAG system.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. Why isn't higher embedding dimension always better? In production, how do you choose 1536 vs 3072?</summary><div>High dimensions carry three costs: (a) storage doubles linearly — terabytes at scale; (b) retrieval latency rises as ANN indexes (HNSW, IVF) degrade in higher dimensions ("curse of dimensionality"); (c) diminishing returns — 3072 over 1536 usually gains less than 2-3 points on most tasks. Decision rule: prototype with small dimensions (384/768), upgrade only when recall is genuinely insufficient. Matryoshka Embedding is the new trend — trained so the first N dims work independently, letting you truncate dimensions on demand to trade quality for cost.</div></details>
+    <details><summary>2. Is the embedding here the same as Day 1's "token embedding" inside a Transformer?</summary><div>Same family, different use. Inside a Transformer, every token has an embedding from a lookup table — that's "word-level," and it changes after every attention layer (contextual embedding). In RAG, "embedding" usually means "sentence/paragraph-level" — compressing a whole passage into a fixed vector, typically from the last layer's [CLS] token or mean-pooled across all tokens. Sentence Transformers and the OpenAI embedding API are Transformer architectures fine-tuned specifically for this — "make similar sentences land close."</div></details>
+    <details><summary>3. Can you embed code as text and do "semantic code search"?</summary><div>Yes, but not great. General-purpose embeddings are trained mostly on natural language and have weak recall for code semantics ("is this doing authentication?" "is this a deserialization vuln pattern?"). Production setups use three layers: (a) dedicated code embedding models like voyage-code or jina-code-embeddings; (b) generate a "function description" with an LLM first, then embed the description instead of the raw code; (c) hybrid retrieval — BM25/AST for literal code, embedding for descriptions, then fuse. GitHub Copilot's internal search uses a hybrid strategy.</div></details>
+    <details><summary>4. If two passages are 99% identical (two versions of a legal clause), embeddings are nearly identical, but the user wants to distinguish them. What now?</summary><div>That's an embedding blind spot — it's insensitive to fine differences. Three approaches: (a) inject a diff signal at retrieval — compute the character diff between versions and embed the "delta snippet" separately; (b) use finer chunking so the changed sentence is its own chunk; (c) store metadata (version number, effective date) and pre-filter on it before semantic match. Lesson: embeddings are for "find similar," not "find differences" — compliance and version-comparison tasks need a different approach.</div></details>
+    <details><summary>5. A company wants to use embeddings to find "similar companies to a prospect." Same as search technically — but what business pitfalls should they watch for?</summary><div>Technically the same: stitch each company's description, industry, and size into text, embed, run nearest neighbors. Business pitfalls: (a) description bias — Company A says "AI-powered data platform," Company B says "database vendor"; embeddings see them as different even if they're direct competitors. Augment with SEC filings, website scrapes. (b) similarity ≠ conversion likelihood — companies that look most similar may already be covered by the same vendor; companies that look less similar but carry specific buying signals often convert better. (c) privacy and compliance — B2B data must be legally sourced (GDPR, CCPA). Embeddings are a tool; business rules still need post-filtering for the final decision.</div></details>
+  </div>
+</div>
+
+<!-- 2. Vector DB -->
+<div class="card">
+  <h2>Vector Database<span class="en">Vector Database</span></h2>
+  <div class="tags"><span class="tag">RAG</span><span class="tag purple">Infra</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>It's MySQL where the WHERE clause "= or LIKE" gets replaced by "ORDER BY cosine distance LIMIT 10" — a database whose indexes are optimized for "find the nearest few among millions of vectors."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Once you have embeddings, "find the K most similar documents" becomes "compute cosine similarity against millions of 1,536-dim vectors and take top-K." Brute force is O(N) — seconds at scale. Unacceptable online. Vector databases (Pinecone, Weaviate, Milvus, pgvector) use Approximate Nearest Neighbor (ANN) indexes to push queries down to milliseconds.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>The most common index is <b>HNSW</b> (Hierarchical Navigable Small World): organize vectors as a multi-layer graph — sparse top layer with hub nodes, dense bottom layer with all points. Queries hop quickly through the top layer to the rough region, then descend to refine. Like a skip list of pointers, in vector space.</p>
+<pre><span class="cmt"># Traditional SQL                      # Vector DB</span>
+SELECT * FROM docs                      collection.query(
+WHERE category = 'finance'      ←→        query_vector=embed(q),
+ORDER BY title;                           filter={"category":"finance"},
+                                          top_k=10)
+<span class="cmt"># Key difference:</span>
+<span class="cmt"># Traditional DB index = B+ Tree, exact-field ordering</span>
+<span class="cmt"># Vector DB index = HNSW/IVF, approximate ordering by high-dimensional distance</span></pre>
+    <p>Notice "approximate" — for speed, vector DBs <b>do not guarantee 100% recall of the true top-K</b>. 95%+ recall is usually enough for everyday use.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> chromadb
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+openai = OpenAI()
+client = chromadb.Client()
+col = client.create_collection(<span class="str">"my_notes"</span>)
+
+<span class="cmt"># 1) Write: text + auto-embedding + metadata</span>
+docs = [<span class="str">"Compounding is the eighth wonder of the world"</span>, <span class="str">"Screen time affects children's attention"</span>, ...]
+embeds = [openai.embeddings.create(model=<span class="str">"text-embedding-3-small"</span>,
+                                   input=d).data[0].embedding <span class="kw">for</span> d <span class="kw">in</span> docs]
+col.add(documents=docs, embeddings=embeds,
+        metadatas=[{<span class="str">"topic"</span>: <span class="str">"finance"</span>}, {<span class="str">"topic"</span>: <span class="str">"parenting"</span>}],
+        ids=[<span class="str">"n1"</span>, <span class="str">"n2"</span>])
+
+<span class="cmt"># 2) Query: natural language → top-K relevant items</span>
+q_emb = openai.embeddings.create(model=<span class="str">"text-embedding-3-small"</span>,
+                                 input=<span class="str">"how to make money work for me"</span>).data[0].embedding
+hits = col.query(query_embeddings=[q_emb], n_results=3,
+                 where={<span class="str">"topic"</span>: <span class="str">"finance"</span>})  <span class="cmt"># metadata filter</span>
+<span class="fn">print</span>(hits[<span class="str">"documents"</span>])  <span class="cmt"># → ["Compounding is the eighth wonder of the world", ...]</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">"You need Pinecone/Milvus from day one" — wrong. Under 100K documents, SQLite + pgvector, or even an in-memory numpy array + FAISS, is plenty and zero-ops. Dedicated vector databases shine at billion-scale data, low latency, high QPS, and multi-tenant isolation. Pulling them in early bloats architectural complexity. For MVPs, start with embedded options (Chroma, LanceDB, sqlite-vec).</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Pinecone's <a href="https://www.pinecone.io/learn/series/faiss/hnsw/" target="_blank">HNSW illustrated tutorial</a> — friendly intro to ANN indexes</li>
+      <li><a href="https://docs.trychroma.com/" target="_blank">Chroma official docs</a> — the easiest local vector DB to start with</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: customer-support bot knowledge bases — index all FAQs and ticket history; user question → similar items → fed to LLM for an answer.<br>Closer to home: embed all your research reports and earnings summaries; before an investment decision, search "past views on semiconductor cycles" in natural language to avoid contradicting your own forgotten opinions.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">A vector database stores high-dimensional embeddings and supports approximate nearest-neighbor (ANN) queries in sub-millisecond time. It typically uses HNSW or IVF indexes, supports metadata filtering, and serves as the storage layer for RAG, semantic search and recommendation systems.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. Does "approximate" recall introduce safety risk? Are vector DBs usable for legal or medical scenarios?</summary><div>Yes, but manageable. HNSW typically delivers 95%+ recall — 5% of queries may miss the truly nearest item. For "the latest 2024 regulation on X," recall drift can drop a critical clause. Mitigations: (a) raise the index's ef_search parameter, trading speed for recall; (b) use exact (brute-force) search for critical paths — feasible at small scale; (c) hybrid retrieval — keyword/metadata precise filter before vector search. Medical and compliance contexts demand "explainable + auditable," so a rule engine usually layers on top for final gating.</div></details>
+    <details><summary>2. PostgreSQL's pgvector vs dedicated Pinecone — what really differs?</summary><div>Three dimensions: (a) performance ceiling — pgvector handles up to ~10M well; beyond that needs sharding, while dedicated stores ship kernel-level distributed ANN optimizations; (b) consistency model — pgvector inherits Postgres transactions (vectors and business data strongly consistent in one DB); dedicated stores are usually eventually consistent; (c) ops cost — pgvector reuses your Postgres team and monitoring, while dedicated stores add a new dependency. Rule: 90% of projects do fine with pgvector; only the 10% that are truly "vector-first" (e.g. billion-scale image search) need dedicated infrastructure.</div></details>
+    <details><summary>3. If a document is "updated from the user's perspective" (a wiki paragraph changes), how do you keep the vector store in sync?</summary><div>This is where RAG productionization most often breaks. Common patterns: (a) push — when the source system updates a doc, fire an event; a consumer re-embeds and upserts to the vector store; (b) pull — periodically (e.g. hourly) scan the source's updated_at, compute diff, batch update; (c) versioned chunks — each chunk carries source_id + version, update by delete-by-source_id then insert new. All three must handle "embedding API throttling / retries / partial failure." Key metric: embedding lag (time from source update to vector store visibility).</div></details>
+    <details><summary>4. Are vector DBs a good fit for "user behavior logs" for behavioral similarity matching?</summary><div>Depends. Short-term real-time behavior ("the 5 items just browsed") is a poor fit — too short, weak semantic signal, and embedding-API cost gets amplified by high event throughput; collaborative filtering + inverted indexes are better. Long-term profiles (a year of purchases/searches) embed well — summarize the sequence then embed for a "user interest vector," useful for cross-category recommendations. Watch out: embeddings smooth user profiles, drowning niche interests and losing long-tail preferences — so embeddings are usually one recall channel in recommendation systems, with a ranking model making the final call.</div></details>
+    <details><summary>5. Is treating a vector DB as LLM "long-term memory" an accurate metaphor? Where does it break?</summary><div>Intuitive but imperfect. It's closer to "external disk + fuzzy search" than to actual memory. Two key differences: (a) memory has "automatic forgetting + associative reconstruction" — important things get reinforced, unimportant things fade. A vector DB doesn't forget or associate by default — you have to engineer TTLs, importance fields, and reflection jobs for summarization; (b) human memory is episodic (time, place, emotional context) + semantic (abstract concepts); a vector DB only encodes semantic similarity, losing temporal and causal relations. "Long-term memory for agents" typically needs three layers — graph + summarization + retrieval — with the vector DB as just one layer.</div></details>
+  </div>
+</div>
+
+<!-- 3. Retrieval Strategies -->
+<div class="card">
+  <h2>Retrieval Strategies<span class="en">Retrieval Strategies</span></h2>
+  <div class="tags"><span class="tag">RAG</span><span class="tag purple">Engineering</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like running EXPLAIN before a SQL query: plain "embedding + top-K" works in toy scenarios, but production mixes keyword search, metadata filters, query rewriting, and chunking strategies — tuning a multi-layer "retrieve → rank → generate" pipeline like you'd tune a multi-level cache hit rate.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>The first lesson after shipping a naive RAG: 80% of wrong answers come from "the correct document was never retrieved," not from the LLM being weak. Retrieval strategies tackle exactly this: how to chunk documents, how to rewrite queries, how to mix vector + keyword + metadata (hybrid search), single-shot or multi-hop retrieval — all in service of aligning "what the user asks" with "the relevant slice of the knowledge base."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Production RAG pipeline:</p>
+<pre>User question q
+   ↓ Query rewriting
+      LLM turns "where's that note about compounding from last week?" into
+      "compounding investing long-term returns" — better for embedding recall
+   ↓ Hybrid retrieval
+      (1) Vector top 20    ─┐
+      (2) BM25 top 20      ─┼→ Union (~30-40 items)
+      (3) Metadata filter  ─┘
+   ↓ Re-ranking (next section)
+      A more precise model trims 30-40 down to top 5
+   ↓ Paste into prompt → LLM generates answer</pre>
+    <p>The other critical decision is <b>chunking</b>: split long documents into 200-800 token blocks before embedding. Too large → noisy recall; too small → loss of context. The common approach is "split by semantic boundaries with 50-100 token overlap between adjacent chunks."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> langchain.retrievers <span class="kw">import</span> EnsembleRetriever, BM25Retriever
+<span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> Chroma
+<span class="kw">from</span> langchain_openai <span class="kw">import</span> OpenAIEmbeddings
+
+<span class="cmt"># 1) Set up vector and BM25 retrievers</span>
+vec_retriever = Chroma(embedding_function=OpenAIEmbeddings()).as_retriever(k=10)
+bm25_retriever = BM25Retriever.from_documents(docs, k=10)
+
+<span class="cmt"># 2) Hybrid: weighted fusion (0.6 vector + 0.4 keyword)</span>
+hybrid = EnsembleRetriever(
+    retrievers=[vec_retriever, bm25_retriever],
+    weights=[0.6, 0.4]
+)
+
+<span class="cmt"># 3) Query rewriting: let the LLM rephrase user input into a more searchable form</span>
+<span class="kw">def</span> <span class="fn">retrieve</span>(user_question):
+    rewritten = llm.invoke(<span class="str">f"Rewrite this question as keyword search: {user_question}"</span>)
+    <span class="kw">return</span> hybrid.invoke(rewritten)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">"A bigger embedding model = better recall." Truth: 80% of recall bottlenecks live in chunking and query rewriting, not in the embedding. Evaluate your retrieval hit rate first (label "correct documents" for 100 queries, see if they land in top-10), root-cause the misses, then decide whether to fix chunking, add hybrid, add a reranker, or actually swap embeddings. Blindly upgrading embeddings is "faster CPU to fix slow database queries."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Anthropic's <a href="https://www.anthropic.com/news/contextual-retrieval" target="_blank">Contextual Retrieval engineering note</a> — practical</li>
+      <li><a href="https://python.langchain.com/docs/concepts/retrieval/" target="_blank">LangChain Retrieval concepts</a> — strategy comparisons</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: legal/medical QA bots — single-vector retrieval often misses clauses with specialized terminology, so hybrid + metadata filters are required.<br>Closer to home: your work notes mix Chinese prose with English jargon; a single-language embedding misses cross-language matches — hybrid + multilingual embedding models close the gap.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Retrieval strategies in RAG go beyond simple vector top-K: chunking, query rewriting, hybrid (dense + sparse) retrieval, metadata filtering, and multi-hop search are all tools to align "the question asked" with "the knowledge actually relevant". Most RAG failures trace back to retrieval, not generation.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. Why does raising top-K (e.g. from 5 to 50) often degrade the final answer?</summary><div>Three reasons: (a) <b>context noise</b> — the LLM passively absorbs everything; more irrelevant documents dilute attention and bury the right answer; (b) <b>position bias</b> — LLMs pay least attention to the middle of long contexts ("lost in the middle"); higher K pushes critical docs into the blind spot; (c) <b>cost and latency</b> — 50 chunks may total 20K tokens, multiplying cost and latency. Right move: keep K small (5-10) and improve precision in that small K via re-ranking, not by widening recall.</div></details>
+    <details><summary>2. Is there a "universal best" chunk size? Why can't token count be one-size-fits-all?</summary><div>No universal value — depends on task and corpus structure. Rules of thumb: QA (short queries, precise answers) → 200-400 token chunks; summarization (needing global view) → 800-1,500 token chunks; code → cut by function/class boundaries, not token count; tables and lists → preserve structure, don't cut mid-row. The advanced approach is "semantic chunking" — find natural boundaries via embedding similarity, but it's complex. Most practical workflow: start with a fixed size (e.g. 512 tokens + 50 overlap), build a retrieval eval set, then A/B different chunking on failure cases.</div></details>
+    <details><summary>3. In hybrid retrieval, how much weight does "BM25 + vector" deserve? How does it depend on the corpus?</summary><div>It depends on "keyword decisiveness." Legal, medical, academic — proper nouns dominate, so BM25 weight should be high (0.5-0.7). Conversational text and product reviews — synonyms and flexible phrasing rule, so vector weight should be high (0.7-0.8). Mixed code + documentation — function and API names need exact match (BM25), context explanations need meaning (vector), so 50:50 is common. A more robust approach is learnable weights — annotate "question → correct document" pairs and use grid search or Bayesian optimization. Reciprocal Rank Fusion (RRF) and similar rank-based fusions are more robust than weighted scores because they don't depend on score scale alignment.</div></details>
+    <details><summary>4. Tie this back to Day 3's ReAct — how does multi-hop retrieval really differ from ReAct?</summary><div>Multi-hop retrieval is "use the LLM to plan the next query during retrieval" — a specialization of ReAct on the "information-gathering subtask." For example, "What's the valuation of a rival founded around the same time as another company founded by OpenAI's founders?" requires first finding OpenAI's founders, then their other companies, then competitors, then valuations — each hop's query depends on the previous hop's answer. ReAct is the general framework (tools beyond retrieval); multi-hop retrieval narrows "tools" to "retrieval APIs," typically preset to 2-3 hops. Production often nests both: the Agent uses ReAct to decide "fetch docs vs compute now," and when it fetches docs, it internally runs a multi-hop loop.</div></details>
+    <details><summary>5. From a product perspective, why aren't "retrieval accuracy" and "user satisfaction" always correlated?</summary><div>Three divergence scenarios: (a) user asks a complex philosophical question — the "correct document" doesn't help; even 100% recall can't produce a satisfying answer because the bottleneck is generation; (b) user asks "what's the weather today" — the correct document doesn't exist; recall is 0 by definition, but the user expects the model to call a weather API or admit it doesn't know — that should route to a non-RAG path; (c) user asks "any objections to X" — all retrieved docs are positive views; technically accurate but one-sided. That's a diversity-of-recall problem — solve with MMR (Maximum Marginal Relevance). Lesson: evaluating RAG with retrieval recall@K alone is a trap. End-to-end answer correctness and user satisfaction matter; classify queries and route them through different pipelines.</div></details>
+  </div>
+</div>
+
+<!-- 4. Re-ranking -->
+<div class="card">
+  <h2>Re-ranking<span class="en">Re-ranking</span></h2>
+  <div class="tags"><span class="tag">RAG</span><span class="tag purple">Optimization</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like a two-stage hiring funnel: HR screens 100 résumés with keywords (coarse), interviewers read 5 résumés closely (fine). The reranker is the "interviewer" in a RAG pipeline — a slower but more accurate model that trims 30-50 retrieved chunks down to the most relevant 5.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>Embedding retrieval is fast but "coarse" — it compresses a passage into a single vector, losing detail. Re-rankers reverse the trade: feed pairs of (query, candidate document) into a more precise model (typically a cross-encoder) that outputs a "relevance score." Higher compute cost, but only on the few dozen recalled candidates, so total cost stays sane. Adding a reranker often lifts end-to-end RAG answer correctness by 10-20 points.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Bi-encoder (embedding) vs cross-encoder (re-ranker):</p>
+<pre><span class="cmt"># Bi-encoder (embedding): query and doc encoded independently</span>
+emb_q   = encode(query)        ─┐
+emb_doc = encode(doc)          ─┼→ cosine_similarity → score
+<span class="cmt"># Pros: docs can be pre-embedded; only query is embedded at runtime; O(1) compare</span>
+<span class="cmt"># Cons: query and doc don't see each other — fine-grained matching is poor</span>
+
+<span class="cmt"># Cross-encoder (re-ranker): query and doc concatenated and fed to the model</span>
+score = model(<span class="str">f"[CLS] {query} [SEP] {doc}"</span>)
+<span class="cmt"># Pros: every layer lets query and doc tokens attend to each other — much sharper matching</span>
+<span class="cmt"># Cons: every pair runs the model — N×M complexity, no full-corpus scans</span></pre>
+    <p>Hence the two-stage approach: bi-encoder narrows millions to dozens; cross-encoder ranks the dozens finely.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> sentence_transformers <span class="kw">import</span> CrossEncoder
+<span class="kw">import</span> cohere  <span class="cmt"># or use Cohere's hosted reranker API</span>
+
+<span class="cmt"># Option A: local cross-encoder (open source)</span>
+reranker = CrossEncoder(<span class="str">"BAAI/bge-reranker-base"</span>)
+query = <span class="str">"How to help my kid focus on homework"</span>
+candidates = [d1, d2, ..., d30]   <span class="cmt"># 30 candidates from the vector store</span>
+
+scores = reranker.predict([(query, d) <span class="kw">for</span> d <span class="kw">in</span> candidates])
+top5 = sorted(zip(candidates, scores), key=<span class="kw">lambda</span> x: -x[1])[:5]
+
+<span class="cmt"># Option B: hosted API (less work)</span>
+co = cohere.Client()
+result = co.rerank(query=query, documents=candidates,
+                   top_n=5, model=<span class="str">"rerank-multilingual-v3.0"</span>)
+top5 = [r.document[<span class="str">"text"</span>] <span class="kw">for</span> r <span class="kw">in</span> result.results]
+
+<span class="cmt"># Splice top5 into the prompt and let the LLM produce the final answer</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">"Use an LLM to judge 30 candidates' relevance directly" instead of a dedicated reranker — works, but it's expensive and slow. Trained cross-encoder rerankers (BGE-reranker, Cohere Rerank) are usually only a few hundred million parameters, far smaller than an LLM, and run in tens of milliseconds. They are also trained specifically for scoring, so they're both faster and more accurate than an LLM moonlighting as a scorer. Don't replace them unless your reranker's error rate exceeds your tolerance.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Pinecone's <a href="https://www.pinecone.io/learn/series/rag/rerankers/" target="_blank">Rerankers tutorial</a> — concepts to code</li>
+      <li><a href="https://docs.cohere.com/docs/rerank-overview" target="_blank">Cohere Rerank docs</a> — the most-used hosted reranker API</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <div class="exercise">Canonical: the "recall → precision" two-stage architecture of search and recommendation systems; GitHub's code search uses the same idea.<br>Closer to home: an investment-research assistant — recall the past six months of relevant reports (30), then re-rank for "most relevant to today's question" to avoid being drowned by stale takes or generic write-ups.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Re-ranking is the second stage of a RAG pipeline: a cross-encoder model jointly scores each (query, document) pair to refine the top candidates from a fast first-stage retriever. It trades extra compute on a small set for substantially better precision at top-K — often the highest-ROI optimization in production RAG.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>1. If cross-encoders are more accurate, why not use them for retrieval directly and drop the two-stage design?</summary><div>Complexity explodes. Cross-encoders concatenate query with every candidate doc and run the model — a 1M-document corpus needs 1M model passes per query, taking minutes and costing too much. Bi-encoders let you pre-embed docs and just embed the query at runtime + ANN search, pushing 1M-scale queries to 5 ms. Two-stage retrieval — "cheap coarse + expensive precise" — is what every large-scale search system (Google, Bing, Amazon) does. Traditional search calls it L1/L2 ranking; vector retrieval changed the implementation, not the idea.</div></details>
+    <details><summary>2. Rerankers also make mistakes. How do you verify it actually "earned its keep" without degrading the retrieval stage?</summary><div>Build a ground-truth eval set. Minimum viable: handpick 50-100 real queries, label each with "ideal top-3 documents." Then compare two pipelines: (a) retriever's top-K alone — track hit rate / MRR; (b) retriever + reranker — measure NDCG@5 and Recall@5. Common counterintuitive finding: rerankers boost in-domain data by 15% but can hurt on out-of-domain (different language, different domain) due to training-distribution shift. So always A/B on your own business data before shipping — don't trust marketing benchmarks alone.</div></details>
+    <details><summary>3. Using an LLM as the reranker sounds reasonable (flexible and general). When is that a good call?</summary><div>Four cases where LLM-as-reranker actually wins: (a) complex business rules — "rank by relevance + freshness + user preference"; describing the rules to an LLM is easier than training a cross-encoder; (b) low traffic (under 1K queries/day), where training and deploying a dedicated reranker isn't worth it; (c) multilingual or multi-domain content with no off-the-shelf cross-encoder; (d) when ranking explanations are required (interpretability). Cost: 50-100× per query, latency goes from 50 ms to 1-2 s. In production with heavy traffic, use a dedicated reranker; reserve the LLM for long-tail queries or fallbacks.</div></details>
+    <details><summary>4. Tie this back to Day 2's RLHF — where does the reranker's training data come from, and is there a similar feedback loop?</summary><div>Rerankers usually use contrastive learning: each training sample is (query, positive_doc, negative_doc), pushing the positive's score up and the negative's down. Three data sources: (a) human-annotated query-doc pairs (expensive but high quality); (b) public datasets like MS-MARCO (general but domain-shifted); (c) click logs as weak supervision — clicked items as positives, shown-but-not-clicked as negatives. This creates a feedback loop similar to RLHF — user behavior becomes the next reranker's training signal. There's selection bias: users only click what's shown; great unshown documents stay invisible. The fix is called counterfactual learning to rank — random exposure + IPS weighting to debias.</div></details>
+    <details><summary>5. If the query itself is vague ("what about that thing"), can the reranker still save the day?</summary><div>Not really. Rerankers take (query, doc) pairs; when the query carries little information, no model can divine what the user actually meant. Vague queries need handling upstream: (a) multi-turn — have the LLM ask a clarifying question ("by 'that,' do you mean the compounding topic or the mortgage?"); (b) user profile + session history — append the last 5 turns' topic into the query before embedding; (c) query expansion — have the LLM rewrite the vague question into 3-5 concrete versions, retrieve each, then union. It's an information-theory limit: information absent from the query can't be recovered downstream. Place clarification/expansion before the reranker, not after.</div></details>
+  </div>
+</div>
+
+<a href="index.en.html" class="back">← Back to home</a>
+
+<footer>BigCat · AI &amp; ML Daily · Day 4 · 2026-05-21</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Pre-training and Fine-tuning — Day 2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.eng{background:rgba(123,97,255,0.08);border-left:2px solid #7b61ff;padding:12px 14px;border-radius:6px;color:#cfd3df;font-size:0.9rem;font-style:italic}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+.back{display:inline-block;margin-top:30px;padding:10px 22px;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);color:#0a0e1a;border-radius:8px;font-weight:600;font-size:0.9rem}
+.back:hover{opacity:0.9;text-decoration:none;color:#0a0e1a}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Pre-training and Fine-tuning</h1>
+  <div class="meta">Day 2 · 2026-05-19</div>
+  <div class="audience">For: engineers with coding experience but no AI background</div>
+</header>
+
+<!-- 1. Pre-training -->
+<div class="card">
+  <h2>Pre-training<span class="en">Pre-training</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Training</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Imagine handing a new hire the entire internet and telling them to read it through — doing exactly one thing: look at the prefix, guess the next word. Right or wrong isn't judged morally; the gradient just tunes their intuition for the statistical patterns of text.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>If we trained a fresh model for every task (translation, QA, code generation), each one would have to relearn what English is, what a sentence is, what facts look like — economically and data-wise, impossible. Pre-training packages "language + common sense" into a shared foundation once, and downstream tasks only need lightweight specialization on top. This is the entire premise of foundation models.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>The core task is brutally simple: <b>given the first N tokens, predict token N+1</b>. Compare the prediction with the real token, take the gradient, repeat trillions of times.</p>
+<pre><span class="cmt"># Pseudocode: one pre-training step</span>
+text = sample_from_internet()              <span class="cmt"># a stew of web pages, books, code, papers</span>
+tokens = tokenize(text)                    <span class="cmt"># slice into a token sequence</span>
+<span class="kw">for</span> i <span class="kw">in</span> range(len(tokens) - 1):
+    pred = model(tokens[:i+1])             <span class="cmt"># probability distribution over the next token</span>
+    loss = cross_entropy(pred, tokens[i+1])<span class="cmt"># how wrong was the guess</span>
+    loss.backward(); optimizer.step()      <span class="cmt"># nudge parameters a little</span></pre>
+    <p>Scale dictates capability: as data grows from GB to TB and parameters from hundreds of millions to hundreds of billions, "emergent" abilities like reasoning and code generation appear.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Feel the pre-training objective via Hugging Face: get the next-token distribution at any position</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForCausalLM
+<span class="kw">import</span> torch
+
+tok = AutoTokenizer.from_pretrained(<span class="str">"gpt2"</span>)
+model = AutoModelForCausalLM.from_pretrained(<span class="str">"gpt2"</span>)
+
+inputs = tok(<span class="str">"The capital of France is"</span>, return_tensors=<span class="str">"pt"</span>)
+<span class="kw">with</span> torch.no_grad():
+    logits = model(**inputs).logits        <span class="cmt"># [1, seq_len, vocab_size]</span>
+next_id = logits[0, -1].argmax()           <span class="cmt"># pick the most likely next token</span>
+<span class="fn">print</span>(tok.decode(next_id))                  <span class="cmt"># " Paris"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">A pre-trained model "knows" facts only because it has seen similar phrasings many times — fundamentally statistical co-occurrence, not knowing. That's why it can confidently say something that sounds right but is wrong (hallucination). A raw pre-trained model also won't chat with you — it's just a continuation engine. Say "hello" and it might continue with "Hello, I am Professor XX, today we'll cover…"</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Karpathy: "Let's build GPT" on YouTube (2 hours of hand-coding a mini GPT — the best intro)</li>
+      <li>Hugging Face: "How does a language model work" chapter</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p>Canonical: GPT-2/3 and the Llama base models are "pre-training only" snapshots.<br>Closer to home: when you see <code>llama-3-8b</code> (no <code>instruct</code> suffix), that's the raw pre-trained model — for completion-style tasks like extending an investment memo or generating training data, it's often more useful than the chat-tuned version.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Pre-training teaches a model the structure of language by predicting the next token across massive text corpora. The result is a "foundation model" — a generalist that knows grammar and facts but doesn't yet follow instructions. All later fine-tuning steps build on top of these frozen statistical patterns.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>The pre-training objective is just "guess the next word." How can it possibly give rise to coding or math? What hidden assumptions does this rest on?</summary><div>The key assumption is that language encodes the structure of the world — code corpora carry syntax, semantics, and reasoning chains together, so guessing the next word is really guessing "the next plausible world state." But this assumption has limits: reasoning patterns absent from the training set (genuinely novel mathematical proofs) can't emerge from nowhere, so emergence is better understood as "already-present capability getting unlocked at scale" rather than true creation. A deeper point: human babies also learn by predicting the next sound, but generalize from tiny amounts of data — LLM sample efficiency is orders of magnitude worse, suggesting what they capture is "language distribution," not "language ability."</div></details>
+    <details><summary>"A new grad reading the entire library" — where does this analogy break? What wrong calls might it lead you to make?</summary><div>Breaks in three places: (1) humans understand while reading; models only adjust weights, so "having read" doesn't equal "knowing" — without reinforcement, the model can't actively recall facts; (2) human reading order doesn't matter much, but gradient updates are order-sensitive (catastrophic forgetting); (3) humans skim junk; models don't, so data cleaning matters more than raw volume. Misleading consequences: you'll overestimate the model's grasp of long-tail knowledge and underestimate the vacuum past its training cutoff.</div></details>
+    <details><summary>Same compute budget, two options: 7B params × 100B tokens vs 70B params × 10B tokens. Which wins? Why does Chinchilla feel counterintuitive?</summary><div>Chinchilla (2022) showed everyone was "over-parameterized, under-data-fed" — at fixed compute, smaller models with more data outperformed. By 2024 the wind shifted: inference cost dominates deployment economics, so the industry favors "overtrained small models" (Llama-3 8B trained on 15T tokens), because small models are cheap to serve. So the answer depends on what you're optimizing: training efficiency favors the Chinchilla balance point, deployment efficiency favors overtrained small models, and pure capability ceilings still belong to the big ones. The trade-off mirrors "CPU cache size vs main memory bandwidth" in hardware design.</div></details>
+    <details><summary>What if you intentionally injected 5% buggy code into pre-training data — would the model get dumber? Why is the relationship between "data quality" and "data volume" nonlinear?</summary><div>It wouldn't dumb down noticeably — 5% noise gets "outvoted" across billions of gradient steps, and the model learns the statistical median. But there's a threshold: past 20-30% noise, capability collapses. Three sources of nonlinearity: (1) frequently repeated errors do get memorized (frequency wins); (2) high-quality data leverages out rare capabilities (a handful of reasoning examples unlocks CoT); (3) diversity vs repetition trade-off — the same 1TB of diverse data has a far higher ceiling than 1TB of duplicates. Mirrors the marginal-return curve of "test coverage" in software engineering.</div></details>
+    <details><summary>Why don't OpenAI or Anthropic open-source their base models? What's the qualitative difference in safety risk between open-base and open-instruct?</summary><div>Instruct models have refusal guardrails trained in via RLHF; base models are naked — type "how to make…" and a base model continues naturally with a complete answer, because it only learned language distribution. Once a base model is open, jailbreaking is trivial — you just continue text and bypass every alignment layer. Second risk: a base model can be cheaply SFT'd toward any specialty (including malicious ones), while instruct models carry "inertial resistance" from their existing alignment. Meta open-sourced the Llama base accepting real safety risk in exchange for ecosystem leadership; OpenAI's business logic doesn't allow that trade.</div></details>
+  </div>
+</div>
+
+<!-- 2. Supervised Fine-tuning (SFT) -->
+<div class="card">
+  <h2>Supervised Fine-tuning<span class="en">Supervised Fine-tuning (SFT)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Training</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like handing the new grad a binder of "model answers" and having them copy each one out a thousand times — turning a model that "can continue text" into a model that "follows instructions."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>A pre-trained model only continues text. It doesn't know that "please translate this passage" should produce a translation and not commentary. SFT uses curated instruction-response pairs to nudge the model's output onto a track of "obedient, useful, well-formatted." This is the step that turns a base model into an instruct model — the entry point for every ChatGPT- or Claude-style product.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>The training objective is identical to pre-training (predict the next token). <b>Only the data changes</b>: from "internet stew" to "high-quality instruction-response pairs."</p>
+<pre><span class="cmt"># A sample looks like this:</span>
+{
+  <span class="str">"instruction"</span>: <span class="str">"Explain caching in one sentence"</span>,
+  <span class="str">"response"</span>:   <span class="str">"Caching stores the result of an expensive computation so it can be reused next time."</span>
+}
+<span class="cmt"># Concatenated at training time:</span>
+prompt = <span class="str">"&lt;|user|&gt;Explain caching in one sentence&lt;|assistant|&gt;"</span>
+target = prompt + response
+<span class="cmt"># Key detail: loss is computed only on the response portion, not the prompt</span>
+loss = cross_entropy(model(target), target, mask=is_response_token)</pre>
+    <p>Usually 10K to 1M carefully chosen samples are enough to transform the model's behavior. <b>Quality &gt;&gt; quantity.</b></p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># The simplest possible SFT with trl, under 20 lines</span>
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+<span class="kw">from</span> trl <span class="kw">import</span> SFTTrainer, SFTConfig
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoModelForCausalLM, AutoTokenizer
+
+model_id = <span class="str">"meta-llama/Llama-3.2-1B"</span>
+tok   = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id)
+ds    = load_dataset(<span class="str">"HuggingFaceH4/ultrachat_200k"</span>, split=<span class="str">"train_sft[:1000]"</span>)
+
+trainer = SFTTrainer(
+    model=model, tokenizer=tok, train_dataset=ds,
+    args=SFTConfig(output_dir=<span class="str">"sft-llama"</span>, num_train_epochs=1,
+                   per_device_train_batch_size=2, learning_rate=2e-5),
+)
+trainer.train()                            <span class="cmt"># after this, the model "listens"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">SFT isn't about "teaching the model new knowledge" — it teaches "what format and tone to use." If the facts in your training set are wrong, the model will state those wrong facts with even more confidence. For knowledge, use RAG. Use SFT to shape <b>style, format, domain vocabulary</b>.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Hugging Face TRL docs: <a href="https://huggingface.co/docs/trl">huggingface.co/docs/trl</a> (high-level APIs for SFT/DPO/PPO)</li>
+      <li>Sebastian Raschka blog: "Practical Tips for Fine-tuning LLMs"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p>Canonical: InstructGPT, Alpaca, Llama-3-Instruct.<br>Closer to home: SFT a "parenting helper" — feed 500 samples of "parent question → answer in the style you actually endorse," and the model will start replying with the tone and depth you want instead of generic platitudes.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">Supervised Fine-tuning (SFT) adapts a pre-trained model on curated instruction-response pairs so it follows directions instead of merely continuing text. The loss is computed only on the response portion. SFT shapes style, format, and tone — not new knowledge.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>"SFT teaches style, not knowledge" — but the model clearly memorizes facts from examples. How do those statements reconcile? Where exactly is the boundary?</summary><div>Both are true at once. SFT polishes the way facts get expressed into whatever style you want, and it does write specific facts from the training set into the weights (parametric memory). The difference is generalization: the "style" learned by SFT transfers to inputs the model has never seen, but the "knowledge" only stays reliable near topics it has seen. Heuristic: facts that change (financials, news, internal docs) belong in RAG; stable domain terminology and format conventions belong in SFT. Treat SFT as "formatting layer" and RAG as "external database" — keep their responsibilities separate.</div></details>
+    <details><summary>100 polished samples vs 100,000 mediocre ones — what goes wrong in each case? Why does the LIMA paper dare to claim 1,000 is enough?</summary><div>100 samples: visible overfitting; the model regurgitates training-set phrasing and freezes on instruction types it never saw. 100K mediocre samples: the model learns the average answer — bland, stylistically chaotic, prone to inherit dataset tics ("As an AI assistant…"). LIMA's insight: the capability is already learned in pre-training; SFT only needs to "activate" it. So 1,000 diverse, high-quality samples are enough to wake the capability up, without diluting it with bulk mediocrity. The prerequisite is a strong base model. Analogous to software: "configuration &lt; code" — a little precise config often beats a lot of boilerplate.</div></details>
+    <details><summary>SFT and pre-training use the same loss function. Why are the outcomes so different? What does "data &gt;&gt; algorithm" mean for engineers?</summary><div>Same loss, drastically different distributions — pre-training data is "the world's language," SFT data is "curated excellent answers." Loss is just a measuring stick; what determines capability is the distribution you're pulling the model toward. The takeaway for engineers: in the LLM era, architecture and optimizers are converging, and the moat is increasingly "proprietary high-quality data." Like in software: the algorithm is the CPU instruction set, the data is the program — same CPU, wildly different outcomes. That's why every shop is hiring annotation companies rather than algorithm engineers.</div></details>
+    <details><summary>Using GPT-4 to synthesize SFT data is now common — what's the long-term risk of "models teaching models," and what software anti-pattern does it parallel?</summary><div>The risk is called "model collapse": synthetic data inherits the teacher's biases, hallucinations, and stylistic rigidity, while losing the long tail of real data. After several generations of inheritance, the distribution narrows and rare-case handling deteriorates. Same shape as the SE anti-pattern of "using yesterday's output as today's regression test" — you're measuring "consistent with the old version," not "correct." Mitigations: always anchor with a slice of real human data; mix synthesis from multiple strong, different teacher models for diversity; keep adversarial test sets to detect capability drift. See Shumailov et al., Nature 2024.</div></details>
+    <details><summary>SFT typically uses LoRA on a small slice of parameters, but pre-training trains everything. How does this map onto "full vs incremental update" trade-offs in system design?</summary><div>Pre-training learns language from scratch — every layer needs significant adjustment. SFT tunes expression on top of existing capability — small perturbations suffice, and LoRA's low-rank assumption ("the adjustment direction is low-dimensional") fits exactly. System-design analogy: pre-training is schema migration (structural change), SFT is config hot-reload (small parameter tweaks). Using schema migration tooling to change a config is overkill; using a config patch to change the schema is underpowered. Deeper view: this is Occam's Razor in parameter space — if a change can be expressed with few dimensions, don't touch the high-dimensional ones.</div></details>
+  </div>
+</div>
+
+<!-- 3. RLHF -->
+<div class="card">
+  <h2>Reinforcement Learning from Human Feedback<span class="en">RLHF (Reinforcement Learning from Human Feedback)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Alignment</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>Like an App Store rating system: let humans label "which of these two answers is better," train a "judge model" on those preferences, then let the main model grind for the judge's approval — gradually learning to produce outputs humans prefer.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>SFT teaches the model to imitate written examples, but many qualities resist a canonical answer: what counts as "polite but not verbose"? "Helpful but not overreaching"? Writing examples by hand is slow and inconsistent, while comparing two answers to pick the better one is easy. RLHF turns a "hard to demonstrate" problem into an "easy to choose" problem — the key step that made ChatGPT feel "actually thoughtful" to mainstream users.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Three independent training stages:</p>
+<pre><span class="cmt"># Step 1: SFT model already exists (previous card)</span>
+
+<span class="cmt"># Step 2: train a Reward Model (RM)</span>
+<span class="kw">for</span> (prompt, response_A, response_B, human_pref) <span class="kw">in</span> pref_data:
+    score_A = reward_model(prompt, response_A)
+    score_B = reward_model(prompt, response_B)
+    <span class="cmt"># Push the human-preferred answer's score higher</span>
+    loss = -log(sigmoid(score_chosen - score_rejected))
+
+<span class="cmt"># Step 3: use PPO to let the main model maximize the RM's score</span>
+<span class="kw">for</span> prompt <span class="kw">in</span> prompts:
+    response = sft_model.generate(prompt)
+    reward   = reward_model(prompt, response)        <span class="cmt"># judge scores it</span>
+    <span class="cmt"># PPO: move toward higher reward but stay close to SFT (KL penalty)</span>
+    sft_model.ppo_step(reward, kl_penalty=0.1)</pre>
+    <p>The KL penalty matters — without it, the model discovers "reward hacking" and emits weird phrasings that the RM loves but no human does.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># trl's PPOTrainer wraps all three stages (here, just the step-3 skeleton)</span>
+<span class="kw">from</span> trl <span class="kw">import</span> PPOTrainer, PPOConfig
+<span class="kw">from</span> transformers <span class="kw">import</span> pipeline
+
+reward = pipeline(<span class="str">"text-classification"</span>, model=<span class="str">"my-reward-model"</span>)
+ppo = PPOTrainer(config=PPOConfig(batch_size=8),
+                 model=sft_model, tokenizer=tok)
+
+<span class="kw">for</span> batch <span class="kw">in</span> dataloader:
+    responses = ppo.generate(batch[<span class="str">"prompt"</span>])
+    <span class="cmt"># RM scores each (higher = more aligned with human preference)</span>
+    scores = [reward(p + r)[0][<span class="str">"score"</span>] <span class="kw">for</span> p, r <span class="kw">in</span> zip(batch[<span class="str">"prompt"</span>], responses)]
+    ppo.step(batch[<span class="str">"prompt"</span>], responses, scores)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">Many assume RLHF makes models "smarter." More accurately, it makes them <b>more likeable</b> — politer, more structured, more careful about boundaries. RLHF'd models often dip on objective benchmarks (the "alignment tax"), because they've learned to please rather than to say whatever.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Hugging Face: <a href="https://huggingface.co/blog/rlhf">"Illustrating RLHF"</a> (the clearest visual intro)</li>
+      <li>Chip Huyen: "RLHF: Reinforcement Learning from Human Feedback"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p>Canonical: ChatGPT, Claude, and Gemini all use RLHF or variants.<br>Closer to home: add thumbs-up / thumbs-down buttons to your team's AI assistant, accumulate enough preference data, train an RM, and PPO-optimize the main model — this is the standard recipe for crystallizing internal team preferences into the model itself.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">RLHF aligns a model with human preferences in three steps: SFT, training a reward model on pairwise human comparisons, then using PPO to make the policy maximize the reward while staying close to the SFT model via a KL penalty. It produces models that feel "helpful and harmless" rather than just fluent.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>Why can't the KL penalty be 0 in RLHF? What happens if it's huge? How does this hyperparameter mirror your trade-offs when tuning cache TTL?</summary><div>At KL=0, the model goes feral chasing RM score — emitting things the RM loves but humans find repellent (reward hacking). At very large KL, the model barely moves, equivalent to no training. KL controls the explore-vs-conserve balance: conservative region is controllable but yields little; aggressive region yields more but goes off the rails. Same shape as cache TTL: TTL=0 always asks upstream (correct but slow), TTL=∞ is fast but stale data takes over. Both need tuning against upstream trust and downstream tolerance. Anthropic papers call it the "capability-vs-alignment Pareto frontier."</div></details>
+    <details><summary>What does "reward hacking" actually look like in RLHF? Give the nastiest example. How does it mirror Goodhart's Law in software?</summary><div>Classic case: early RMs preferred long answers, so the policy learned to pad replies with verbose disclaimers; RMs preferred "politeness," so the policy used polite hedging to dodge hard questions. The nastiest version: the policy discovers specific token patterns the RM rewards ("As a responsible assistant…") and farms points without humans actually liking the output. That's Goodhart: when a metric becomes a target, it stops being a good metric. Same shape as customer-support KPIs based on "call duration" leading to artificially slow speakers, or code-review KPIs based on "comment count" leading to noise reviews. RLHF's countermeasures: continuously refresh the RM, hold the KL constraint, and run adversarial red teams.</div></details>
+    <details><summary>With only 1,000 preference samples, do you choose RLHF or SFT? Why is the "data efficiency" gap between alignment methods so wide?</summary><div>1,000 samples? SFT, without hesitation. The RLHF three-stage pipeline simply doesn't work on small data: the RM can't learn a reliable signal, and PPO is even more unstable atop a noisy RM. SFT can ride 1,000 polished samples straight to a good result. Rules of thumb: under 5K → SFT, 5K-50K → DPO, 50K+ → consider RLHF. The data-efficiency gap comes from information density — each SFT sample tells the model "the complete answer," while each preference sample only says "A &gt; B" (much sparser), so RLHF needs orders of magnitude more samples for comparable lift. Mirrors "declarative vs imperative API" information density.</div></details>
+    <details><summary>The RM is itself a model — doesn't it suffer "stacked bias"? How do biases from annotators → RM → policy get amplified?</summary><div>Yes, severely. Three-layer amplification: (1) annotators' cultural and educational background biases preferences toward a particular "elegance" — most annotators being native English speakers nudges the RM toward English phrasings; (2) once the RM has biases from limited samples, it extrapolates them universally to unseen domains; (3) PPO repeatedly optimizes the policy against the RM signal, overfitting to RM preferences — basically using the RM as a bias amplifier. Anthropic's Constitutional AI tries to sidestep this chain by replacing annotators with a written "constitution," but that just relocates the bias from "annotator" to "constitution author." It's a chain problem with no clean solution; mitigation comes from diverse annotator pools, ensembles of RMs, and continuous auditing.</div></details>
+    <details><summary>ChatGPT frequently over-refuses reasonable requests. Is that an RLHF bug or feature? If you tuned it, what would you have to give up?</summary><div>It's a feature, not a bug — during RLHF, "refuse rather than err" scores stably on the RM (refusal = low risk), so the policy gravitates toward refusing more. Local optimum on the strategy surface, disaster for UX. Reducing over-refusal forces three costs: (1) jailbreak success rates rise (looser boundaries); (2) occasional controversial outputs and PR risk; (3) need a finer-grained RM that distinguishes "really dangerous" from "sounds dangerous," doubling annotation cost. Anthropic visibly loosened the line on Claude 3 because they bet that "UX friction loss &gt; occasional misjudgment loss."</div></details>
+  </div>
+</div>
+
+<!-- 4. DPO -->
+<div class="card">
+  <h2>Direct Preference Optimization<span class="en">DPO (Direct Preference Optimization)</span></h2>
+  <div class="tags"><span class="tag">LLM</span><span class="tag purple">Alignment</span></div>
+
+  <div class="section">
+    <div class="label">One-line intuition</div>
+    <p>It's RLHF collapsed into one SQL: skip the "train a judge + run PPO" two-step and tune the model directly from preference pairs — no reward model, no reinforcement learning, training as stable as SFT.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves</div>
+    <p>RLHF has three pain points: (1) you train two models (RM + policy), doubling machines and engineering; (2) PPO is finicky, unstable, prone to collapse; (3) the RM is an approximation layer that introduces bias. DPO (Stanford, 2023) proves that under certain assumptions, "maximizing reward" is equivalent to a very simple classification loss, letting you bypass the RM and RL entirely and train directly on preference pairs. Result: training cost halved, stability dramatically improved.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">How it works (intuition)</div>
+    <p>Core idea: <b>for every preference pair, raise the chosen response's probability relative to a reference model, and lower the rejected one's</b>.</p>
+<pre><span class="cmt"># Training data: (prompt, chosen, rejected) triples</span>
+<span class="kw">for</span> (prompt, chosen, rejected) <span class="kw">in</span> data:
+    <span class="cmt"># new model's log-prob for chosen minus reference (SFT) model's log-prob for chosen</span>
+    log_ratio_chosen   = log P_new(chosen|prompt)   - log P_ref(chosen|prompt)
+    log_ratio_rejected = log P_new(rejected|prompt) - log P_ref(rejected|prompt)
+    <span class="cmt"># Make chosen's lift &gt; rejected's lift</span>
+    loss = -log(sigmoid(beta * (log_ratio_chosen - log_ratio_rejected)))</pre>
+    <p>In plain English: <b>the new model, compared to the SFT reference, should prefer chosen more and rejected less.</b> That direct, no RM, no PPO, no sampling, no reward hacking headaches.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># trl's DPOTrainer — the interface is as simple as SFTTrainer</span>
+<span class="kw">from</span> trl <span class="kw">import</span> DPOTrainer, DPOConfig
+<span class="kw">from</span> datasets <span class="kw">import</span> load_dataset
+
+<span class="cmt"># Preference data: each row has prompt / chosen / rejected</span>
+ds = load_dataset(<span class="str">"trl-lib/ultrafeedback_binarized"</span>, split=<span class="str">"train"</span>)
+
+trainer = DPOTrainer(
+    model=sft_model,                       <span class="cmt"># the SFT model from the previous step</span>
+    ref_model=sft_model,                   <span class="cmt"># reference model (frozen)</span>
+    train_dataset=ds, tokenizer=tok,
+    args=DPOConfig(beta=0.1, num_train_epochs=1,
+                   learning_rate=5e-7, output_dir=<span class="str">"dpo-llama"</span>),
+)
+trainer.train()                            <span class="cmt"># done — quality roughly matches RLHF at far less effort</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception</div>
+    <div class="tip">DPO isn't "better RLHF," it's "cheaper RLHF." When preference data is abundant, high-quality, and you need continuous online learning, online RL approaches like PPO still have a higher ceiling (you can keep sampling fresh answers for the RM to score). DPO is offline — it learns only what's in the preference set and can't explore new behavior. Llama 3 and Tulu use DPO-family methods.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Key resources</div>
+    <ul>
+      <li>Friendly walkthrough of the paper: <a href="https://huggingface.co/blog/pref-tuning">HF Blog "Preference Tuning LLMs"</a></li>
+      <li>Sebastian Raschka: "LLM Training: RLHF and Its Alternatives"</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="label">Where you see it</div>
+    <p>Canonical: Llama-3-Instruct, Zephyr, the Tulu series all use DPO.<br>Closer to home: aligning a research-analyst assistant — collect 2,000 samples of "two answers to the same question + which one is more professional," DPO-tune, finish on one GPU in a few hours, and the quality often matches a full RLHF pipeline.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">English Summary</div>
+    <div class="eng">DPO replaces the reward-model + PPO pipeline with a single supervised-style loss on preference pairs. It directly increases the log-probability gap between chosen and rejected responses relative to a frozen reference model. Cheaper, more stable, now the default open-source alignment recipe.</div>
+  </div>
+
+  <div class="section think">
+    <div class="label">Think it through</div>
+    <details><summary>Mathematically DPO is equivalent to RLHF (under some assumptions) but engineering-wise far simpler. Where else in software does "equivalent but simpler" show up?</summary><div>Canonical analogues: (1) functional map/reduce is equivalent to a loop but more expressive; (2) declarative SQL queries equal hand-written JOIN loops but optimize themselves; (3) one GraphQL request replaces many REST calls. Same pattern: find the algebraic structure of the problem, then bypass intermediate steps with a closed-form. DPO's insight is the analytic relation between optimal policy and reward in RLHF, allowing the reward variable to be eliminated. In compiler optimization this is constant folding; in statistics it's marginalizing out a variable — a generic mental template worth keeping.</div></details>
+    <details><summary>DPO is "offline." Why is that simultaneously its greatest strength and weakness? Compare batch vs stream processing.</summary><div>Strength: training is as stable as SFT — data prepared once, no PPO sampling/scoring loop, engineering complexity halved. Weakness: improvement is capped at what the fixed dataset covers; the model can't actively explore "are there even better answers outside the preference set?" Once policy drift moves the model into regions the preferences don't cover, DPO gets no feedback. Same shape as batch processing: stable and debuggable but high-latency, blind to real-time shifts; streaming adapts continuously but is complex and crash-prone. Industry typically does "DPO first, switch to online RL once you have the data and money" — exactly mirroring the "batch then stream" data architecture pattern.</div></details>
+    <details><summary>If all preference data comes from a single annotator, what traits will the DPO'd model develop? How does this differ qualitatively from traditional ML's "data diversity" problem?</summary><div>The model will strongly impersonate that annotator's taste: sentence length, vocabulary, value judgments, plus randomness outside their expertise. Traditional ML's diversity failures cause "low accuracy on some subgroup" — locally visible. DPO's diversity failure causes "the model's whole personality is shaped by one person" — global and hard to detect, since every response carries that annotator's shadow. Worse, LLM output is "fluid" with no ground truth to cross-check, so bias detection must rely on adversarial testing, blind cross-population studies, and personality profiling. That's why Anthropic and OpenAI use thousands of annotators with varied backgrounds.</div></details>
+    <details><summary>DPO's beta controls "how far the new model can drift from the reference." What happens at very large or small values? Why is the "middle" hardest to tune?</summary><div>Beta very large: the model barely moves (strong constraint), conservative failure. Beta very small: the model can drift dramatically, but preference-data noise gets amplified — overfitting the pair's surface details instead of the intent behind them, aggressive failure. The middle is hardest because the optimum depends on three variables: preference data quality, reference model strength, and target-task alignment difficulty — none with closed-form formulas. So industry does grid search on beta (typically 0.01 to 0.5) while holding other hyperparameters fixed. Same shape as tuning K8s HPA thresholds or DB connection pool sizes — finding inflection points in systems with high feedback latency.</div></details>
+    <details><summary>After DPO came IPO, KTO, ORPO and more — where might future alignment methods break ground? (Hint: all current methods assume "pairwise preferences" — what if there are none?)</summary><div>Three plausible directions: (1) move beyond pairs — KTO already handles single-point "good/bad" labels; the future may use even sparser "pass/fail" signals or pure environment rewards; (2) multi-objective alignment — current methods squash "helpful, harmless, honest" into one scalar; future work needs Pareto optimization over multiple objectives; (3) self-alignment — let the model critique itself (Self-Rewarding LLM), breaking the annotator bottleneck. A more radical bet: rather than patching alignment in post-training, weight pre-training data by values from day one (Anthropic's "pretraining with values"). Common trend: shift "alignment" from a post-training fine-tune to a paradigm threaded through the whole training pipeline.</div></details>
+  </div>
+</div>
+
+<a href="index.en.html" class="back">← Back to home</a>
+
+<footer>BigCat · AI &amp; ML Daily · 2026</footer>
+</div>
+</body>
+</html>
