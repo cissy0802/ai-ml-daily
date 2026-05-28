@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Tokenization Deep Dive — Day 11</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Tokenization Deep Dive</h1>
+  <div class="meta">Day 11 · 2026-05-28 · Difficulty ★★★☆☆</div>
+  <div class="audience">For: engineers with coding experience, not from an AI background</div>
+</header>
+
+<!-- 1. BPE -->
+<div class="card">
+  <h2>Byte Pair Encoding<span class="en">BPE</span></h2>
+  <div class="tags"><span class="tag">subword algorithm</span><span class="tag purple">compression origin</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>BPE is essentially a <b>greedy dictionary-compression algorithm</b>—same ancestor as gzip / LZ, which compress files by "replacing frequent byte sequences with short codes" (Gage's 1994 data-compression algorithm). The only difference is the objective: compression software makes <b>files smaller</b>, BPE makes the <b>vocabulary big enough yet not explosive</b>. Sennrich et al. (2016) carried it from compression into NLP.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Both extremes fail. <b>Word-level vocab</b> (one token per word): English has hundreds of thousands of words plus spelling variants and neologisms—the vocab is unbounded, and any word unseen in training (<b>OOV</b>, out-of-vocabulary) just breaks. <b>Character-level</b>: vocab shrinks to a few dozen chars, but a sentence explodes into hundreds of tokens, and since attention is O(n²), long sequences become unaffordable. BPE takes the middle ground: <b>common words stay one token, rare words split into subword pieces</b>.</p>
+    <p style="margin-top:8px">The mechanism is <b>greedy merging</b>: ① init vocab = all single characters; ② count the frequency of adjacent token pairs in the corpus; ③ merge the <b>most frequent pair</b> into a new token and add it to the vocab; ④ repeat ②③ until the vocab hits a target size (say 50K). The training output is an <b>ordered list of merge rules</b>, applied in the same order at inference:</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">corpus (split into chars): low low low lower newest widest</span><br><br>
+Round 1: top pair <span class="box o">e + s</span> <span class="arrow">→</span> merge into <span class="box g">es</span><br>
+Round 2: top pair <span class="box o">es + t</span> <span class="arrow">→</span> merge into <span class="box g">est</span><br>
+Round 3: top pair <span class="box o">l + o</span> <span class="arrow">→</span> merge into <span class="box g">lo</span><br>
+Round 4: <span class="box o">lo + w</span> <span class="arrow">→</span> <span class="box g">low</span> &nbsp;(now "low" is a single token)<br><br>
+<span style="color:#5a6378">vocab = [chars...] + es + est + lo + low ...　"newest" → "new" + "est"</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> tokenizers <span class="kw">import</span> Tokenizer
+<span class="kw">from</span> tokenizers.models <span class="kw">import</span> BPE
+<span class="kw">from</span> tokenizers.trainers <span class="kw">import</span> BpeTrainer
+<span class="kw">from</span> tokenizers.pre_tokenizers <span class="kw">import</span> Whitespace
+
+<span class="cmt"># 1) empty BPE, pre-split on whitespace (BPE assumes pre-tokenized)</span>
+tok = <span class="fn">Tokenizer</span>(<span class="fn">BPE</span>(unk_token=<span class="str">"[UNK]"</span>))
+tok.pre_tokenizer = <span class="fn">Whitespace</span>()
+
+<span class="cmt"># 2) train: target vocab 5000, repeatedly merge frequent pairs</span>
+trainer = <span class="fn">BpeTrainer</span>(vocab_size=5000, special_tokens=[<span class="str">"[UNK]"</span>])
+tok.<span class="fn">train</span>([<span class="str">"corpus.txt"</span>], trainer)   <span class="cmt"># output = ordered merge-rule table</span>
+
+<span class="cmt"># 3) encode: apply the same merge rules to new text</span>
+out = tok.<span class="fn">encode</span>(<span class="str">"tokenization"</span>)
+<span class="fn">print</span>(out.tokens)   <span class="cmt"># maybe → ['token','ization'], maybe finer</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + your scenario</div>
+    <div class="tip">"BPE splits words along linguistic roots"—wrong. BPE is purely <b>frequency</b>-based; "tokenization" → "token"+"ization" only because those segments are frequent, nothing to do with grammar/morphology. A different corpus may split it oddly. This is the root cause of why models sometimes "understand" rare words awkwardly.</div>
+    <div class="exercise" style="margin-top:8px">📌 Parent scenario: when estimating prompt cost, count tokens with a tokenizer first—the same sentence phrased with <b>more mainstream (frequent) wording</b> often yields fewer tokens, both saving money and reducing the model's chance of "misreading."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 BPE is "frequency-driven compression," not "linguistic segmentation"—it knows nothing about meaning, only statistics.<br>🤔 If token boundaries are decided by frequency, not meaning, what systematic disadvantage does the model have with "low-frequency but semantically important" terms (your domain jargon)?</div>
+  </div>
+</div>
+
+<!-- 2. WordPiece -->
+<div class="card">
+  <h2>WordPiece<span class="en">WordPiece · BERT family</span></h2>
+  <div class="tags"><span class="tag">subword algorithm</span><span class="tag orange">BERT</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>WordPiece and BPE share "the same greedy-merge framework, different scoring function"—like two databases both using B-trees, but one caches by <b>access frequency</b> and the other by <b>benefit/cost ratio</b>. BPE looks at <b>absolute frequency</b>; WordPiece looks at a <b>mutual-information-style gain</b>. It originated in Schuster &amp; Nakajima 2012 (Japanese/Korean voice search) and was popularized by BERT (Devlin et al. 2018).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>BPE's "merge the most frequent pair" has a flaw: two segments that are each frequent and merely <b>happen to be adjacent</b> often (like "the" followed by various words) get merged by mistake. WordPiece instead merges the pair that <b>most increases the corpus likelihood</b>, scored as:</p>
+    <p style="margin-top:10px;text-align:center;font-family:'SF Mono',Menlo,monospace;color:#a48cff;font-size:1.02rem">score(a, b) = freq(ab) / ( freq(a) × freq(b) )</p>
+    <p style="margin-top:10px">Intuition: the numerator is how often the pair <b>appears together</b>; the denominator is how often each appears <b>on its own</b>. If a and b are merely each frequent but randomly adjacent, the denominator is large, the score is low, no merge; only when a and b are <b>tightly bound</b> (the combo is far more common than the parts) does the score rise. This is exactly <b>pointwise mutual information (PMI)</b>—measuring whether two things co-occur more than by chance.</p>
+    <p style="margin-top:8px">At inference it uses <b>longest-match</b> greedy splitting, and word-internal continuation subwords are marked with the <b>##</b> prefix (playing → play + ##ing), enabling <b>lossless reconstruction</b>: ## attaches to the previous, no-## gets a leading space.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> BertTokenizer
+tok = BertTokenizer.<span class="fn">from_pretrained</span>(<span class="str">"bert-base-uncased"</span>)
+
+<span class="cmt"># ## = "attaches to previous subword, no space between", for lossless restore</span>
+<span class="fn">print</span>(tok.<span class="fn">tokenize</span>(<span class="str">"playing tokenization"</span>))
+<span class="cmt"># illustrative → ['playing', 'token', '##ization']</span>
+<span class="cmt"># frequent words stay whole, rare words split into ## pieces</span>
+
+<span class="fn">print</span>(tok.<span class="fn">tokenize</span>(<span class="str">"antidisestablishment"</span>))
+<span class="cmt"># the rarer the word, the more ## fragments (actual split depends on vocab)</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + your scenario</div>
+    <div class="tip">"## is garbage in BERT's output"—wrong. ## marks "this is a word-internal continuation piece"; it is the key to lossless restoration, not noise. Strip it as garbage and your spaces will misalign on detokenize.</div>
+    <div class="exercise" style="margin-top:8px">📌 Parent scenario: when using BERT / sentence-embedding models for semantic search, understanding ## splitting helps diagnose—why do certain <b>proper nouns or code identifiers</b> have poor embeddings? Because they get shredded into meaningless ## fragments, diluting the semantics.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 BPE compares "who appears most," WordPiece compares "who binds tightest"—the latter uses the PMI idea to suppress "frequent but unrelated" spurious merges.<br>🤔 The same corpus trains different vocabs under BPE vs WordPiece. How would that difference affect a downstream model's handling of "compound words / coined words"?</div>
+  </div>
+</div>
+
+<!-- 3. SentencePiece + Unigram -->
+<div class="card">
+  <h2>SentencePiece &amp; Unigram<span class="en">SentencePiece · Unigram LM</span></h2>
+  <div class="tags"><span class="tag">framework</span><span class="tag purple">language-agnostic</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>BPE / WordPiece both <b>assume you can pre-split on whitespace</b>—a hidden assumption that breaks for Chinese / Japanese (no whitespace word boundaries). SentencePiece treats the whole sentence as a <b>raw Unicode stream</b>, with even the space as an ordinary character (shown as ▁). Analogy: BPE is a parser that "splits on a delimiter first, then parses"; SentencePiece is a <b>schema-less parser</b> running directly on the raw byte stream—it depends on no language's tokenization rules, and is therefore <b>losslessly reversible</b> (detokenize restores the original exactly).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>First, clear up a common confusion: <b>SentencePiece is a framework / tool</b> (open-sourced by Google) that internally runs either <b>BPE</b> or <b>Unigram</b>. Unigram is its default and its biggest contribution (Kudo 2018).</p>
+    <p style="margin-top:8px">Unigram goes in <b>exactly the opposite direction</b> from BPE: BPE is <b>bottom-up merging</b> (building up from characters), Unigram is <b>top-down pruning</b>—</p>
+    <ul>
+      <li>① start from a <b>large</b> candidate subword set;</li>
+      <li>② give each subword a probability, and score <b>all possible segmentations</b> of a sentence by probability;</li>
+      <li>③ use the <b>EM algorithm</b> to iterate, each round dropping the batch of subwords that contributes least to total likelihood;</li>
+      <li>④ until the vocab shrinks to the target size.</li>
+    </ul>
+    <p style="margin-top:8px">Bonus: each token carries a probability, and one word admits <b>multiple valid segmentations</b>—used for subword regularization (randomly sampling different splits at training time as data augmentation). T5, LLaMA, Gemma, etc. all use SentencePiece.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">The pre-tokenization assumption</b><br><br>
+BPE / WordPiece: <span class="box r">split on whitespace first</span> <span class="arrow">→</span> subword merge　<span style="color:#5a6378">(no spaces in Chinese → breaks)</span><br>
+SentencePiece:　<span class="box g">raw stream + space as ▁</span> <span class="arrow">→</span> subword　<span style="color:#5a6378">(unified across CJK/EN, reversible)</span><br><br>
+<span style="color:#8b92a8">"机器学习 hello" → ['▁机','器','学','习','▁hello']　▁ records the space</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> sentencepiece <span class="kw">as</span> spm
+
+<span class="cmt"># train unigram: eats raw text directly, no pre-tokenization</span>
+spm.SentencePieceTrainer.<span class="fn">train</span>(
+    input=<span class="str">"corpus.txt"</span>, model_prefix=<span class="str">"m"</span>,
+    vocab_size=8000, model_type=<span class="str">"unigram"</span>)  <span class="cmt"># or "bpe"</span>
+
+sp = spm.<span class="fn">SentencePieceProcessor</span>(model_file=<span class="str">"m.model"</span>)
+<span class="fn">print</span>(sp.<span class="fn">encode</span>(<span class="str">"机器学习 hello"</span>, out_type=str))
+<span class="cmt"># space → ▁, CJK and English handled uniformly</span>
+<span class="fn">print</span>(sp.<span class="fn">decode</span>(sp.<span class="fn">encode</span>(<span class="str">"机器学习 hello"</span>)))  <span class="cmt"># == original (lossless)</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + your scenario</div>
+    <div class="tip">"SentencePiece is a tokenization algorithm"—inaccurate. It is a <b>framework</b> that hosts BPE or Unigram. Saying "this model uses SentencePiece" only tells half the story; you still need to ask "which algorithm."</div>
+    <div class="exercise" style="margin-top:8px">📌 Parent scenario: interdisciplinary reading often involves multilingual terms (Latin, German philosophy words, Japanese Buddhist concepts). SentencePiece-based models (LLaMA / Gemma) usually have better token efficiency on non-English than English-trained BPE—worth weighing when picking a model for multilingual content.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 BPE "builds up" bottom-up, Unigram "trims" top-down; SentencePiece's real breakthrough is <b>removing the "must pre-tokenize first" assumption</b>, making the tokenizer language-agnostic and reversible.<br>🤔 Why does "lossless reversibility" matter? Think about code generation and JSON output—scenarios where <b>not a single character can be wrong</b>.</div>
+  </div>
+</div>
+
+<!-- 4. Byte-level BPE & UTF-8 -->
+<div class="card">
+  <h2>Byte-level BPE &amp; UTF-8 Boundaries<span class="en">Byte-level BPE · UTF-8 · Vocab trade-off</span></h2>
+  <div class="tags"><span class="tag">byte fallback</span><span class="tag purple">vocab trade-off</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Even the smartest subword algorithm will hit characters unseen in training (rare glyphs, emoji, new symbols). Byte-level BPE's solution is like programming's <b>"always have a fallback to raw bytes"</b>: any character in UTF-8 ultimately becomes 1–4 bytes, and there are only <b>256 possible bytes</b>—put those 256 in the base vocab and you <b>never get OOV</b>. GPT-2 has done this since.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>The cost is the <b>UTF-8 boundary problem</b>: one Chinese character = 3 UTF-8 bytes, an emoji can be 4, and a token boundary <b>can land in the middle of a character's bytes</b>. Two counterintuitive consequences:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">UTF-8 boundary: a character gets shredded</b><br><br>
+"你好" <span class="arrow">→</span> UTF-8 bytes: <span class="box o">E4 BD A0</span>｜<span class="box o">E5 A5 BD</span> <span style="color:#5a6378">(3 bytes each)</span><br>
+token split may land at: <span class="box r">[E4 BD]</span> <span class="box r">[A0 E5 A5]</span> <span class="box r">[BD]</span> <span style="color:#5a6378">← char shredded</span><br><br>
+streaming output: <span class="box r">�</span> <span class="box r">�</span> <span class="arrow">→</span> <span class="box g">你 好</span> <span style="color:#5a6378">(half-bytes arrive first, shown once complete)</span>
+</div>
+
+    <ul style="margin-top:14px">
+      <li><b>① Streaming garbage</b>: when emitting token by token, half a character's bytes arrive first and render as �, only assembling into a full character once the rest arrives (those flickering boxes you sometimes see in streaming output);</li>
+      <li><b>② The model "can't see characters"</b>: the model operates on tokens / bytes, not human "letters." So "how many r's in strawberry" or "spell this word backwards" often trip it up—it has no "character" representation layer at all.</li>
+    </ul>
+
+    <p style="margin-top:14px"><b>The vocab-size trade-off</b> (a core trade-off, pure mechanism not tuning):</p>
+    <ul>
+      <li><b>Large vocab</b>: shorter sequences (fewer tokens) → faster inference, more fits in context, lower cost; <b>but</b> the embedding matrix = <b>V × d_model</b> grows linearly (4× the V means 4× these params), and rare tokens get few training samples and learn poorly;</li>
+      <li><b>Small vocab</b>: fewer params, but the same text splits into more tokens, sequences lengthen, O(n²) cost rises.</li>
+    </ul>
+    <p style="margin-top:8px">The trend is <b>ever-larger vocabs</b>: Llama 2 = 32K, Llama 3 = 128K, GPT-4 (cl100k) ≈ 100K, GPT-4o (o200k) ≈ 200K. The main driver is multilingual efficiency—non-English often uses <b>2–4×</b> more tokens (the "tokenization tax"), which a larger vocab mitigates.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">import</span> tiktoken
+enc = tiktoken.<span class="fn">get_encoding</span>(<span class="str">"cl100k_base"</span>)  <span class="cmt"># GPT-4's vocab</span>
+
+ids = enc.<span class="fn">encode</span>(<span class="str">"你好🌍"</span>)
+<span class="fn">print</span>(<span class="fn">len</span>(ids), ids)         <span class="cmt"># CJK/emoji often span several tokens</span>
+
+<span class="cmt"># a single Chinese char is 3 bytes in UTF-8</span>
+<span class="fn">print</span>(<span class="str">"你"</span>.<span class="fn">encode</span>(<span class="str">"utf-8"</span>))  <span class="cmt"># b'\xe4\xbd\xa0' —— 3 bytes</span>
+
+<span class="cmt"># 256 byte tokens as fallback, so never OOV</span>
+<span class="kw">for</span> t <span class="kw">in</span> ids:
+    <span class="fn">print</span>(t, enc.<span class="fn">decode_single_token_bytes</span>(t))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + your scenario</div>
+    <div class="tip">"1 token ≈ 1 word / 1 Chinese char"—wrong. English is roughly 1 token ≈ 0.75 words; Chinese is often 1 char ≈ 1–2 tokens (depending on vocab). Extrapolating Chinese cost from English token intuition badly underestimates it.</div>
+    <div class="exercise" style="margin-top:8px">📌 Parent scenario: when estimating API cost and context budget, Chinese content usually has far more tokens than intuition suggests. Measure a representative sample with tiktoken / the SDK first, then extrapolate by ratio—don't eyeball it from English experience.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Byte fallback guarantees "never OOV," at the cost of shredded characters—in the model's world there are no "letters," only tokens and bytes.<br>🤔 If the model can't see characters, how does it spell fluently and write correct code? (Hint: in massive data, "character-level patterns" get indirectly encoded into token co-occurrence statistics.)</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en"></span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1508.07909" target="_blank">Sennrich et al. 2016 — Neural Machine Translation of Rare Words with Subword Units</a> — the paper that brought BPE into NLP</li>
+      <li><a href="https://arxiv.org/abs/1804.10959" target="_blank">Kudo 2018 — Subword Regularization</a> — the Unigram LM algorithm + multi-segmentation augmentation</li>
+      <li><a href="https://arxiv.org/abs/1808.06226" target="_blank">Kudo &amp; Richardson 2018 — SentencePiece</a> — the language-agnostic, reversible subword framework (official implementation)</li>
+      <li><a href="https://arxiv.org/abs/1810.04805" target="_blank">Devlin et al. 2018 — BERT</a> — the flagship application of WordPiece</li>
+      <li><a href="https://github.com/karpathy/minbpe" target="_blank">Karpathy — minbpe + "Let's build the GPT Tokenizer"</a> — build BPE from scratch, highly recommended</li>
+      <li><a href="https://huggingface.co/docs/transformers/tokenizer_summary" target="_blank">HuggingFace — Tokenizer Summary</a> — BPE / WordPiece / Unigram / SentencePiece compared</li>
+      <li><a href="https://github.com/openai/tiktoken" target="_blank">OpenAI tiktoken</a> — the byte-level BPE implementation for GPT models</li>
+      <li><a href="https://github.com/google/sentencepiece" target="_blank">google/sentencepiece</a> — the official SentencePiece repo</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en"></span></h2>
+  <div class="section">
+    <details><summary>1. BPE, WordPiece, and Unigram all essentially "carve the corpus into the optimal set of units." What does this share with the <b>database index design / cache-key design</b> you know?</summary><div>Core isomorphism: all <b>choose a set of "reusable units" under a fixed budget to maximize overall efficiency</b>. Index design picks "which columns to index"—too many indexes slow writes and waste space, too few slow queries; a tokenizer picks "which subwords go in the vocab"—too large blows up the embedding matrix and undertrains rare tokens, too small lengthens sequences. Cache-key design picks "cache granularity"—too fine means high hit-rate but heavy management, too coarse means low hit-rate; subword granularity is the same: char-level has high "hit-rate" (never OOV) but long sequences, word-level has short sequences but frequent OOV. The three algorithms are three <b>selection strategies</b>: BPE = greedy by frequency (like LFU caching), WordPiece = by mutual-information gain (like "benefit/cost" eviction), Unigram = build everything then trim by global probability (like building all indexes then pruning by query cost). Your distributed-systems intuitions about "hot/cold tiering" and "index selectivity" map almost one-to-one onto understanding tokenizers.</div></details>
+
+    <details><summary>2. "The model can't see characters" makes it miscount the r's in strawberry. Is this a <b>fundamental flaw</b> of tokenization, or an engineering problem you can work around with data/training?</summary><div>Both, but the root is tokenization. The model's input is token ids; the character "r" never enters the model as an independent unit—it's buried inside the <b>holistic vectors</b> of tokens like "straw" and "berry." So "counting letters" / "reversing a string"—<b>character-level operations</b>—are indirect inference for the model, not direct reads, and naturally error-prone. How far can you work around it? (a) <b>Data</b>: with lots of "spelling, letter games, character counting" examples in training, the model can <b>indirectly encode</b> character-level patterns into token co-occurrence statistics, so frequent words get spelled right; (b) <b>but</b> the long tail / rare / coined words still break, lacking enough co-occurrence signal; (c) the real <b>architectural</b> fix is character-level / byte-level models (e.g. ByT5, recent BLT) that eat bytes directly with no tokens—at the cost of long sequences and heavy compute. So the status quo is an engineering compromise: trade tokens for efficiency, patch character ability with massive data, and leave the long tail to "the model occasionally errs." A reminder, too: before outsourcing character-precise tasks (checksums, formatting) to a model, ask whether it can even "see" that granularity.</div></details>
+
+    <details><summary>3. Vocabs keep growing (Llama 2's 32K → Llama 3's 128K). Will this trend continue forever? What forces push and what forces pull?</summary><div>Pushes (toward larger): (a) <b>multilingual</b>—the "tokenization tax" on non-English is eased by a larger vocab, and covering more languages/scripts needs more subwords; (b) <b>long-context efficiency</b>—the same text becomes fewer tokens, effectively expanding context and lowering O(n²) cost; (c) <b>code / structured text</b>—folding common code snippets, indentation, and symbols into the vocab greatly shortens sequences. Pulls (toward smaller): (a) the <b>embedding + output softmax matrix = V × d</b>, so doubling V doubles both, a heavy memory burden especially for small models; (b) <b>rare-token undertraining</b>—the larger the vocab, the fewer training samples each long-tail token sees, learning poorly or becoming a "glitch token" (almost absent in training, weird at inference); (c) <b>output-layer compute</b>—each step computes a softmax over the whole vocab, slower as V grows. So it won't grow without bound; it converges to a <b>sweet spot set by model scale, target language distribution, and deployment cost</b>. Today's large models mostly land at 100K–250K. A more radical direction is to <b>drop the fixed vocab altogether</b> (byte-level / dynamic segmentation), turning this trade-off from "pick a vocab size" into "let the model learn to segment."</div></details>
+
+    <details><summary>4. SentencePiece emphasizes "<b>lossless reversibility</b>" (detokenize restores the original perfectly). Why couldn't early tokenizers do this? For which downstream tasks is reversibility make-or-break?</summary><div>Early tokenizers were irreversible because they did <b>destructive preprocessing first</b>: split on whitespace (losing "how many spaces" and "which whitespace char"), lowercasing, stripping punctuation, Unicode normalization—these steps <b>permanently discard</b> part of the original, so detokenize can only "guess" its way back (e.g. heuristics for "should there be a space before punctuation," which fail on edge cases). SentencePiece's key design: <b>treat the space as an ordinary character (▁) and model it</b>, doing no lossy preprocessing, making encode→decode a strict bijection. Tasks where reversibility is make-or-break: (a) <b>code generation</b>—one wrong space/indent/tab is a Python syntax error; (b) <b>structured output</b> (JSON / XML / YAML)—format characters can't be wrong; (c) <b>diff / patch generation</b>—must be character-exact; (d) <b>rich text / markdown</b>—whitespace and newlines carry meaning; (e) <b>non-English + mixed scripts</b>—"normalization" preprocessing often corrupts CJK / Arabic. In short: for any task where "the output gets re-parsed by a machine," a tokenizer's lossiness is a hidden bug source.</div></details>
+
+    <details><summary>5. Tokenization is the <b>translation layer</b> between "human symbols" and "model numbers." Zoom out to a cognitive view—what does this layer's existence imply about whether the model "really understands" language?</summary><div>A deep question that touches symbol grounding. The tokenizer compresses text into a string of integer ids; the model never touches "letters" or "sounds," only <b>how those ids co-occur across massive text</b>. Implications at several levels: (a) <b>the model's "language" is statistical geometry, not symbolic semantics</b>—it "knows" strawberry not by recognizing s-t-r-a-w..., but by where that token's vector sits relative to "fruit"/"red"/"sweet" in high-dimensional space; this is utterly unlike the human path of "sound first, then meaning"; (b) <b>tokenization is a cognitive filter</b>—it <b>predetermines</b> the smallest unit the model can perceive; whatever gets shredded (rare words, character-level structure, non-mainstream languages) is innately "myopic" to the model, not from lack of effort but from lost resolution at the input; (c) <b>versus humans</b>—humans hold characters, syllables, words, concepts at multiple granularities and switch freely (so you can play word games, decompose characters, hear-and-disambiguate), while the model is locked to the single granularity the tokenizer hands it. For anyone interested in consciousness and cognition, there's a striking parallel: when we say a model "understands" language, it largely does geometric operations in a <b>discrete symbol space forcibly defined by the tokenizer</b>. The "boundary" of understanding is, in a sense, drawn at the tokenization step. This is why some argue: to get closer to human language ability, the next architecture may first have to break the "fixed tokenization" ceiling.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 11 · 2026-05-28</footer>
+
+</div>
+
+</body>
+</html>
