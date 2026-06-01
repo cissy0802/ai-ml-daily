@@ -132,7 +132,7 @@ manual_loss = -log_probs[<span class="fn">range</span>(<span class="str">2</span
 
   <div class="section">
     <div class="label">Takeaway + reflection</div>
-    <div class="takeaway">💡 Cross-entropy = the extra bits to encode reality using your model's distribution. Training an LLM is training the optimal corpus compressor.<br>🤔 Information theory says "understanding ≈ compression." Do you agree? If an AI compressed all human knowledge into a volume far smaller than your brain, did it "understand" or merely "remember"?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-week12.html" target="_blank">Engineering counterpart → super-individual W12 (Fine-tuning in practice)</a></div>
+    <div class="takeaway">💡 Cross-entropy = the extra bits to encode reality using your model's distribution. Training an LLM is training the optimal corpus compressor.<br>🤔 Information theory says "understanding ≈ compression." Do you agree? If an AI compressed all human knowledge into a volume far smaller than your brain, did it "understand" or merely "remember"?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">Engineering counterpart → super-individual D12 (Fine-tuning in practice)</a></div>
   </div>
 </div>
 
@@ -209,7 +209,7 @@ optimizer = <span class="fn">AdamW</span>(
 
   <div class="section">
     <div class="label">Takeaway + reflection</div>
-    <div class="takeaway">💡 AdamW = momentum + per-parameter adaptive step + decoupled weight decay. <b>All three are required</b> and form the hidden prerequisite for Transformers to train stably.<br>🤔 "Each parameter adjusts its own step from its own history" — where else does per-key adaptive thinking show up in distributed systems you've built? What's the common precondition for it to work?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-week12.html" target="_blank">Engineering counterpart → super-individual W12 (Fine-tuning in practice)</a></div>
+    <div class="takeaway">💡 AdamW = momentum + per-parameter adaptive step + decoupled weight decay. <b>All three are required</b> and form the hidden prerequisite for Transformers to train stably.<br>🤔 "Each parameter adjusts its own step from its own history" — where else does per-key adaptive thinking show up in distributed systems you've built? What's the common precondition for it to work?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">Engineering counterpart → super-individual D12 (Fine-tuning in practice)</a></div>
   </div>
 </div>
 
@@ -287,7 +287,7 @@ scheduler = <span class="fn">get_cosine_schedule_with_warmup</span>(
 
   <div class="section">
     <div class="label">Takeaway + reflection</div>
-    <div class="takeaway">💡 "How fast to learn" is not a constant — it's a function of time. Warmup prevents early divergence; decay enables late-stage refinement. <b>Both ends are required.</b><br>🤔 In your work or daily life, what activities also have a natural "slow start → full speed → gentle finish" rhythm? Does that cosine curve resonate with your most productive cadence?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-week12.html" target="_blank">Engineering counterpart → super-individual W12 (Fine-tuning in practice)</a></div>
+    <div class="takeaway">💡 "How fast to learn" is not a constant — it's a function of time. Warmup prevents early divergence; decay enables late-stage refinement. <b>Both ends are required.</b><br>🤔 In your work or daily life, what activities also have a natural "slow start → full speed → gentle finish" rhythm? Does that cosine curve resonate with your most productive cadence?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">Engineering counterpart → super-individual D12 (Fine-tuning in practice)</a></div>
   </div>
 </div>
 
@@ -364,7 +364,7 @@ CLIP_VALUE = <span class="str">1.0</span>   <span class="cmt"># GPT-3/Llama defa
 
   <div class="section">
     <div class="label">Takeaway + reflection</div>
-    <div class="takeaway">💡 Gradient clipping = the training process's circuit breaker. <b>Direction preserved, length reined in</b> — near-zero cost, saves days of compute when needed.<br>🤔 "Cheap safety net for rare extreme events" — where does this thinking show up in your system designs? Why do some people object ("ugly," "inelegant"), and under what premises does their objection hold?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-week12.html" target="_blank">Engineering counterpart → super-individual W12 (Fine-tuning in practice)</a></div>
+    <div class="takeaway">💡 Gradient clipping = the training process's circuit breaker. <b>Direction preserved, length reined in</b> — near-zero cost, saves days of compute when needed.<br>🤔 "Cheap safety net for rare extreme events" — where does this thinking show up in your system designs? Why do some people object ("ugly," "inelegant"), and under what premises does their objection hold?<br>🔗 <a href="https://cissy0802.github.io/super-individual-weekly/finetuning-day12.html" target="_blank">Engineering counterpart → super-individual D12 (Fine-tuning in practice)</a></div>
   </div>
 </div>
 
