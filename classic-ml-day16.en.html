@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Classic ML Algorithms — Day 16</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.formula{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:"SF Mono",Menlo,monospace;font-size:0.92rem;color:#a48cff;text-align:center;overflow-x:auto}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Classic ML Algorithms</h1>
+  <div class="meta">Day 16 · 2026-06-02 · Difficulty ★★☆</div>
+  <div class="audience">For: experienced engineers outside the AI/ML field</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff">
+  <div class="section">
+    <p style="color:#cfd3df">For 15 days we've been talking about LLMs. But the LLM is the <strong>tip of the pyramid</strong>; its base is the classic ML built up between 1950–2000. Today we go back to the foundation: four algorithms still running at scale in production systems. What they share — <strong>interpretable, cheap, and often beating deep learning on tabular data</strong>. Understand these and you finally grasp what "machine learning" actually <em>learns</em>.</p>
+  </div>
+</div>
+
+<!-- 1. Linear Regression -->
+<div class="card">
+  <h2>Linear Regression<span class="en">Linear Regression</span></h2>
+  <div class="tags"><span class="tag">Supervised</span><span class="tag purple">Regression</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Linear regression is a <strong>scoring formula with learnable weights</strong>. Doing capacity planning you've hand-written things like <code>cost = 0.3·CPU + 0.5·MEM + 0.2·IO</code> — those coefficients you picked by gut. Linear regression does exactly the same thing, <strong>except it lets the data compute the optimal coefficients</strong>, aiming to minimize prediction error.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: you have historical "input features → numeric outcome" samples (house area→price, request count→latency) and want a rule to predict new ones. Linear regression assumes the outcome is a <strong>weighted sum</strong> of inputs:</p>
+<div class="formula">ŷ = w₁x₁ + w₂x₂ + … + wₙxₙ + b</div>
+    <p style="margin-top:8px">Here <strong>xᵢ are features</strong> (area, room count), <strong>wᵢ are weights</strong> (how much each feature matters), <strong>b is the bias</strong> (baseline). How do we find the best w? Define a measure of "how badly we're wrong" — the <strong>Mean Squared Error (MSE)</strong>: take each sample's prediction minus truth, square it, average.</p>
+<div class="formula">Loss = (1/N) · Σ (yᵢ − ŷᵢ)²</div>
+    <p style="margin-top:8px">Why <strong>square</strong> instead of absolute value? Three reasons: ① squares are differentiable everywhere, enabling gradient descent; ② big errors are amplified (an error of 10 is penalized 100× more than 1), forcing the model to avoid large mistakes; ③ mathematically there's a <strong>closed-form solution</strong> — one matrix formula <code>w = (XᵀX)⁻¹Xᵀy</code> gives the answer, no iteration. This is "least squares," used by Legendre back in 1805 — 150 years before neural nets.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LinearRegression
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># features: [area, rooms]   label: price (10k)</span>
+X = np.array([[50, 1], [80, 2], [120, 3], [200, 4]])
+y = np.array([300, 480, 700, 1100])
+
+model = LinearRegression()
+model.<span class="fn">fit</span>(X, y)              <span class="cmt"># one line solves for optimal weights (closed form)</span>
+
+<span class="fn">print</span>(model.coef_)          <span class="cmt"># weight w per feature</span>
+<span class="fn">print</span>(model.intercept_)     <span class="cmt"># bias b</span>
+<span class="fn">print</span>(model.<span class="fn">predict</span>([[100, 2]]))  <span class="cmt"># predict price of 100㎡/2-room</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"Linear regression only fits straight lines, too weak" — wrong. It's linear in the <strong>parameters</strong>, but you can feed it nonlinear features: add an x² column, log(x), x₁·x₂, and it fits curves and interactions. The real limit isn't "straight lines" — it's that <strong>you must design the features by hand</strong>. That's exactly the part deep learning replaces.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: model your own time investment — "N hours writing per week → subscriber growth." The coefficients tell you which action has the highest ROI, far more reliable than deciding by feel. Linear regression is <strong>the cheapest causal-intuition tool</strong>.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Linear regression is the "Hello World" of all ML: a weighted sum + an error measure + an optimizer. A neural net just stacks these three things a million times over.<br>🤔 That decision formula where you last "picked weights by gut" — if you had 50 rows of history, could regression compute the coefficients for you?</div>
+  </div>
+</div>
+
+<!-- 2. Logistic Regression -->
+<div class="card">
+  <h2>Logistic Regression<span class="en">Logistic Regression</span></h2>
+  <div class="tags"><span class="tag">Supervised</span><span class="tag purple">Classification</span><span class="tag orange">Probability</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Logistic regression = <strong>linear regression + a valve that squashes any number into a "probability."</strong> It's like an <strong>admission controller with calibrated probabilities</strong>: instead of just "allow/deny," it says "this request is 87% likely to be normal traffic." It has "regression" in its name but does classification.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: many tasks want a <strong>yes/no</strong>, not a number — is this email spam? will this user churn? Linear regression outputs (−∞, +∞), unusable as a probability. Logistic regression wraps the weighted sum in a <strong>Sigmoid function</strong> that squeezes it into (0, 1):</p>
+<div class="formula">p = σ(wᵀx + b),&nbsp; σ(z) = 1 / (1 + e<sup>−z</sup>)</div>
+    <p style="margin-top:8px">Intuition: large z → p near 1 (almost certainly positive); very negative z → p near 0; z=0 → p=0.5 (maximally uncertain). This S-curve smoothly maps a "linear score" into a "probability." Its mathematical identity is the <strong>log-odds</strong>: <code>wᵀx+b = log(p/(1−p))</code> — the model is linearly predicting the "log of the odds of winning."</p>
+    <p style="margin-top:8px">Training uses not MSE but <strong>cross-entropy / log loss</strong>: when truth is positive, penalize by −log(p); when negative, by −log(1−p). Why switch losses? Sigmoid + MSE makes the loss <strong>non-convex</strong> (bumpy, gradient descent gets stuck in local minima); cross-entropy makes it <strong>convex again</strong>, and is equivalent to <strong>maximum likelihood estimation</strong> — the most natural choice mathematically.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+
+<span class="cmt"># features: [email length, count of 'free']   label: 1=spam 0=ham</span>
+X = [[20, 0], [15, 3], [200, 0], [30, 5]]
+y = [0, 1, 0, 1]
+
+clf = LogisticRegression()
+clf.<span class="fn">fit</span>(X, y)
+
+<span class="cmt"># predict_proba gives probabilities, not hard labels — that's the value</span>
+<span class="fn">print</span>(clf.<span class="fn">predict_proba</span>([[18, 4]]))  <span class="cmt"># [[P(ham), P(spam)]]</span>
+<span class="fn">print</span>(clf.<span class="fn">predict</span>([[18, 4]]))        <span class="cmt"># hard label after default 0.5 threshold</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"Output 0.9 means 90% accuracy" — this conflates <strong>probability</strong> with <strong>accuracy</strong>. 0.9 is the model's confidence on this one sample; whether it's "well calibrated" (do 90% of its 0.9-samples truly turn out positive?) must be verified separately. Also: the default 0.5 threshold isn't sacred — for fraud detection you might drop it to 0.2, preferring false alarms over misses.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: build a lightweight "importance scorer" for your inbox/task stream. Logistic regression's <strong>weights are directly readable</strong> — you can see how much "sender is the boss" contributes. Far better than a black box for personal decision systems that need explaining.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Logistic regression is the most-used classifier in industry — not because it's strongest, but because it's <strong>fast, interpretable, and outputs calibrated probabilities</strong>. A neural net's final layer (Softmax) is essentially multi-class logistic regression.<br>🤔 Which of your "binary judgments" (worth doing? trustworthy?) could actually be decomposed into a few quantifiable features and handed to a scorer?</div>
+  </div>
+</div>
+
+<!-- 3. Decision Tree & Random Forest -->
+<div class="card">
+  <h2>Decision Tree &amp; Random Forest<span class="en">Decision Tree &amp; Random Forest</span></h2>
+  <div class="tags"><span class="tag">Supervised</span><span class="tag purple">Ensemble</span><span class="tag orange">Trees</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A decision tree is an <strong>auto-generated nested if-else routing table</strong> — exactly like the rule engines you've written, except the rules are learned from data. A random forest then <strong>replaces a single-point decision with quorum voting</strong>: grow hundreds of mutually different trees, let them vote, and majority rule cancels out any single tree's random bias — the same idea as using replica redundancy to defend against single-point failure in distributed systems.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: linear models make you design features by hand and assume the relationship is linear. A decision tree assumes no shape — it <strong>greedily splits the data over and over</strong>: at each step asking "which feature, which threshold makes the two sides purest?" Purity is measured by <strong>Gini impurity</strong>:</p>
+<div class="formula">Gini = 1 − Σ pₖ²</div>
+    <p style="margin-top:8px">pₖ is the fraction of class k in a node. All one class → Gini=0 (purest); 50/50 → Gini=0.5 (most mixed). The tree keeps picking the split that <strong>drops weighted Gini the most</strong>, until leaves are pure enough. This gives you a <strong>fully readable</strong> model — you can draw it for a non-technical audience.</p>
+    <p style="margin-top:8px">But a single tree has a fatal flaw: <strong>extremely high variance</strong>. Swap a few samples and it grows into a totally different tree — it overfits easily. Random forest (Breiman 2001) uses two layers of randomness to <strong>decorrelate</strong> the trees:</p>
+    <ul>
+      <li><strong>Bagging (bootstrap sampling)</strong>: each tree trains only on a <strong>random sample drawn with replacement</strong> — like sampling data shards;</li>
+      <li><strong>Random feature subsets</strong>: each split considers only <strong>a random subset of features</strong>, forcing different trees to view from different angles.</li>
+    </ul>
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Random Forest = many decorrelated trees voting</b><br><br>
+random samples+features <span class="arrow">→</span> <span class="box g">Tree1: spam</span> <span class="box g">Tree2: ham</span> <span class="box g">Tree3: spam</span> <span class="box g">…Tree500</span><br>
+<span style="color:#5a6378">　　　　　　　　　　└──────── majority vote (quorum) ────────┘</span><br>
+final output <span class="arrow">→</span> <span class="box o">spam (312 votes vs 188)</span>
+</div>
+    <p style="margin-top:14px">Key math intuition: <strong>averaging N roughly-independent noisy predictions cuts variance to about 1/N</strong> (the same statistics as taking the mean of repeated measurements to reduce noise). Bagging makes the trees independent, so voting "averages away" each tree's overfitting — the core of why ensembles win.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> load_iris
+
+X, y = <span class="fn">load_iris</span>(return_X_y=<span class="kw">True</span>)
+
+<span class="cmt"># n_estimators = number of trees; more is steadier, with diminishing returns</span>
+rf = RandomForestClassifier(n_estimators=300, max_depth=5)
+rf.<span class="fn">fit</span>(X, y)
+
+<span class="cmt"># near-free feature importances — forests naturally rank which feature helps most</span>
+<span class="kw">for</span> name, imp <span class="kw">in</span> <span class="fn">zip</span>([<span class="str">"sepal_len"</span>,<span class="str">"sepal_wid"</span>,<span class="str">"petal_len"</span>,<span class="str">"petal_wid"</span>], rf.feature_importances_):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"{name}: {imp:.2f}"</span>)</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"Deeper trees are better" — wrong. A single deep tree memorizes the training set (overfits) and generalizes worse. Random forest wins via "many shallow trees voting," not "one deep tree." When you want a single production model, the more common choice is <strong>gradient boosting (XGBoost / LightGBM)</strong> — also a tree ensemble, but using boosting (each tree corrects the last) instead of bagging (parallel voting), and it <strong>still beats deep learning on tabular-data competitions</strong>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: with a structured dataset in hand (user-behavior table, personal finances, experiment logs), <strong>don't</strong> reach for a neural net first. Random forest / XGBoost gives you a strong baseline + feature-importance ranking in a few lines with no tuning, telling you "which variables truly drive the outcome."</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 A single tree is interpretable but unstable; random forest trades a little interpretability for robustness via the "wisdom of the crowd" — a perfect mapping of distributed-redundancy thinking into ML.<br>🤔 Your familiar "replica voting / quorum consensus" and the forest's "tree voting" — how does each manufacture independence between members? Why is independence the linchpin of both?</div>
+  </div>
+</div>
+
+<!-- 4. SVM -->
+<div class="card">
+  <h2>Support Vector Machine<span class="en">Support Vector Machine (SVM)</span></h2>
+  <div class="tags"><span class="tag">Supervised</span><span class="tag purple">Classification</span><span class="tag orange">Kernel</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>SVM finds the <strong>widest "buffer zone / DMZ"</strong> between two classes. Other classifiers are happy drawing any line that separates the sides; SVM insists on the line that is <strong>farthest from both</strong> — the wider the buffer, the more robust to new data. And that line is decided by only a <strong>handful of critical samples hugging the boundary (the support vectors)</strong>, like the few constraints that are actually "tight" in an optimization problem.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What it solves + how it works</div>
+    <p>Pain point: there are infinitely many straight lines separating two classes — which generalizes best? SVM gives a clear answer: <strong>maximize the margin</strong>, the distance from the decision boundary to the nearest sample. Geometrically the margin equals 2/‖w‖, so "maximize the margin" equals "minimize ‖w‖," solved under the constraint that "every point lands correctly outside the buffer":</p>
+<div class="formula">min ½‖w‖²　s.t.　yᵢ(wᵀxᵢ + b) ≥ 1</div>
+    <p style="margin-top:8px">Intuition: smaller ‖w‖ → wider buffer; the constraint guarantees each sample sits on its own side, at least "one unit" from the boundary. The optimal solution is determined only by the few <strong>support vectors pressed against the boundary</strong> — delete the other samples and the boundary doesn't budge. This makes SVM especially stable in <strong>high-dimensional, small-sample</strong> settings.</p>
+    <p style="margin-top:8px">But data is often <strong>not linearly separable</strong> (no straight line works). SVM's killer move is the <strong>kernel trick</strong>: implicitly map the data into a higher-dimensional space where the two tangled classes become cleanly cuttable by a plane — like <strong>adding a computed column</strong> to a SQL query (say x²+y²), instantly making ring-shaped data separable. The beauty is the kernel <strong>never actually computes the high-dimensional coordinates</strong>, only the similarity between samples, saving astronomical compute:</p>
+<div class="formula">RBF kernel: K(x, x′) = exp(−γ‖x − x′‖²)</div>
+    <p style="margin-top:8px">γ controls the "radius of influence": large γ → each point only affects its neighborhood, boundary bends (overfits easily); small γ → wide influence, smooth boundary. This is SVM's most important knob.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code</div>
+<pre><span class="kw">from</span> sklearn.svm <span class="kw">import</span> SVC
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> make_circles
+
+<span class="cmt"># ring data: inner ring one class, outer ring another — no line can split</span>
+X, y = <span class="fn">make_circles</span>(n_samples=200, noise=0.1, factor=0.4)
+
+<span class="cmt"># RBF kernel: implicitly lift dimensions, making the rings separable</span>
+clf = SVC(kernel=<span class="str">"rbf"</span>, C=1.0, gamma=<span class="str">"scale"</span>)
+clf.<span class="fn">fit</span>(X, y)
+
+<span class="fn">print</span>(<span class="str">"num support vectors:"</span>, <span class="fn">len</span>(clf.support_))  <span class="cmt"># only a few samples decide the boundary</span>
+<span class="fn">print</span>(<span class="str">"accuracy:"</span>, clf.<span class="fn">score</span>(X, y))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + practical scenario</div>
+    <div class="tip">"SVM is obsolete, killed by deep learning" — half true. On big data, images, and text it did cede ground to neural nets; but in <strong>small-sample (hundreds to thousands), high-dimensional</strong> settings (bioinformatics, small classification tasks), SVM is still accurate, stable, and needs no GPU. Picking the wrong tool isn't the algorithm's fault — <strong>there's no silver bullet, only fit</strong>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: you have only 300 labeled samples (say hand-labeled "high-quality / ordinary" articles). A neural net will surely overfit. An RBF-kernel SVM is often <strong>the best starting point for small-sample classification</strong>.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 SVM teaches two timeless ideas: "maximum margin" = leave slack to be robust; "kernel trick" = look from another space and the hard problem turns easy. These two outlive SVM itself.<br>🤔 "Lifting dimensions turns inseparable into separable" — is there an analog in your other domains (data modeling, problem decomposition, cross-disciplinary thinking): switch representation space and a tangled problem suddenly resolves?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://link.springer.com/article/10.1023/A:1010933404324" target="_blank">Breiman 2001 — Random Forests</a> (Machine Learning, vol.45) — the founding paper, origin of bagging + random features</li>
+      <li><a href="https://link.springer.com/article/10.1007/BF00994018" target="_blank">Cortes &amp; Vapnik 1995 — Support-Vector Networks</a> (Machine Learning, vol.20) — the paper that launched SVM</li>
+      <li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank">scikit-learn Supervised Learning docs</a> — official API, parameters, and examples for all four algorithms; the most practical starting point</li>
+      <li><a href="https://hastie.su.domains/ElemStatLearn/" target="_blank">The Elements of Statistical Learning</a> (Hastie, Tibshirani, Friedman) — the classic-ML bible, free PDF, authoritative derivations</li>
+      <li><a href="https://www.statlearning.com/" target="_blank">An Introduction to Statistical Learning (ISL)</a> — the gentler version of the above, with R/Python code, engineer-friendly</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. All four of today's algorithms are "supervised learning." What's their essential difference from — and common ground with — the LLMs of the past 15 days, in terms of "what is learned"?</summary><div>Common ground: <strong>all fit a function f(input)→output from data, all minimize some loss</strong> — an LLM's next-token prediction is also classification (Softmax over a vocabulary of tens of thousands, i.e. a giant logistic regression). The differences are threefold: (1) <strong>features</strong> — classic ML needs you to <strong>hand-design features</strong> (area, word frequency), while deep learning <strong>learns representations automatically from raw data</strong>, the revolution of "representation learning"; (2) <strong>capacity and data</strong> — linear/SVM have few parameters and run on hundreds of samples, while LLMs have hundreds of billions of parameters and need vast data or they overfit; (3) <strong>interpretability</strong> — you can read logistic regression's weights one by one, while an LLM is a black box. Deeper insight: <strong>a neural network can be seen as a "tower of logistic regressions with automated feature engineering"</strong> — each layer is a linear transform + nonlinear activation, and the final layer is logistic regression. Grasp classic ML and you truly see how pivotal it is that deep learning "removed human feature engineering."</div></details>
+
+    <details><summary>2. Why do tree ensembles like XGBoost still often beat deep learning on "tabular / structured data"? What does this imply for "should we just throw a big model at everything"?</summary><div>Tabular data's traits: <strong>heterogeneous features (numeric/categorical mixed), modest dimensionality, limited samples, no spatial/temporal structure between features</strong>. Tree models are naturally good at this: (1) <strong>insensitive to feature scale</strong>, no normalization needed; (2) automatically handle <strong>nonlinearity and feature interactions</strong> (each split is an interaction); (3) <strong>robust to irrelevant features</strong>, ignoring them automatically. Neural nets' strength — <strong>learning hierarchical representations from raw signals</strong> — has nothing to chew on when the table is "already hand-engineered features," and with few samples they overfit and need heavy tuning. Implication: <strong>match the model to the data structure; bigger isn't better</strong>. Images/text/audio — "high-dimensional, structured, abundant" unstructured data — are deep learning's home turf; but the huge number of <strong>tabular prediction problems</strong> in enterprises are crushed by a few-line XGBoost that beats a carefully tuned neural net, while being 100× cheaper and interpretable. "Just throw a big model at it" is often <strong>using an aircraft carrier to deliver a parcel</strong>.</div></details>
+
+    <details><summary>3. Random forest cuts variance via "many trees voting"; SVM seeks robustness via "maximum margin." Are these two anti-overfitting ideas actually the same thing underneath?</summary><div>Different on the surface, but both fight <strong>overfitting = the model memorized noise instead of the rule</strong>, betting on different mechanisms. Random forest takes the <strong>"averaging out noise"</strong> route: a single tree has high variance (sensitive to the training set), but as long as the trees' <strong>error directions are uncorrelated</strong>, averaging shrinks variance by ~1/N — the <strong>ensemble / statistical-averaging</strong> idea, same family as "average repeated measurements" and "distributed multi-replica." SVM takes the <strong>"leave slack"</strong> route: instead of fitting the training points as happily as possible, it pushes the boundary <strong>as far from the data as it can</strong>, leaving a buffer — the <strong>regularization / Occam's razor</strong> idea, "don't draw the rule hugging the samples; leave a buffer to survive perturbation." Unified view: both <strong>deliberately sacrifice fit on the training set to gain stability on unseen data</strong> — exactly the core tension of generalization (the bias-variance trade-off). Grasp this and you can ask of any ML method: "how is it buying robustness?"</div></details>
+
+    <details><summary>4. These algorithms were invented 50–200 years ago (least squares 1805, SVM 1995). Why are they still running at scale in production today?</summary><div>Because they hit the <strong>true complexity of most real problems</strong>. A counterintuitive fact: <strong>80% of industry's ML value comes not from the bleeding edge but from applying classic algorithms in the right place</strong>. Reasons: (1) <strong>interpretability is mandatory</strong> — finance risk control, healthcare, hiring and other high-stakes settings are <strong>legally required</strong> to explain decisions; logistic regression's weights are inherently compliant, while black-box big models can't be used; (2) <strong>cost and latency</strong> — logistic-regression inference is one dot product, microseconds, zero GPU; an LLM inference is orders of magnitude pricier; (3) <strong>data reality</strong> — most companies lack the data to train a big model but have a few thousand rows of tabular data, exactly classic ML's sweet spot; (4) <strong>robust and maintainable</strong> — simple models have clear failure modes, easy to debug and monitor. The deeper lesson matters especially for the "AI super-individual": <strong>real engineering judgment isn't always chasing the newest, but knowing how heavy a tool each problem deserves</strong>. Whatever linear regression can solve, don't reach for a Transformer — that restraint is itself a scarce skill.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 16 · 2026-06-02</footer>
+
+</div>
+
+</body>
+</html>
