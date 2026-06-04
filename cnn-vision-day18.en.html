@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: CNN &amp; Vision — Day 18</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: CNN &amp; Vision</h1>
+  <div class="meta">Day 18 · 2026-06-04</div>
+  <div class="audience">For: engineers with coding experience, outside the AI field</div>
+</header>
+
+<!-- 1. Convolution -->
+<div class="card">
+  <h2>Convolution<span class="en">Conv</span></h2>
+  <div class="tags"><span class="tag">vision basics</span><span class="tag purple">weight sharing</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A convolutional kernel is a <strong>stored procedure that slides across an image</strong>—the same small function moves position by position, computing a dot product over whatever local pixels it covers. The point isn't the sliding, it's <strong>weight sharing</strong>: one piece of logic deployed everywhere, like one CDN edge function serving every region's requests, rather than a separate set of weights per pixel.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>If you feed an image straight into a Day-17 fully-connected layer (every input wired to every neuron), parameters explode: a 1000×1000 image has a million inputs, and a thousand-neuron hidden layer means <strong>a billion parameters</strong>—and the model can't tell "the cat shifted 10 pixels" from "a different cat." Convolution breaks this with two moves: <strong>local connectivity</strong> (each neuron sees only a small receptive field) + <strong>weight sharing</strong> (one kernel sweeps the whole image). Parameters drop from a billion to a few hundred, and you get <strong>translation invariance</strong> for free—the same feature is caught by the same kernel wherever it appears.</p>
+    <p style="margin-top:8px">Mechanically, each kernel learns one "local pattern detector": the first layer learns edges/color blobs; stacking layers grows the <strong>receptive field</strong>, so layer two composes textures and corners, higher layers compose eyes, wheels, eventually a whole cat. Interleaved <strong>pooling</strong> (taking local max/average) downsamples—shrinking size and adding robustness to tiny shifts. This "local → compose → abstract" hierarchy was LeCun's design intuition back in 1989, and AlexNet detonated it on ImageNet in 2012.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">One 3×3 kernel slides over the input (weight sharing)</span><br><br>
+input map &nbsp;&nbsp;&nbsp; kernel &nbsp;&nbsp;&nbsp; output map<br>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span class="arrow">×</span> <span class="box p">▣ 3×3</span> <span class="arrow">=</span> <span class="box g">▨ ▨ ▨</span><br>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">↓slide</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="box g">▨ ▨ ▨</span><br>
+<span class="box">▦ ▦ ▦ ▦ ▦</span> <span style="color:#5a6378">dot product</span> <span class="box g">▨ ▨ ▨</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ only these 9 weights for the whole image → param count independent of image size</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+
+<span class="cmt"># One conv layer: 3 input channels (RGB), 16 output feature maps</span>
+conv = nn.<span class="fn">Conv2d</span>(in_channels=3, out_channels=16,
+                 kernel_size=3, stride=1, padding=1)
+
+x = torch.<span class="fn">randn</span>(1, 3, 32, 32)   <span class="cmt"># 1 RGB image, 32×32</span>
+y = <span class="fn">conv</span>(x)
+<span class="fn">print</span>(y.shape)               <span class="cmt"># [1, 16, 32, 32] padding=1 keeps size</span>
+
+<span class="cmt"># Key: params = 16×3×3×3 + 16(bias) = 448, independent of image size</span>
+<span class="cmt"># Same output via a dense layer = 3·32·32 × 16·32·32 ≈ 800M params</span>
+<span class="fn">print</span>(<span class="fn">sum</span>(p.numel() <span class="kw">for</span> p <span class="kw">in</span> conv.<span class="fn">parameters</span>()))  <span class="cmt"># 448</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <p><span class="tip">⚠️ <strong>Misconception</strong>: that kernels are hand-designed (like Photoshop sharpen/blur filters). In fact CNN kernel weights are all <strong>learned automatically by backprop</strong>—you only define kernel size and count; what detector each becomes is decided by the data.</span></p>
+    <p style="margin-top:10px">🎯 <strong>Your scenario</strong>: for a personal project tagging/deduplicating thousands of family photos, your first instinct might be a cloud LLM API. But a small few-layer CNN (or an off-the-shelf pretrained backbone) runs locally—zero API cost, data never leaves home. Understanding convolution tells you <strong>when you don't need a big model</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Convolution's entire power comes from one constraint: <strong>local connectivity + weight sharing</strong>. It bakes the prior "images have translation invariance" directly into the architecture.<br>🤔 In the backend systems you know, where do you "apply one piece of logic to massive similar units"? What do those designs share with weight sharing?</div>
+  </div>
+</div>
+
+<!-- 2. ResNet -->
+<div class="card">
+  <h2>Residual Networks<span class="en">ResNet</span></h2>
+  <div class="tags"><span class="tag">deep training</span><span class="tag purple">skip connection</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A residual / skip connection is a <strong>bypass line on every layer</strong>—in code it's <code>return x + f(x)</code>. Think of a middleware chain where each middleware has a default "pass through unchanged" bypass, and only modifies if it needs to. That bypass turns "add more layers" from "must learn something better" into "at worst, no worse."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Before 2015 people hit a paradox: past a few dozen layers, <strong>training error went up</strong>. Note—this isn't overfitting (good on train, bad on test); it's <strong>degradation</strong>: the network can't even fit the training set. Intuitively, extra layers should at least learn an <strong>identity mapping</strong> (output the input unchanged) as a fallback, but optimizers struggle to make a stack of nonlinear layers approximate identity, and gradients decay badly on the way back.</p>
+    <p style="margin-top:8px">He et al. 2015 solved it minimally: instead of having layers learn the target <strong>H(x)</strong> directly, learn the <strong>residual F(x) = H(x) − x</strong>, with final output <strong>H(x) = F(x) + x</strong>. If the optimum is the identity, the optimizer just drives F(x) to 0—far easier than fitting an identity from scratch. Even better, that <strong>+x</strong> opens a <strong>gradient highway</strong>: in backprop the gradient flows straight back to shallow layers via the skip, bypassing chain-rule decay. With this, ResNet pushed depth to <strong>152 layers</strong>, won ImageNet 2015, and the "residual block" became standard in nearly every deep network—including the Transformer.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Residual block: H(x) = F(x) + x</span><br><br>
+&nbsp;&nbsp;<span class="box">input x</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;╲ <span style="color:#7ed6a0">skip (identity)</span><br>
+&nbsp;&nbsp;<span class="box p">weight → ReLU</span> &nbsp;║<br>
+&nbsp;&nbsp;<span class="box p">weight</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;║ <span style="color:#7ed6a0">gradient highway</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;│ F(x)&nbsp;&nbsp;&nbsp;╱<br>
+&nbsp;&nbsp;<span class="box g">⊕ add</span> <span class="arrow">→</span> <span class="box">output F(x)+x</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ F(x)→0 falls back to identity; "adding layers never hurts"</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+
+<span class="kw">class</span> <span class="fn">ResidualBlock</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, ch):
+        <span class="fn">super</span>().<span class="fn">__init__</span>()
+        self.conv1 = nn.<span class="fn">Conv2d</span>(ch, ch, 3, padding=1)
+        self.conv2 = nn.<span class="fn">Conv2d</span>(ch, ch, 3, padding=1)
+        self.relu  = nn.<span class="fn">ReLU</span>()
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):
+        out = self.<span class="fn">relu</span>(self.<span class="fn">conv1</span>(x))
+        out = self.<span class="fn">conv2</span>(out)
+        <span class="kw">return</span> self.<span class="fn">relu</span>(out + x)   <span class="cmt"># the +x skip is the whole magic</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <p><span class="tip">⚠️ <strong>Misconception</strong>: that residual connections exist "to fix vanishing gradients." Smooth gradients are a <strong>side effect</strong>; the paper's core point is the <strong>degradation problem</strong>—making deep nets easy to learn an identity mapping. Related, but not the same thing.</span></p>
+    <p style="margin-top:10px">🎯 <strong>Your scenario</strong>: the residual idea transfers far beyond vision. When you design a multi-step AI pipeline (agent / data chain), keeping a "raw input passthrough" bypass on key stages lets the system degrade gracefully when a step fails, instead of collapsing wholesale—the engineering philosophy of <code>output = step(x) + x</code>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 ResNet's insight: <strong>rewrite a hard-to-learn target as an easy-to-learn residual</strong>. One <code>+x</code> made thousand-layer networks possible, and every Transformer block uses it today.<br>🤔 "Make the default behavior 'no change, change only if needed'"—where else, in system design or even building personal habits, does this principle apply?</div>
+  </div>
+</div>
+
+<!-- 3. ViT -->
+<div class="card">
+  <h2>Vision Transformer<span class="en">ViT</span></h2>
+  <div class="tags"><span class="tag">architecture fusion</span><span class="tag purple">patch token</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>ViT does one thing: <strong>it "tokenizes" an image</strong>. It cuts the image into 16×16 patches, flattens each into a token, so an image becomes "a sentence made of image blocks," then runs the same text Transformer from Day 1. A vision problem gets translated into an NLP problem.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>CNNs carry strong <strong>inductive bias</strong> (prior assumptions baked into the architecture): locality, translation invariance. That makes them fast and accurate on small/medium data, but limits modeling of <strong>global long-range relationships</strong>—a convolution needs many layers before the top-left corner can "see" the bottom-right. Transformer self-attention is global by birth: any two tokens connect in one step. Dosovitskiy et al. 2020 made the bet: can we <strong>drop the convolutional prior and let pure attention + massive data</strong> learn visual regularities itself?</p>
+    <p style="margin-top:8px">The flow: cut image into patches → linearly project each into a vector (patch embedding) → add <strong>positional encoding</strong> (Day 13, else the model has no sense of spatial order) → prepend a <strong>[CLS] token</strong> to aggregate global info → feed a standard Transformer encoder → classify from the [CLS] output. The conclusion is key and honest: <strong>data scale is the dividing line</strong>. On "mid-sized" ImageNet, ViT loses to a comparable CNN (without the inductive-bias prior, it has to relearn "locality" from data); but with pretraining data in the hundreds of millions, ViT <strong>overtakes</strong>—fewer priors become an advantage, because it isn't shackled by human assumptions. This is the vision version of Day 14's scaling laws.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Turning an image into a token sequence</span><br><br>
+<span class="box">🖼 image</span> <span class="arrow">→</span> cut 16×16 patches <span class="arrow">→</span><br>
+<span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span><span class="box p">▣</span> ... <span style="color:#5a6378">(N patches)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span> linear projection + positional encoding<br>
+<span class="box g">[CLS]</span><span class="box">t₁</span><span class="box">t₂</span><span class="box">t₃</span>...<span class="box">t_N</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓</span> Transformer Encoder (self-attention)<br>
+<span class="box g">[CLS] output</span> <span class="arrow">→</span> <span class="box o">classifier</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ almost the same stack as text Transformers—tokens just come from patches</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> ViTImageProcessor, ViTForImageClassification
+<span class="kw">from</span> PIL <span class="kw">import</span> Image
+
+<span class="cmt"># Load ViT pretrained on ImageNet (base, patch16)</span>
+proc  = ViTImageProcessor.<span class="fn">from_pretrained</span>(<span class="str">"google/vit-base-patch16-224"</span>)
+model = ViTForImageClassification.<span class="fn">from_pretrained</span>(<span class="str">"google/vit-base-patch16-224"</span>)
+
+img = Image.<span class="fn">open</span>(<span class="str">"cat.jpg"</span>)
+inputs = <span class="fn">proc</span>(images=img, return_tensors=<span class="str">"pt"</span>)  <span class="cmt"># auto patch + normalize</span>
+logits = <span class="fn">model</span>(**inputs).logits
+pred = logits.<span class="fn">argmax</span>(-1).<span class="fn">item</span>()
+<span class="fn">print</span>(model.config.id2label[pred])          <span class="cmt"># predicted class, e.g. 'Egyptian cat'</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <p><span class="tip">⚠️ <strong>Misconception</strong>: that "ViT fully replaced CNNs." Reality is <strong>each has its turf</strong>: with limited data/compute or when speed matters, CNNs (and modern variants) remain the default; for huge-scale pretraining and text/multimodal integration, ViT wins. Treating it as a mandatory upgrade backfires on small data.</span></p>
+    <p style="margin-top:10px">🎯 <strong>Your scenario</strong>: ViT's real significance is <strong>architectural unification</strong>—images, text, audio can all be cut into tokens and fed into one Transformer. Understand it and you understand why today's multimodal models (GPT/Gemini seeing images) can "run all modalities on one engine."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 ViT proved: <strong>given enough data, a general architecture beats a specialized prior</strong>. The step "an image is a token sequence" merged vision into the Transformer's unified empire.<br>🤔 "Fewer priors + more data &gt; more priors + less data"—does this trade-off belong only to deep learning? What does it suggest for cross-disciplinary judgment: gathering evidence vs trusting intuition?</div>
+  </div>
+</div>
+
+<!-- 4. CLIP -->
+<div class="card">
+  <h2>Contrastive Language-Image Pretraining<span class="en">CLIP</span></h2>
+  <div class="tags"><span class="tag">multimodal</span><span class="tag purple">contrastive</span><span class="tag orange">zero-shot</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>CLIP packs images and text into <strong>one shared vector space via two-tower retrieval</strong>—the multimodal version of the embedding semantic search you know from Day 4. One image encoder, one text encoder, trained so that paired image-text vectors pull together and mismatched ones push apart. After training, "a photo of a cat" and the cat image nearly coincide in space.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Traditional vision models have a hard limit: <strong>they only know classes fixed at training time</strong>. A model trained on 1000-class ImageNet will forever only output those 1000 labels—to add "latte art" you'd re-label data and retrain. CLIP wants <strong>zero-shot</strong> (recognizing arbitrary new concepts without any dedicated training).</p>
+    <p style="margin-top:8px">Radford et al. 2021's approach: crawl <strong>400 million (image, text) pairs</strong> from the internet and train with <strong>contrastive learning</strong>. Each batch takes N images and N texts; after encoding, compute an N×N similarity matrix—<strong>the diagonal is the true pairs (positives, pull up), the other N²−N entries are mismatches (negatives, push down)</strong>. That's the essence of contrastive learning: don't predict absolute labels, just learn "who should be close to whom." At inference, a clever move: wrap candidate class names into a template ("a photo of a {label}"), encode them, compare similarity to the image vector, highest wins—<strong>classification becomes image-text retrieval</strong>, classes added at will, no retraining. CLIP thus became the visual bedrock of Stable Diffusion and multimodal LLMs.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">Contrastive learning: N×N similarity matrix, diagonal = positives</span><br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T₁&nbsp;&nbsp;T₂&nbsp;&nbsp;T₃&nbsp;&nbsp;<span style="color:#5a6378">(text)</span><br>
+I₁ &nbsp;<span class="box g">✓</span><span class="box r">✗</span><span class="box r">✗</span><br>
+I₂ &nbsp;<span class="box r">✗</span><span class="box g">✓</span><span class="box r">✗</span><br>
+I₃ &nbsp;<span class="box r">✗</span><span class="box r">✗</span><span class="box g">✓</span><br>
+<span style="color:#5a6378">(image)</span> &nbsp; <span style="color:#7ed6a0">✓ pull up</span> &nbsp; <span style="color:#ff8e8e">✗ push down</span><br>
+<span style="color:#5a6378;font-size:0.78rem">↑ inference: class name→text, take highest similarity = zero-shot classification</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> transformers <span class="kw">import</span> CLIPProcessor, CLIPModel
+<span class="kw">from</span> PIL <span class="kw">import</span> Image
+
+model = CLIPModel.<span class="fn">from_pretrained</span>(<span class="str">"openai/clip-vit-base-patch32"</span>)
+proc  = CLIPProcessor.<span class="fn">from_pretrained</span>(<span class="str">"openai/clip-vit-base-patch32"</span>)
+
+img = Image.<span class="fn">open</span>(<span class="str">"photo.jpg"</span>)
+<span class="cmt"># Candidate classes—write anything, model need not have trained on them</span>
+labels = [<span class="str">"a photo of a cat"</span>, <span class="str">"a photo of a dog"</span>, <span class="str">"a coffee latte"</span>]
+
+inputs = <span class="fn">proc</span>(text=labels, images=img, return_tensors=<span class="str">"pt"</span>, padding=<span class="kw">True</span>)
+out = <span class="fn">model</span>(**inputs)
+probs = out.logits_per_image.<span class="fn">softmax</span>(dim=1)  <span class="cmt"># image-text similarity → probs</span>
+<span class="fn">print</span>(labels[probs.<span class="fn">argmax</span>().<span class="fn">item</span>()])      <span class="cmt"># zero-shot prediction</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <p><span class="tip">⚠️ <strong>Misconception</strong>: that CLIP "understands" image content. It learns <strong>image-text statistical association</strong>, not true visual reasoning—it stumbles on out-of-distribution concepts, counting, or spatial reasoning. Strong at "matching," weak at "reasoning."</span></p>
+    <p style="margin-top:10px">🎯 <strong>Your scenario</strong>: CLIP lets you build a <strong>zero-training personal image semantic search</strong>—encode your whole family album into a vector store, then retrieve "photos of the kids at the beach" in natural language. It's Day 4 vector retrieval extended to images: runs locally, privacy intact.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 CLIP's lever is <strong>using natural language as the supervision signal</strong>: no more hand-labeling fixed classes—let massive "image + caption" pairs teach the model. The essence of zero-shot is quietly swapping classification for retrieval.<br>🤔 "Replace finely-labeled small data with weaker but massive supervision (web image-text)"—does this idea also hold for building your own knowledge and judgment?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en"></span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1512.03385" target="_blank">He et al. 2015 — Deep Residual Learning (ResNet)</a> — the residual-connection foundation, ImageNet 2015 winner, essential</li>
+      <li><a href="https://arxiv.org/abs/2010.11929" target="_blank">Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)</a> — the work that brought Transformers into vision</li>
+      <li><a href="https://arxiv.org/abs/2103.00020" target="_blank">Radford et al. 2021 — Learning Transferable Visual Models (CLIP)</a> — the cornerstone of multimodal zero-shot</li>
+      <li><a href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks" target="_blank">Krizhevsky et al. 2012 — AlexNet</a> — the NeurIPS paper that ignited the deep-learning vision revolution</li>
+      <li><a href="https://cs231n.github.io/" target="_blank">Stanford CS231n</a> — the classic course notes on convolutional networks and vision, CNNs from scratch</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en"></span></h2>
+  <div class="section">
+    <details><summary>1. Convolution's inductive bias (locality, translation invariance) makes it efficient on small data; ViT throws away these priors and overtakes it with massive data. What general law about "priors vs data" does this trade-off reveal?</summary><div>The essence: <strong>inductive bias is a double-edged sword</strong>. A prior is a "free assumption"—when data is scarce it fills in missing information and saves samples (a CNN never learns from scratch that "nearby pixels are correlated," because the architecture already assumes it). But a prior is also a <strong>ceiling</strong>: when it diverges from the real regularity, no amount of data can break past that wrong assumption. CNNs assume "local patterns are what matter," true for most natural images, but global long-range relations (the symmetry of a face, distant objects echoing each other) take many layers to reach. ViT has almost no spatial prior, so on small data it "wastes" samples rediscovering locality and loses to CNNs; yet once data reaches hundreds of millions, unbound by wrong priors, it learns regularities a CNN architecture can't express, and overtakes. General law: <strong>when data is scarce, strong priors win; when data is abundant, weak priors + big models win</strong>. This is the same story as Day 14 scaling laws, and even the shift of weight from "prior vs likelihood" in Bayesian inference—the more evidence, the more the prior should yield. For BigCat's cross-disciplinary judgment: relying on experiential intuition (strong prior) when information is thin is rational, but when you can gather abundant evidence, dare to let data overturn intuition.</div></details>
+    <details><summary>2. ResNet's skip connection later became standard in every Transformer block. Why does "residual," a trick seemingly designed only for deep vision nets, generalize across architectures?</summary><div>Because it solves not a vision-specific problem but a <strong>common ailment of all deeply stacked structures</strong>: as layers pile up, both the signal (forward) and gradient (backward) decay/distort over the long chain, and optimizers struggle to make deep layers approximate identity. The skip connection gives two architecture-agnostic benefits: (1) <strong>identity fallback</strong>—<code>x + f(x)</code> makes the worst case of "one more layer" degrade to "did nothing," so adding depth never hurts, giving confidence to stack arbitrary depth; (2) <strong>gradient highway</strong>—in backprop the gradient reaches shallow layers directly via +x, bypassing layer-by-layer multiplicative decay. Transformers run dozens to hundreds of layers; without residuals they simply won't train, so every attention sub-layer and FFN sub-layer is followed by <code>x + sublayer(x)</code>. Deeper still, this is a <strong>meta-principle of architecture design</strong>: make "doing nothing" the default, easy-to-reach state, and concentrate learning pressure on "what to change relative to now" (residual) rather than "constructing everything from zero" (absolute). This idea is everywhere in engineering—incremental updates, delta encoding, git diff all "store the residual, not the full state."</div></details>
+    <details><summary>3. CLIP uses "image-text pairs"—cheap but massive weak supervision—to replace expensive hand labeling. What does this paradigm shift mean for "what counts as a high-quality training signal"?</summary><div>It overturns the old intuition that "<strong>the more precise the supervision, the better</strong>." Traditional ImageNet has humans label each image into one of 1000 classes—precise but expensive, and capped at those 1000 classes. CLIP uses the internet's ready-made image-text pairs—captions are noisy, irregular, often wrong—but <strong>the scale crushes (400M pairs) and the semantic space is open natural language</strong>. Key insight: <strong>a signal's "information content" = quality × scale × breadth of coverage</strong>; when scale and breadth are large enough, per-signal noise averages out, while the concept coverage open language brings is something no fixed label scheme can give. That's why CLIP can do zero-shot—its "classes" are not discrete labels but a continuous language space, naturally generalizing to unseen concepts. The cost: <strong>it inherits web data's biases and shallowness</strong>, learning statistical co-occurrence rather than deep understanding, so it can't count and is weak at spatial reasoning. The transfer for BigCat: when building personal knowledge, "extensive skimming + forming associations" (weak supervision, broad coverage) and "selective deep reading + mastery" (strong supervision, narrow depth) are two complementary signals; what a super-individual needs may not be either/or, but like CLIP+downstream fine-tuning—first lay a broad foundation with massive weak signal, then dig deep wells with a little precise signal at key points.</div></details>
+    <details><summary>4. From CNN (local convolution) to ViT (global attention), vision architecture walked a path "from specialized to general." Is this path comparable to the software evolution you know "from specialized optimization to general platform"?</summary><div>Highly comparable, but with one key difference worth thinking through. The similar side: early designs are specialized for performance/resource constraints (CNN's local connectivity = "hard-coded optimization" for image structure, just as early systems wrote specialized C modules for single-machine speed), later abundant compute/data shifts toward general abstraction (ViT/Transformer = a general compute substrate, just as the shift to general platforms, microservices, cloud-native), trading for <strong>composability and cross-domain reuse</strong>—one Transformer engine eats image/text/audio, just as one general infrastructure runs all business. The different side: in software, "generalization" usually <strong>trades performance for development efficiency</strong> (general solutions are typically slower and more resource-hungry), whereas in deep learning the general architecture under big data <strong>even overtakes specialized solutions on performance (accuracy)</strong>—rare in traditional engineering. The reason: software's specialized optimization is deterministic logic written by humans, and generalization just reorganizes it; but CNN's "specialization" hard-codes human priors into the architecture, while ViT's "generality" lets the model learn regularities from data better than human assumptions—generalization here buys both flexibility and a higher ceiling. This suggests a counterintuitive judgment: in <strong>domains where the data/compute bottleneck has been broken</strong>, "general + scale" may be not just a convenient compromise but genuinely the better solution. For your architecture decisions, ask: is this domain's bottleneck "human design wisdom" or "data and compute"? The answer decides whether to bet specialized or general.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 18 · 2026-06-04</footer>
+
+</div>
+</body>
+</html>
