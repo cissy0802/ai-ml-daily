@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: RNNs &amp; Sequences — Day 19</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: RNNs &amp; Sequences</h1>
+  <div class="meta">Day 19 · 2026-06-05 · Difficulty ★★★☆☆</div>
+  <div class="audience">For: engineers with coding experience, but not from an AI background</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff">
+  <div class="section">
+    <p style="color:#cfd3df">The Transformer didn't appear out of nowhere. Before it, the workhorse for processing "sequences" (a sentence, a clip of speech, a stream of timestamps) was the <b>RNN (Recurrent Neural Network)</b>. Today we walk the 2014–2015 evolutionary line: <b>LSTM → GRU → Seq2Seq → the origin of Attention</b>. Trace it and you'll see the Transformer's attention isn't magic — it's a precise answer to one specific RNN bottleneck. And that bottleneck can be stated in one phrase you already know: <b>lossy compression</b>.</p>
+  </div>
+</div>
+
+<!-- 1. LSTM -->
+<div class="card">
+  <h2>Long Short-Term Memory<span class="en">LSTM</span></h2>
+  <div class="tags"><span class="tag">gating</span><span class="tag purple">long dependency</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A plain RNN is like a <b>running aggregate with a single variable</b>: every new word gets mashed into the same state, repeatedly overwriting older information. LSTM adds a separate <b>"conveyor belt" (cell state)</b> alongside it — much like a database <b>WAL (write-ahead log)</b>: information travels forward <b>untouched by default</b>, and is only read, written, or erased when a "gate" explicitly approves. That belt lets distant information travel far with <b>almost no decay</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>First, the RNN's root disease: the <b>vanishing gradient</b>. Each RNN step multiplies information by a weight matrix; during training, backpropagating the error has to <b>multiply these matrices dozens or hundreds of times</b>. Multiply numbers below 1 and you get exponential decay toward zero — distant gradients <b>vanish</b> (above 1 and they explode). The result: RNNs fail to learn long dependencies like "<b>The clouds are in the ___</b>" where the cue is many words back — like a signal that decays after too many hops.</p>
+    <p style="margin-top:8px">LSTM (Hochreiter &amp; Schmidhuber, 1997) solves this by <b>separating "memory" from "computation."</b> Updates on the cell-state belt use <b>addition</b> rather than repeated multiplication — and on an additive path, gradients don't decay exponentially. That's the mathematical core of LSTM's long memory. Three gates control the belt:</p>
+    <ul>
+      <li><b>Forget gate f</b>: decides <b>which old information on the belt to erase</b> (e.g. a new subject appears, so the old subject's gender info is dropped);</li>
+      <li><b>Input gate i</b>: decides <b>which new information gets written</b> to the belt;</li>
+      <li><b>Output gate o</b>: decides <b>which part of the belt to read out</b> as this step's output.</li>
+    </ul>
+    <p style="margin-top:10px">Each gate is <code>σ(W·[h, x] + b)</code> — the sigmoid squashes the result to <b>0~1</b>, intuitively "<b>how far the switch is open</b>": 0 = fully closed, 1 = fully open. The gates aren't hand-written rules; they are <b>learned</b>.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">cell-state belt (info goes straight by default; gates read/write on demand)</b><br><br>
+<span style="color:#8b92a8">C_{t-1}</span> <span class="arrow">──×forget──＋input──→</span> <span style="color:#7ed6a0">C_t</span> <span style="color:#5a6378">(additive update, gradient doesn't decay)</span><br>
+　　　　　　　　<span class="arrow">↓ output gate</span><br>
+　　　　　　　　<span class="box g">h_t this step's output</span><br><br>
+<span style="color:#5a6378">vs RNN: only one h, multiplied by a weight matrix every step → distant gradients vanish</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+
+<span class="cmt"># PyTorch's built-in LSTM — all the gate logic is packaged</span>
+lstm = nn.<span class="fn">LSTM</span>(input_size=<span class="str">16</span>, hidden_size=<span class="str">32</span>, batch_first=<span class="kw">True</span>)
+
+x = torch.<span class="fn">randn</span>(<span class="str">4</span>, <span class="str">10</span>, <span class="str">16</span>)   <span class="cmt"># (batch=4, seq_len=10, 16 features per step)</span>
+out, (h_n, c_n) = <span class="fn">lstm</span>(x)     <span class="cmt"># c_n is the "conveyor belt" cell state</span>
+
+<span class="fn">print</span>(out.shape)    <span class="cmt"># (4, 10, 32) an output at every time step</span>
+<span class="fn">print</span>(h_n.shape)    <span class="cmt"># (1, 4, 32) last hidden state — often used as the whole-sequence "summary"</span>
+<span class="fn">print</span>(c_n.shape)    <span class="cmt"># (1, 4, 32) last cell state</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "LSTM can remember <b>infinitely far</b>." Wrong. The additive path <b>mitigates</b> vanishing gradients but doesn't <b>eliminate</b> them — in practice, effective LSTM memory is typically tens to a couple hundred steps, no more. For truly long context you need attention (read on). This is why Transformers replaced LSTMs after 2017.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: understanding the "gating" abstraction itself is worth more than memorizing the formula. When you design a <b>stateful Agent workflow</b>, "what to forget, what to write to long-term memory, what to output" is the engineering version of forget/input/output gates — LSTM gives you a native vocabulary for thinking about memory management.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 LSTM's core innovation isn't "more complex" — it's <b>opening an additive highway for information</b>, bypassing the vanishing gradient caused by repeated multiplication.<br>🤔 Where in systems you know is "default pass-through + explicit gating" used to fight information decay? (Hint: cache penetration, message-queue acks)</div>
+  </div>
+</div>
+
+<!-- 2. GRU -->
+<div class="card">
+  <h2>Gated Recurrent Unit<span class="en">GRU</span></h2>
+  <div class="tags"><span class="tag">gating</span><span class="tag orange">lightweight</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>GRU is a <b>slimmed-down LSTM</b>. If LSTM is "<b>three-replica strong consistency</b>" storage, GRU is "<b>two-replica</b>" — it drops the separate cell state, merges "memory" and "output" into one hidden state, and cuts the gates from 3 to 2. The payoff: <b>fewer parameters, faster training</b>, with performance on most tasks roughly <b>tied</b> with LSTM. A textbook engineering trade-off: spend a little theoretical expressiveness to buy real speed.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>LSTM's three gates plus a separate cell state mean many parameters and heavy compute. GRU (Cho et al., 2014) asked: can we do it cheaper? Its design:</p>
+    <ul>
+      <li><b>Update gate z</b>: one knob controlling both "how much old state to keep" and "how much new state to write" — <b>merging LSTM's forget and input gates</b> (keep = 1 − write);</li>
+      <li><b>Reset gate r</b>: decides whether to <b>ignore the old state</b> when computing the new candidate (r→0 means "forget the past, look only at the current input");</li>
+      <li><b>No separate cell state</b>: a single hidden state h serves as both memory and output.</li>
+    </ul>
+    <p style="margin-top:10px">The key intuition lives in the update gate's <b>interpolation</b> structure: <code>h_t = (1−z)·h_{t-1} + z·h̃_t</code>. Read it as "<b>new state = (1−z) parts old + z parts new</b>." When z→0, h passes through almost untouched — the <b>same trick</b> as LSTM's belt for fighting vanishing gradients: leave a near-<b>identity</b> pass-through channel.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+
+gru  = nn.<span class="fn">GRU</span>(<span class="str">16</span>, <span class="str">32</span>, batch_first=<span class="kw">True</span>)
+lstm = nn.<span class="fn">LSTM</span>(<span class="str">16</span>, <span class="str">32</span>, batch_first=<span class="kw">True</span>)
+
+<span class="cmt"># Compare parameter counts directly: GRU uses 3 gate weight groups, LSTM 4</span>
+n_gru  = <span class="fn">sum</span>(p.<span class="fn">numel</span>() <span class="kw">for</span> p <span class="kw">in</span> gru.<span class="fn">parameters</span>())
+n_lstm = <span class="fn">sum</span>(p.<span class="fn">numel</span>() <span class="kw">for</span> p <span class="kw">in</span> lstm.<span class="fn">parameters</span>())
+<span class="fn">print</span>(n_gru, n_lstm)   <span class="cmt"># 4800 vs 6400 — GRU ~1/4 fewer params</span>
+
+out, h_n = <span class="fn">gru</span>(torch.<span class="fn">randn</span>(<span class="str">4</span>, <span class="str">10</span>, <span class="str">16</span>))  <span class="cmt"># note: GRU returns only h, no c</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "GRU is newer than LSTM, so it's better." Wrong. There's no universal winner — with little data or a need for speed GRU often wins; on very long dependencies or big data LSTM is sometimes more stable. <b>Run the comparison, don't pick by reputation</b>. This is the norm in classic ML: architecture choice is data-driven.</div>
+    <div class="exercise" style="margin-top:8px">📌 Decision-support scenario: GRU vs LSTM is a small instance of "<b>is the simplification worth it?</b>" When you pick a tech stack you ask the same thing: does cutting a component save more than the capability it costs? GRU's answer — "<b>worth it in most cases</b>" — is itself a useful prior.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 GRU = interpolating LSTM's "keep vs write" with a single update gate, losing one belt and one gate to trade tiny expressiveness for speed.<br>🤔 What's the deep connection between "(1−z)·old + z·new" and the <b>exponential moving average (EMA) / weighted sliding window</b> you've seen?</div>
+  </div>
+</div>
+
+<!-- 3. Seq2Seq -->
+<div class="card">
+  <h2>Sequence to Sequence<span class="en">Seq2Seq · Encoder-Decoder</span></h2>
+  <div class="tags"><span class="tag">architecture</span><span class="tag purple">encode-decode</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Seq2Seq splits "input sequence → output sequence" into two halves: an <b>encoder</b> reads the whole sentence and compresses it into <b>one fixed-length vector</b>; a <b>decoder</b> takes that vector and generates the output word by word. Like an <b>RPC call</b>: the client (encoder) <b>serializes the whole request into one fixed-length payload</b>, sends it to the server (decoder) which deserializes the result. The problem is immediate — <b>cramming an arbitrarily long sentence into a fixed-size vector is necessarily lossy</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Pain point: translation, summarization, dialogue — tasks where <b>input and output lengths are both variable and unaligned</b> (5 Chinese words may become 8 English words). A plain classification network can't do "variable in, variable out." Seq2Seq (Sutskever, Vinyals &amp; Le, 2014) solves it elegantly:</p>
+    <ul>
+      <li>The <b>encoder</b> (an LSTM) reads the input in order; its final hidden state <b>= the whole sentence's "summary vector"</b> (context vector, aka thought vector);</li>
+      <li>The <b>decoder</b> (another LSTM) starts from that vector and autoregressively emits one word at a time until an end token.</li>
+    </ul>
+    <p style="margin-top:10px">This is the first time "<b>understanding</b>" and "<b>generation</b>" were cleanly split into two modules — every encoder-decoder architecture today (including the original Transformer) inherits this skeleton. The paper also had a counterintuitive trick: <b>feeding the input sentence in reverse</b> boosts scores, because it brings the source's start and the translation's start closer in time, easing long-distance decay.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Seq2Seq: the whole sentence is squeezed into one fixed-length vector (the bottleneck)</b><br><br>
+I love cats <span class="arrow">→</span> <span class="box">Encoder LSTM</span> <span class="arrow">→</span> <span class="box r">[one fixed-length vector]</span> <span class="arrow">→</span> <span class="box p">Decoder LSTM</span> <span class="arrow">→</span> J'aime les chats<br><br>
+<span style="color:#5a6378">↑ No matter how long the sentence, all info must squeeze into this red box → longer sentence, more loss</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+
+<span class="kw">class</span> <span class="fn">Seq2Seq</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, vocab, dim=<span class="str">64</span>):
+        <span class="fn">super</span>().<span class="fn">__init__</span>()
+        self.emb = nn.<span class="fn">Embedding</span>(vocab, dim)
+        self.encoder = nn.<span class="fn">LSTM</span>(dim, dim, batch_first=<span class="kw">True</span>)
+        self.decoder = nn.<span class="fn">LSTM</span>(dim, dim, batch_first=<span class="kw">True</span>)
+        self.out = nn.<span class="fn">Linear</span>(dim, vocab)
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, src, tgt):
+        _, state = self.encoder(self.emb(src))   <span class="cmt"># encode: keep only final state as the "summary"</span>
+        dec, _ = self.decoder(self.emb(tgt), state)  <span class="cmt"># init decoder with the summary</span>
+        <span class="kw">return</span> self.out(dec)                      <span class="cmt"># predict the next word at each step</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "just make the vector dimension bigger and no info is lost." That treats the symptom, not the cause. The bottleneck isn't dimension size — it's the structural assumption of "<b>representing arbitrarily long input with one fixed vector</b>": a 50-word sentence and a 5-word sentence are forced into the same-sized space. The real cure is structural: let the decoder stop relying on a summary and instead <b>look back at every spot in the source</b> — that's attention.</div>
+    <div class="exercise" style="margin-top:8px">📌 Cross-disciplinary thought: this "fixed-summary bottleneck" resembles human memory uncannily — after reading a book your brain keeps only a fuzzy "summary," and details require flipping back. Attention is to Seq2Seq as <b>"keep the book handy and look things up" is to "rely on recollection alone."</b></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Seq2Seq established the encoder-decoder skeleton, but squeezing the whole sentence into one fixed vector is a <b>structural, lossy bottleneck</b>.<br>🤔 Without changing the RNN, only the information flow, how would you let the decoder "remember" the input's details instead of just getting a summary? (That's exactly the next card's answer.)</div>
+  </div>
+</div>
+
+<!-- 4. Origin of Attention -->
+<div class="card">
+  <h2>The Origin of Attention<span class="en">Attention · Bahdanau 2014</span></h2>
+  <div class="tags"><span class="tag">alignment</span><span class="tag purple">milestone</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Attention turns Seq2Seq's "<b>send only one summary</b>" into "<b>keep all the original records + an on-demand retrieval index</b>." Every word the decoder generates, it runs a <b>weighted retrieval</b> over all the encoder's hidden states — like a database <b>JOIN, but with relevance scoring instead of exact matching</b>, and like RAG dynamically recalling the most relevant snippets at each step. It eliminates the fixed bottleneck entirely, and it's the <b>direct ancestor</b> of the later Transformer's "Attention is All You Need."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>The pain is the previous card's bottleneck: the decoder gets only a fixed summary, so a long sentence's details are lost. Bahdanau, Cho &amp; Bengio (2014) solve it with <b>soft alignment</b> — when the decoder generates word i, it <b>no longer uses just that one vector</b>, but computes a context vector <b>specific to this step</b>:</p>
+    <div style="background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:14px 16px;margin-top:10px;font-family:'SF Mono',Menlo,monospace;color:#cfe9f5">
+      c<sub>i</sub> = Σ<sub>j</sub> α<sub>ij</sub> · h<sub>j</sub><br>
+      <span style="color:#8b92a8">α<sub>ij</sub> = softmax( score(s<sub>i-1</sub>, h<sub>j</sub>) )</span>
+    </div>
+    <p style="margin-top:10px">Symbol by symbol (the one formula worth chewing on today):</p>
+    <ul>
+      <li><b>h<sub>j</sub></b>: the encoder's hidden state for source word j — the <b>"original record" we keep</b> instead of discarding;</li>
+      <li><b>score(·)</b>: a scoring function measuring how relevant "the decoder's current state s<sub>i-1</sub>" is to "source word h<sub>j</sub>" — i.e. <b>whether to attend to this source word</b>;</li>
+      <li><b>α<sub>ij</sub></b>: pass all scores through softmax to normalize into <b>weights that sum to 1</b>, read as "how much attention to give source word j at this step";</li>
+      <li><b>c<sub>i</sub></b>: a weighted sum of all h<sub>j</sub> with those weights — <b>context tailored to this particular step</b>.</li>
+    </ul>
+    <p style="margin-top:10px">Core intuition: <b>when translating each word, the model learns on its own which source words to look back at</b>. Translating "cats," weight concentrates on "猫"; translating "love," on "爱." This score→softmax→weighted-sum trio is the <b>prototype</b> of today's Transformer self-attention — the only difference is the Transformer generalized it from between-encoder-and-decoder to the sequence attending to itself.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Attention: the decoder looks back at all source words each step, weighted by relevance</b><br><br>
+<span style="color:#8b92a8">source hidden states:</span><span class="box">h(I)</span> <span class="box">h(love)</span> <span class="box">h(cats)</span><br>
+<span style="color:#5a6378">　　　　　　　　↘ 0.1　　↘ 0.1　　↘ 0.8</span><br>
+decode "chats" <span class="arrow">→</span> weighted sum <span class="arrow">→</span> <span class="box g">c (heavily attends "cats")</span><br><br>
+<span style="color:#5a6378">weights α are learned and change dynamically each step → no fixed bottleneck</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+
+<span class="cmt"># The 3 core steps of additive (Bahdanau) attention, stripped of packaging</span>
+<span class="kw">def</span> <span class="fn">attention</span>(s_prev, enc_h):       <span class="cmt"># s_prev:(B,d) decoder prev step; enc_h:(B,T,d) all source words</span>
+    score = (enc_h * s_prev.<span class="fn">unsqueeze</span>(<span class="str">1</span>)).<span class="fn">sum</span>(-<span class="str">1</span>)  <span class="cmt"># (1) score (B,T)</span>
+    alpha = F.<span class="fn">softmax</span>(score, dim=-<span class="str">1</span>)              <span class="cmt"># (2) normalize to weights summing to 1</span>
+    ctx   = (alpha.<span class="fn">unsqueeze</span>(-<span class="str">1</span>) * enc_h).<span class="fn">sum</span>(<span class="str">1</span>)   <span class="cmt"># (3) weighted sum (B,d)</span>
+    <span class="kw">return</span> ctx, alpha             <span class="cmt"># alpha also visualizes "which word the model is looking at"</span>
+
+ctx, a = <span class="fn">attention</span>(torch.<span class="fn">randn</span>(<span class="str">2</span>,<span class="str">8</span>), torch.<span class="fn">randn</span>(<span class="str">2</span>,<span class="str">5</span>,<span class="str">8</span>))
+<span class="fn">print</span>(ctx.shape, a.shape)   <span class="cmt"># (2,8) (2,5) — one custom context per step + one row of attention</span>
+</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Pitfall + where you'd use it</div>
+    <div class="tip">Pitfall: "attention was invented by the Transformer." Not so. Bahdanau attention existed in 2014, 3 years earlier, where it was still <b>grafted onto an RNN</b> as an add-on. The Transformer's (2017) truly radical move was to <b>throw out the RNN entirely and keep only attention</b> — the title "Attention is All You Need" is aimed squarely at "no more recurrence." Grasp this history and you'll see attention isn't just another trick — it <b>untied the 20-year-old knot of long dependencies in sequence modeling</b>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Super-individual scenario: the attention weights α are <b>interpretable</b> — you can literally plot "where in the source the model is looking while translating this word." This "make the model tell you what it's attending to" idea is exactly what you should demand in AI collaboration: not just the answer, but <b>where its attention landed</b>, so you can judge whether the reasoning is trustworthy.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Attention = score → softmax → weighted sum, letting the decoder dynamically look back at all source info, killing the fixed bottleneck and directly birthing the Transformer.<br>🤔 If attention is so powerful, why did it take 3 years (2014→2017) before anyone dared delete the RNN entirely? Where might the resistance lie? (Hint: parallelization, inductive bias, compute)</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en"></span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank">colah — Understanding LSTM Networks (2015)</a> — the clearest illustrated post on LSTM gating; a must-read</li>
+      <li><a href="https://arxiv.org/abs/1406.1078" target="_blank">Cho et al. 2014 — RNN Encoder-Decoder (origin of GRU)</a> — foundational paper for GRU and the encoder-decoder idea</li>
+      <li><a href="https://arxiv.org/abs/1409.3215" target="_blank">Sutskever et al. 2014 — Sequence to Sequence Learning</a> — the formal establishment of Seq2Seq, including the "reverse input" trick</li>
+      <li><a href="https://arxiv.org/abs/1409.0473" target="_blank">Bahdanau et al. 2014 — NMT by Jointly Learning to Align and Translate</a> — the origin of attention; the prerequisite for understanding Transformers</li>
+      <li><a href="https://karpathy.github.io/2015/05/21/rnn-effectiveness/" target="_blank">Karpathy — The Unreasonable Effectiveness of RNNs (2015)</a> — the classic post that made RNNs famous; full of intuition</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en"></span></h2>
+  <div class="section">
+    <details><summary>1. Are LSTM's "additive belt" and ResNet's "residual connection" (Day 18) the same idea?</summary><div>Essentially <b>yes, the same move</b>: both leave a near-<b>identity</b> pass-through path inside the network so gradients can flow through many layers/steps without decay. LSTM's cell state updates as C_t = f·C_{t-1} + i·C̃; when the forget gate f≈1 it's "C_t ≈ C_{t-1} + increment." ResNet's y = x + F(x) is "output = input + residual." Both give backprop a direct "+1" path, bypassing the exponential decay of repeated multiplication — the only difference is LSTM goes along the <b>time</b> axis (same layer, different time steps), ResNet along the <b>depth</b> axis (same moment, different layers). GRU's (1−z)·h + z·h̃ interpolation is the same. So "<b>leave an identity shortcut to fight vanishing gradients</b>" is a core motif running through deep learning, and LSTM (1997) used it 18 years before ResNet (2015) — good ideas get reinvented again and again in different places.</div></details>
+
+    <details><summary>2. If attention existed in 2014 and was so effective, why did no one dare delete the RNN until 2017?</summary><div>Three sources of resistance. <b>(1) The incentive for parallelization wasn't painful enough yet</b>: RNNs must compute step by step (step t depends on step t−1) and can't parallelize, but in 2014 sequences and models were still small, so the slowness was tolerable. Removing recurrence lets the Transformer compute all positions <b>simultaneously</b>, perfectly saturating GPUs — it was compute growth that turned "parallelizable" from nice-to-have into decisive. <b>(2) Belief in inductive bias</b>: an RNN's "process in order" natively encodes the prior "sequences have order," and people intuitively felt deleting it would lose the sense of time. The Transformer plugged that gap with <b>positional encoding</b> (Day 13), proving the prior can be injected explicitly rather than imposed structurally. <b>(3) It needed a bundle of innovations together</b>: self-attention, multi-head, positional encoding, residual + LayerNorm — none could be missing. Attention alone can't delete the RNN. History is often like this: a key part A exists early, but B, C, D must arrive and external conditions (compute/data) mature before a paradigm leap happens. The 3-year gap from attention to Transformer is the classic "<b>parts assembled but one final push short</b>."</div></details>
+
+    <details><summary>3. RNNs are serial over time, Transformers fully parallel — is this the same as "stream vs batch processing"?</summary><div>There's a deep echo, though not an exact match. An RNN is like <b>stream processing</b>: data arrives one at a time, you maintain a rolling state (hidden state), naturally suited to <b>unbounded / online</b> scenarios with constant memory — but it <b>can't parallelize</b>, and distant info decays. A Transformer is like <b>batch processing</b>: load the whole window at once, all positions interact pairwise, parallelizable and detail-preserving — but at the cost of <b>O(n²)</b> compute/memory and a hard window limit that can't fit an "infinite stream." Interestingly, 2024–2025's <b>SSM / Mamba</b> (Day 34) want <b>both ends</b>: maintain a constant-size state like an RNN, be streamable, linear complexity, yet approach attention's long-range power through clever design. So it's not "who replaces whom" but a long tug-of-war between <b>serial constant state</b> and <b>parallel full connectivity</b> — isomorphic to distributed systems' "stateful stream vs stateless batch" trade-off. Your distributed background transfers directly here: throughput vs latency, memory vs compute, online vs offline.</div></details>
+
+    <details><summary>4. Attention weights claim to be "interpretable," telling you which word the model is looking at — but is that explanation trustworthy?</summary><div>Be <b>cautiously optimistic</b>. Attention weights do offer a <b>tempting</b> explanation: plot the α matrix and you see "cats" highlighting "猫," intuitively "the model is aligning." But the field has a long debate over whether <b>attention is genuinely an explanation</b> (Jain &amp; Wallace 2019 "Attention is not Explanation" vs Wiegreffe &amp; Pinter 2019 "Attention is not not Explanation"). The core doubts: (a) <b>high weight ≠ causal importance</b> — you can construct different attention distributions yet nearly identical output, suggesting it isn't necessarily the model's true basis for decisions; (b) after stacking many heads and layers, a single layer's weights are diluted and can't be naively read as "the model's attention." Pragmatic conclusion: attention weights are a useful <b>debugging clue and hypothesis source</b>, but not an authoritative <b>confession</b> of the model's reasoning. This has a direct lesson for AI collaboration — when a tool "tells you its reasons," is that reason a <b>post-hoc narrative</b> or <b>true causality</b>? The two often differ, demanding cross-verification rather than blind acceptance.</div></details>
+
+    <details><summary>5. Over the decade from RNN to Transformer, did things get "more complex" or "simpler"?</summary><div>On the surface, more complex (parameters from millions to trillions), but the <b>core abstraction actually got simpler and more unified</b>. RNN era: processing sequences required carefully designed gating, managing hidden state's temporal transfer, and wrestling vanishing gradients — the structure was packed with human priors about "how sequences should be processed." The Transformer <b>drastically cuts</b> these: no recurrence, no gating, no temporal assumptions, leaving just "all positions attend to each other + feed-forward + positional encoding," a <b>highly uniform, stackable</b> set of blocks. This is a recurring law in deep learning — the <b>Bitter Lesson</b> (Sutton): in the long run, simple general architectures that <b>cut human priors and cede the space to data and compute</b> beat carefully engineered complex structures. LSTM's gating is a crystallization of human insight, but the Transformer proved: given enough data and compute, a simpler, more parallelizable, fewer-assumption architecture learns better. For super-individuals this is a profound metaphor — <b>real leverage often comes from cutting to the simple and letting general mechanisms emerge, not from piling up special cases</b>. Designing any system (workflow, Agent, decision framework), it's worth asking: is the structure I'm adding a necessary inductive bias, or a human assumption data will eventually wash away?</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 19 · 2026-06-05</footer>
+
+</div>
+
+</body>
+</html>
