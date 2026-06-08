@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：语义搜索 — Day 22</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：语义搜索</h1>
+  <div class="meta">Day 22 · 2026-06-08</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/rag-day11.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    工程对应 → super-individual D11: RAG 实战工程（检索质量、chunk 策略、re-ranking）
+  </a>
+</div>
+
+<!-- 1. BM25 -->
+<div class="card">
+  <h2>BM25 词法检索<span class="en">BM25 / Lexical Retrieval</span></h2>
+  <div class="tags"><span class="tag">稀疏检索</span><span class="tag purple">统计打分</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>BM25 就是 <b>Elasticsearch / Lucene 默认那个全文搜索打分函数</b>——你早就在用。把它想成数据库<b>倒排索引（inverted index）</b>之上的一个相关性公式：给定 query 里的词，给每篇文档算一个"含金量分数"再排序。本质是 <code>SQL LIKE</code> 的统计学升级版——不只看"含不含关键词"，而是看<b>含得有多到位</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>最朴素的相关性打分是<b>数关键词出现次数（词频 TF）</b>。但这有两个坑：(1) 常见词如"的""is"出现极多却没区分度；(2) 长文档天然词多，会不公平地占优。BM25 正是修这两个坑的：</p>
+    <ul>
+      <li><b>IDF（逆文档频率）</b>——一个词在<b>越少</b>文档里出现，它越"稀有"、越有区分度，权重越高。"量子纠缠"比"系统"值钱；</li>
+      <li><b>词频饱和</b>——一个词出现 1 次和 10 次差别大，10 次和 100 次差别小。BM25 让分数随词频<b>趋于饱和</b>，而不是线性暴涨；</li>
+      <li><b>长度归一化</b>——按文档相对长度打折，避免长文档靠"词多"刷分。</li>
+    </ul>
+    <p style="margin-top:8px">核心打分公式（对 query 里每个词 q<sub>i</sub> 求和）：</p>
+<div class="diagram" style="margin-top:10px;font-size:0.8rem">
+score(D,Q) = Σ<sub>i</sub> &nbsp;<span style="color:#7ed6a0">IDF(q<sub>i</sub>)</span> · <span style="color:#ffb450">f(q<sub>i</sub>,D)·(k₁+1)</span> / <span style="color:#a48cff">[ f(q<sub>i</sub>,D) + k₁·(1 − b + b·|D|/avgdl) ]</span>
+</div>
+    <p style="margin-top:10px">把符号翻译成人话：<span style="color:#7ed6a0">IDF(q<sub>i</sub>)</span> = 这个词有多稀有（罕见词权重大）；<span style="color:#ffb450">f(q<sub>i</sub>,D)</span> = 词在文档里出现几次；<b>k₁</b>（典型 1.2–2.0）= 控制词频饱和的速度，越小越快饱和；<b>b</b>（典型 0.75）= 长度惩罚强度，0 表示完全不管文档长度，1 表示全力惩罚；<b>|D|/avgdl</b> = 这篇文档比平均长还是短。整个分母就是"<b>词频 + 长度惩罚</b>"，让分子的词频不会无限膨胀。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> rank_bm25 <span class="kw">import</span> BM25Okapi  <span class="cmt"># pip install rank-bm25</span>
+
+corpus = [
+    <span class="str">"猫科动物的睡眠周期研究"</span>,
+    <span class="str">"如何给 Postgres 配置连接池"</span>,
+    <span class="str">"分布式系统中的缓存一致性"</span>,
+]
+<span class="cmt"># BM25 基于词，中文需先分词（这里简化为按字/空格）</span>
+tokenized = [<span class="fn">list</span>(doc) <span class="kw">for</span> doc <span class="kw">in</span> corpus]
+bm25 = <span class="fn">BM25Okapi</span>(tokenized)  <span class="cmt"># 内部建倒排索引 + 算 IDF</span>
+
+query = <span class="fn">list</span>(<span class="str">"缓存一致性"</span>)
+scores = bm25.<span class="fn">get_scores</span>(query)  <span class="cmt"># 每篇文档一个 BM25 分</span>
+<span class="fn">print</span>(scores)  <span class="cmt"># 第 3 篇分数最高——精确词命中</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"有了向量 embedding，BM25 就过时了"——<b>大错</b>。BM25 在<b>精确匹配</b>上依然是王者：产品型号（iPhone 15 Pro）、人名、错误码、代码标识符、罕见专有名词——这些 embedding 反而容易"语义漂移"成近义词。2024–2025 的主流检索系统几乎都<b>保留 BM25 作为一路</b>，而不是丢弃它。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：搭建个人知识库搜索时，对<b>代码片段、API 名、论文标题</b>这类"字面就是答案"的内容，BM25 往往比纯向量更准、更便宜、零 GPU——别一上来就只上向量库。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 BM25 不是"老土的关键词搜索"，而是一个调过几十年的统计相关性函数——精确匹配场景里它依然打不过。<br>🤔 你的检索需求里，有多少其实是"找一个确切的词/ID"而非"找语义相近的概念"？</div>
+  </div>
+</div>
+
+<!-- 2. Dense Retrieval -->
+<div class="card">
+  <h2>稠密检索<span class="en">Dense Retrieval</span></h2>
+  <div class="tags"><span class="tag">向量检索</span><span class="tag purple">语义</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>把每段文本用神经网络编码成<b>一个固定维度的向量（embedding）</b>，检索就变成"在高维空间找最近邻"。类比 <b>geohash</b>：地理上靠近的点编码后坐标也靠近——稠密检索是把这套思路从"地理近"换成"<b>语义近</b>"。"汽车""轿车""automobile"在空间里挤成一团，哪怕一个字都不重叠。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>BM25 的死穴是<b>词不匹配（vocabulary mismatch）</b>：query 写"如何降低延迟"，文档写"优化响应时间"，字面零重叠 → BM25 检索不到。稠密检索用神经网络把<b>语义</b>编码进向量，绕开字面。机制叫 <b>bi-encoder（双编码器）</b>：</p>
+    <ul>
+      <li>query 和 document <b>各自</b>过一个编码器，得到两个向量；</li>
+      <li>用<b>点积或余弦相似度</b>打分：sim(q,d) = E<sub>q</sub>(q) · E<sub>d</sub>(d)，越大越相关；</li>
+      <li>文档向量可<b>离线预先算好</b>存进向量库，查询时只编码 query——这是它能扩展到亿级文档的关键。</li>
+    </ul>
+    <p style="margin-top:8px">怎么训练这个编码器？<b>对比学习（contrastive learning）</b>：给一对"问题—正确段落"，把它俩的向量<b>拉近</b>；同 batch 里其他段落当负样本<b>推远</b>（in-batch negatives）。<b>Karpukhin 等人的 DPR 论文 (arXiv 2004.04906, 2020)</b> 证明：在开放域问答上，稠密检索的 top-20 召回准确率比 Lucene-BM25 高 <b>9–19 个百分点</b>——语义检索第一次在大规模任务上系统性胜过词法检索。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Bi-encoder：query 与 doc 各自编码，离线索引</b><br><br>
+<span class="box p">query</span><span class="arrow">→</span><span class="box">Encoder_q</span><span class="arrow">→</span> [0.2, -0.7, ...]<br>
+<span class="box g">doc（百万篇）</span><span class="arrow">→</span><span class="box">Encoder_d</span><span class="arrow">→</span> 向量库（<b>离线预算</b>）<br>
+<span style="color:#5a6378">查询时：只算 query 向量 → 在向量库找最近邻 → top-k 段落</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer, util
+<span class="cmt"># Sentence-BERT：把句子编码成可比较的向量</span>
+model = <span class="fn">SentenceTransformer</span>(<span class="str">"all-MiniLM-L6-v2"</span>)
+
+corpus = [<span class="str">"优化数据库响应时间的几种方法"</span>,
+          <span class="str">"猫的睡眠习性"</span>]
+doc_emb = model.<span class="fn">encode</span>(corpus, convert_to_tensor=<span class="kw">True</span>)  <span class="cmt"># 离线预算</span>
+
+q_emb = model.<span class="fn">encode</span>(<span class="str">"如何降低系统延迟"</span>, convert_to_tensor=<span class="kw">True</span>)
+hits = util.<span class="fn">cos_sim</span>(q_emb, doc_emb)[0]  <span class="cmt"># 余弦相似度</span>
+<span class="fn">print</span>(hits)  <span class="cmt"># 第 1 篇分高——字面零重叠但语义命中</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"稠密检索永远比 BM25 强"——<b>错</b>。它有三个软肋：(1) <b>跨领域（out-of-domain）</b>——编码器没见过的领域（医学、法律、你公司黑话）召回会塌；(2) <b>精确匹配</b>——型号、ID 容易被它"理解"成近义词；(3) <b>长尾罕见实体</b>。所以业界很少<b>只</b>用稠密检索——下一张卡讲怎么和 BM25 合体。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：跨学科笔记搜索的杀手锏——你用"佛学的无常"去搜，能命中你三个月前写的"分布式系统里没有永久状态"。这种<b>跨域语义联想</b>正是稠密检索的主场，BM25 完全做不到。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 稠密检索把"找词"变成"找意思"——它的强项（语义泛化）和弱项（精确匹配）恰好和 BM25 互补。<br>🤔 如果编码器没见过你的专业领域，它的"语义"还可信吗？这暗示了什么时候该微调 embedding？</div>
+  </div>
+</div>
+
+<!-- 3. Hybrid Search -->
+<div class="card">
+  <h2>混合检索<span class="en">Hybrid Search</span></h2>
+  <div class="tags"><span class="tag">融合排序</span><span class="tag orange">RRF</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>既然 BM25 强在精确词法、稠密检索强在语义，那就<b>别二选一</b>——两路都召回，再融合排序。这就是<b>集成学习（ensemble）</b>的思路，也像数据库查询优化器综合多个索引、或推荐系统的<b>多路召回 + 融合</b>。一个查 query 走两条路，最后把两份排名合成一份。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>单路检索总有盲区：BM25 漏掉换了说法的，稠密漏掉罕见专名的。混合检索同时跑两路，难点在<b>怎么融合</b>。两种主流做法：</p>
+    <ul>
+      <li><b>① 分数加权</b>：final = α·BM25 + (1−α)·cosine。<b>问题</b>：BM25 分数可以是 0–30 任意范围，余弦相似度是 0–1，<b>量纲完全不同</b>，直接相加等于让 BM25 碾压余弦。要先归一化，但归一化对异常值很脆。</li>
+      <li><b>② RRF（Reciprocal Rank Fusion，倒数排名融合）</b>：<b>只用排名、不用原始分数</b>，从根上回避量纲问题。</li>
+    </ul>
+    <p style="margin-top:8px">RRF 的公式极简——每个文档 d 的融合分数：</p>
+<div class="diagram" style="margin-top:10px;font-size:0.82rem">
+RRF(d) = Σ<sub>检索器 i</sub> &nbsp; 1 / ( <b style="color:#ffb450">k</b> + rank<sub>i</sub>(d) )
+</div>
+    <p style="margin-top:10px">直觉：一个文档在某一路<b>排名越靠前（rank 越小）</b>，<b>1/(k+rank)</b> 越大，贡献越多；在两路都靠前的文档分数叠加，自然冒头。<b>k</b>（通常取 60）是个平滑常数——避免 rank=1 的文档分数过度碾压第 2、3 名，让排名靠后的也还有发言权。<b>Cormack 等人 2009 (SIGIR)</b> 证明：这个朴素到不像话的公式，融合效果竟<b>稳定胜过</b>各单路方法、也胜过更复杂的 Condorcet 融合。</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">混合检索流程</b><br><br>
+<span class="box p">query</span><br>
+<span class="arrow">├→</span> <span class="box o">BM25 召回</span> <span class="arrow">→</span> 排名 A<br>
+<span class="arrow">└→</span> <span class="box g">稠密召回</span> <span class="arrow">→</span> 排名 B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓ RRF 融合（只看排名）</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box">最终 top-k</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">def</span> <span class="fn">rrf</span>(rank_lists, k=60):
+    <span class="cmt"># rank_lists: 每路检索返回的 doc_id 有序列表（按相关性降序）</span>
+    scores = {}
+    <span class="kw">for</span> ranking <span class="kw">in</span> rank_lists:
+        <span class="kw">for</span> rank, doc_id <span class="kw">in</span> <span class="fn">enumerate</span>(ranking):  <span class="cmt"># rank 从 0 起</span>
+            <span class="cmt"># 只用排名，不碰原始分数 → 天然免量纲问题</span>
+            scores[doc_id] = scores.<span class="fn">get</span>(doc_id, 0) + 1 / (k + rank + 1)
+    <span class="kw">return</span> <span class="fn">sorted</span>(scores, key=scores.get, reverse=<span class="kw">True</span>)
+
+bm25_top = [<span class="str">"d3"</span>, <span class="str">"d1"</span>, <span class="str">"d7"</span>]   <span class="cmt"># BM25 这一路的排名</span>
+dense_top = [<span class="str">"d1"</span>, <span class="str">"d3"</span>, <span class="str">"d9"</span>]  <span class="cmt"># 稠密这一路的排名</span>
+<span class="fn">print</span>(<span class="fn">rrf</span>([bm25_top, dense_top]))  <span class="cmt"># d1/d3 两路都靠前 → 冒头</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"直接把 BM25 分和余弦分相加就行"——<b>错</b>。两者量纲差一个数量级，相加等于只用了 BM25。要么严格归一化（脆），要么用 <b>RRF 只比排名</b>（鲁棒，几乎零调参）。生产首选 RRF——它没有需要per-query 调的 α。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：个人知识库的"全都要"配置——搜"PPO 公式"时 BM25 精准命中术语，搜"那个讲探索与利用权衡的笔记"时稠密路捞到语义。RRF 融合让你<b>一个搜索框同时吃下两种意图</b>。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 混合检索是检索界的"集成学习"——RRF 用"只比排名"这一招优雅绕过量纲难题，几乎免调参。<br>🤔 当两路检索给出完全冲突的 top-1 时，RRF 的"民主投票"一定对吗？什么场景下你更该信任其中一路？</div>
+  </div>
+</div>
+
+<!-- 4. HNSW -->
+<div class="card">
+  <h2>HNSW 向量索引<span class="en">Hierarchical Navigable Small World</span></h2>
+  <div class="tags"><span class="tag">近似最近邻</span><span class="tag purple">ANN</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>稠密检索说"找最近邻"——但百万、十亿向量，<b>每次 query 都暴力算所有距离 = 全表扫描 O(n)</b>，没法用。HNSW 给向量空间建了个<b>分层跳表（skip list）</b>：高层稀疏、一步跳很远；低层密集、一步走很近。你对 Redis 的 sorted set 跳表已经熟得不能再熟——HNSW 就是把跳表从一维数轴搬到高维空间的图上，让最近邻搜索从 O(n) 降到约 <b>O(log n)</b>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>精确最近邻在高维下没有捷径，必须近似。这类算法叫 <b>ANN（Approximate Nearest Neighbor，近似最近邻）</b>——<b>牺牲一点召回，换几个数量级的速度</b>。HNSW 是 <b>Malkov & Yashunin (arXiv 1603.09320)</b> 提出的、目前向量库（Faiss、Milvus、pgvector、Qdrant）最主流的索引。它的两个核心思想：</p>
+    <ul>
+      <li><b>Small World（小世界图）</b>——每个节点连到若干近邻，但也保留少量"长边"，让任意两点间<b>跳几步就能到</b>（六度分隔那个直觉）；</li>
+      <li><b>Hierarchical（分层）</b>——最高层节点极少、边极长，像高速公路；越往下层节点越密、边越短，像市区小路。查询<b>从最高层贪心走到局部最近，再下沉一层细化</b>，逐层逼近。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">HNSW 分层导航（类比跳表）</b><br><br>
+L2（稀疏·长跳）&nbsp;&nbsp;<span class="box">●</span><span class="arrow">─────────</span><span class="box">●</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓ 下沉</span><br>
+L1（中等）&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="box g">●</span><span class="arrow">──</span><span class="box g">●</span><span class="arrow">──</span><span class="box g">●</span><span class="arrow">──</span><span class="box g">●</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="arrow">↓ 下沉</span><br>
+L0（全量·短边）<span class="box o">●</span><span class="arrow">─</span><span class="box o">●</span><span class="arrow">─</span><span class="box o">●</span><span class="arrow">─</span><span class="box o">★</span><span class="arrow">─</span><span class="box o">●</span> ★=最近邻<br>
+<span style="color:#5a6378">从顶层粗定位 → 逐层细化 → 在底层锁定最近邻，总跳数 ≈ log n</span>
+</div>
+
+    <p style="margin-top:14px">三个关键参数就是 <b>recall（召回） vs 速度/内存</b>的旋钮：<b>M</b> = 每个节点的边数（大 → 召回高、内存大）；<b>ef_construction</b> = 建图时的候选广度（大 → 图质量高、建得慢）；<b>ef_search</b> = 查询时的候选广度（<b>查询时实时可调</b>，大 → 召回高、慢）。生产里 ef_search 是你最常拧的旋钮。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> hnswlib, numpy <span class="kw">as</span> np  <span class="cmt"># pip install hnswlib</span>
+
+dim, n = 384, 10000
+data = np.random.<span class="fn">rand</span>(n, dim).<span class="fn">astype</span>(<span class="str">"float32"</span>)
+
+index = hnswlib.<span class="fn">Index</span>(space=<span class="str">"cosine"</span>, dim=dim)
+index.<span class="fn">init_index</span>(max_elements=n, ef_construction=200, M=16)  <span class="cmt"># 建图</span>
+index.<span class="fn">add_items</span>(data)
+
+index.<span class="fn">set_ef</span>(50)  <span class="cmt"># ef_search：查询时召回/速度旋钮，可随时调</span>
+q = np.random.<span class="fn">rand</span>(dim).<span class="fn">astype</span>(<span class="str">"float32"</span>)
+labels, dists = index.<span class="fn">knn_query</span>(q, k=5)  <span class="cmt"># 近似 top-5，约 O(log n)</span>
+<span class="fn">print</span>(labels)  <span class="cmt"># 近似——可能漏掉真正第 1 名，这是 ANN 的本质</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">"向量库返回的就是精确最近邻"——<b>错</b>。HNSW 是<b>近似</b>，recall 几乎不会是 100%：它可能漏掉真正最近的那个。ef_search 调大召回升、延迟也升，这是<b>明确的 trade-off 旋钮</b>，不是 bug。需要 100% 精确（如去重、合规）时，要么用暴力精确检索，要么对 HNSW 结果做精排兜底。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：个人知识库到几万条时，pgvector / Qdrant 默认就用 HNSW。理解 ef_search 这个旋钮，你才能在"搜得快"和"别漏重要笔记"之间按需调——而不是被默认值悄悄坑了召回。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 HNSW = 高维空间里的跳表，用"分层 + 小世界图"把最近邻搜索压到 O(log n)，代价是放弃 100% 精确。<br>🤔 你愿意为 50× 的检索提速，接受 1% 的最近邻被漏掉吗？这个 recall/延迟权衡该由谁、按什么标准来定？<br><a href="https://cissy0802.github.io/super-individual-weekly/rag-day11.html" style="color:#a48cff">工程对应 → super-individual D11（RAG 检索工程实战）</a></div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/2004.04906" target="_blank">Karpukhin et al. 2020 — Dense Passage Retrieval (DPR)</a> — 稠密检索系统性胜过 BM25 的奠基论文，必读</li>
+      <li><a href="https://arxiv.org/abs/1603.09320" target="_blank">Malkov & Yashunin — HNSW (2016)</a> — 现代向量库 ANN 索引的算法源头</li>
+      <li><a href="https://arxiv.org/abs/1908.10084" target="_blank">Reimers & Gurevych 2019 — Sentence-BERT</a> — 把 BERT 改造成可比较句向量，语义检索的工程基石</li>
+      <li><a href="https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf" target="_blank">Cormack et al. 2009 — Reciprocal Rank Fusion</a> — RRF 原始论文，融合公式与实证</li>
+      <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-similarity.html" target="_blank">Elasticsearch BM25 文档</a> — 生产级 BM25 实现与 k₁/b 参数说明</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. BM25 和稠密检索，本质上是"符号匹配"和"分布式表示"两种范式之争。这和 AI 历史上 symbolic vs connectionist 之争有什么呼应？</summary><div>这是一个漂亮的微缩版。BM25 是<b>符号派（symbolic）</b>——词就是离散符号，相关性来自符号统计（词频、文档频率），<b>可解释、可调、零训练</b>，但脆在"同义不同词"。稠密检索是<b>联结派（connectionist）</b>——意义弥散在向量的各个维度里（分布式表示），<b>泛化强但是黑箱</b>，你说不清第 137 维代表什么。AI 史上这两派斗了几十年，而 2020 年后检索领域的答案恰恰是<b>不选边、要混合</b>——RRF 让符号派的精确和联结派的泛化各取所长。这其实是更普遍的工程智慧：当两个范式各有不可替代的强项时，<b>融合往往胜过纯化</b>。BigCat 你的分布式背景对此应有共鸣——CAP 定理下没有银弹，最终架构总是按场景做权衡组合，而非追求某个理论最优。</div></details>
+
+    <details><summary>2. 稠密检索把语义压成一个固定维度向量——这个"压缩"必然有损。哪些信息在这一步被丢掉了？这解释了它的哪些失败模式？</summary><div>把一整段话压成 384 或 1024 维向量，是极激进的有损压缩——必然丢东西。丢掉的主要是：(1) <b>精确的字面 token</b>——"GPT-4o"和"GPT-4"在向量空间可能几乎重合，因为模型抓的是"它们都是 OpenAI 模型"这个语义，而非字面差异，这直接解释了精确匹配的失败；(2) <b>组合结构</b>——bi-encoder 把整句压成一个点，"猫追狗"和"狗追猫"可能很近，因为词袋语义相似；(3) <b>长尾罕见信息</b>——编码器训练时少见的实体，表示质量差。这也是为什么有 <b>late-interaction</b>（如 ColBERT，把每个 token 各留一个向量、检索时细粒度交互）这类方案——它们用更多存储换回被压缩丢掉的 token 级信息。理解"向量 = 有损压缩"，你就能预测它什么时候会出错：凡是<b>字面精度</b>和<b>细粒度结构</b>要紧的场景，单向量稠密检索就危险。</div></details>
+
+    <details><summary>3. HNSW 是"近似"换速度。在哪些场景下，1% 的召回损失是灾难性的、绝不能用 ANN？反过来，哪些场景下精确检索是过度工程？</summary><div>关键看<b>漏掉一个结果的代价</b>。绝不能用 ANN（或必须精排兜底）的场景：(a) <b>去重 / 实体解析</b>——漏掉那个真正的重复项，会让脏数据混进库，下游全错；(b) <b>合规 / 安全</b>——比如检索"这段文本是否匹配已知违禁内容库"，漏一个就是事故；(c) <b>金融对账 / 唯一性校验</b>——任何要求"必须找到就是它"的场景。反过来，精确检索是过度工程的场景：(a) <b>RAG 喂给 LLM 的候选段落</b>——反正要召回 top-20 再让 LLM 筛，漏掉第 8 名通常无伤大雅；(b) <b>推荐 / 探索</b>——本来就没有"唯一正确答案"，多样性甚至比精确更可取；(c) <b>海量低价值数据</b>——为 1% 召回付 50× 算力不划算。判断公式很朴素：<b>(漏检概率 × 单次漏检代价) vs (精确检索的额外成本)</b>。BigCat 你的个人知识库属于前述"RAG 候选"类——HNSW 默认值足够，不必上精确检索。</div></details>
+
+    <details><summary>4. RRF 用 k=60 这个"魔法常数"。它到底在调什么？如果设成 k=1 或 k=1000，融合行为会怎么变？</summary><div>k 调的是<b>"头部排名的话语权"</b>。回看公式 1/(k+rank)：当 <b>k 很小（如 1）</b>，rank=0 的文档贡献 1/1=1，rank=1 的贡献 1/2——头部差距被放得极大，<b>融合几乎被各路 top-1 主导</b>，后面的几乎没机会。当 <b>k 很大（如 1000）</b>，rank=0 贡献 1/1000、rank=1 贡献 1/1001——几乎一样，<b>排名差异被抹平</b>，融合退化成"近似只看一个文档在多少路里出现过"（趋近投票计数）。k=60 是 Cormack 论文里实验出的折中：既让头部有合理优势，又不让某一路的 top-1 一票否决另一路。这是个典型的<b>平滑超参</b>——和你熟悉的拉普拉斯平滑、学习率里的 epsilon 同源：用一个常数防止"除以小数爆炸"，在"信任头部"和"兼顾长尾"之间找平衡点。值得记住的元认知：很多工程里的"魔法常数"，本质都是某个 trade-off 旋钮的经验默认值——知道它在调什么，比记住数值重要。</div></details>
+
+    <details><summary>5. 把今天四个概念串起来：一个生产级语义搜索系统，数据和查询是怎么流动的？每个环节的瓶颈在哪？</summary><div>串成一条完整流水线：<b>① 离线索引</b>——文档切 chunk，一路过 BM25 建倒排索引，一路过 embedding 模型编码成向量、灌进 HNSW 图。瓶颈：embedding 算力（百万文档要批量 GPU）+ HNSW 建图时间。<b>② 在线查询</b>——query 同时走两路：BM25 倒排查 top-N、向量编码后用 HNSW 找近似 top-N。瓶颈：稠密路要实时编码 query（有延迟），HNSW 的 ef_search 决定召回/延迟。<b>③ 融合</b>——RRF 把两路排名合成一份。瓶颈几乎没有，RRF 极轻。<b>④ 精排（可选）</b>——对融合后的 top-k 用 cross-encoder 或 LLM re-ranker 精排（这一步属于工程实战，见 super-individual D11）。<b>⑤ 喂给 LLM</b>——top 段落进 context。整条链的核心权衡：<b>召回宽度（每路捞多少）× 各环节延迟 × 算力成本</b>。理解今天四块拼图，你就能看懂任何向量库/RAG 框架的架构图——它们都是这五步的不同封装。下一步的"chunk 怎么切、re-ranker 怎么选、检索质量怎么评"，是 super-individual D11 的工程主场。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 22 · 2026-06-08</footer>
+
+</div>
+
+</body>
+</html>
