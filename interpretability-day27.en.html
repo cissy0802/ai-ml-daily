@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Deep Dive: Interpretability — Day 27</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Deep Dive: Interpretability</h1>
+  <div class="meta">Day 27 · 2026-06-13 · Difficulty ★★★★☆</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D10: Hallucination mitigation (turning interpretability insight into anti-hallucination engineering)
+  </a>
+</div>
+
+<!-- 1. Mechanistic Interpretability -->
+<div class="card">
+  <h2>Mechanistic Interpretability<span class="en">Mechanistic Interpretability</span></h2>
+  <div class="tags"><span class="tag">reverse engineering</span><span class="tag purple">residual stream</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A trained neural network is a <b>binary with no source code</b>—weights are the "compiled artifact," a forward pass is "running it," yet no one ever wrote its internal logic. Mechanistic interpretability is <b>disassembly + single-step debugging</b>: without touching the weights, you attach "breakpoints" and "distributed tracing" to the black box and watch, layer by layer, what each component reads, what it writes, and which hop's signal it passes downstream. The goal is not "does the model predict well" but "<b>what algorithm is actually running inside</b>."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Classic ML interpretability (SHAP, feature importance) only tells you "<b>which input feature influenced the output</b>"—external attribution on a black box. Mechanistic interpretability is more radical: it wants to recover the internal <b>computational circuit</b>, reading the weights like you'd read assembly. The key handle is a structural fact about Transformers—the <strong>residual stream</strong>:</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Residual stream = a shared message bus</b><br><br>
+token embedding <span class="arrow">→</span> <span class="box g">residual stream</span> <span class="arrow">→→→→→→→→→→→→</span> <span class="box p">unembed → logits</span><br>
+<span style="margin-left:120px;color:#5a6378">↑read ↓write&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑read ↓write</span><br>
+<span style="margin-left:96px"><span class="box">Attn head</span></span><span style="margin-left:18px"><span class="box o">MLP</span></span> ... every layer <b>adds</b> its contribution onto the bus<br><br>
+<span style="color:#8b92a8">Each component reads the bus, computes, and <b>adds</b> its result back—linearly additive, so it's decomposable</span>
+</div>
+
+    <p style="margin-top:14px">The key insight comes from Anthropic's <b>A Mathematical Framework for Transformer Circuits</b> (2021): because every attention head and MLP <b>adds</b> its result back to the residual stream (rather than overwriting), the whole bus is a <b>linear superposition</b> of each component's contribution—you can "pull out" any single hop and inspect it. The most famous finding is the <strong>induction head</strong>: an attention circuit that only emerges in models with ≥2 layers, which does this—"find where the current token last appeared in context, and copy the token <b>that came after it</b>." This is precisely one of the core mechanisms of in-context learning (see a few examples, then mimic them).</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># pip install transformer_lens — Neel Nanda's standard mech-interp library</span>
+<span class="kw">from</span> transformer_lens <span class="kw">import</span> HookedTransformer
+model = HookedTransformer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-small"</span>)
+
+<span class="cmt"># run_with_cache: one forward pass, "recording" every layer's activations</span>
+tokens = model.<span class="fn">to_tokens</span>(<span class="str">"The cat sat on the mat. The cat sat on the"</span>)
+logits, cache = model.<span class="fn">run_with_cache</span>(tokens)
+
+<span class="cmt"># grab layer 5, head 1's attention-weight matrix</span>
+attn = cache[<span class="str">"pattern"</span>, 5][0, 1]   <span class="cmt"># shape: [seq, seq]</span>
+<span class="cmt"># see where the last token attends—an induction head points after the earlier "cat"</span>
+<span class="fn">print</span>(attn[-1].<span class="fn">argmax</span>().<span class="fn">item</span>())  <span class="cmt"># expected: the position after "cat" in sentence 1</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + use case</div>
+    <div class="tip">"Interpretability = attach a natural-language explanation to the output"—wrong. Having the model <b>explain itself</b> (chain-of-thought, "why did you answer that") is <b>self-report</b>, which can be a <b>post-hoc rationalization</b> that doesn't reflect the real computation (Anthropic's work repeatedly shows the two diverge). The value of mechanistic interpretability is exactly that it <b>distrusts</b> the model's self-narration and autopsies the internal circuit directly.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real-life scenario: when you do interdisciplinary thinking you often ask "<b>why</b> does this system behave this way." Mech interp offers a paradigm—for any black box (an organization, a market, even your own cognitive habits) first ask "is there a <b>decomposable causal circuit</b> inside," rather than stopping at "input→output" correlation.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Mechanistic interpretability treats a network as "a program to be disassembled," using the linear additivity of the residual stream to split a black box into readable circuits.<br>🤔 If a model's self-explanation can diverge from its real circuit, would you still trust "just ask the AI to explain" as a reliable audit?</div>
+  </div>
+</div>
+
+<!-- 2. Sparse Autoencoders -->
+<div class="card">
+  <h2>Sparse Autoencoders<span class="en">Sparse Autoencoders (SAE)</span></h2>
+  <div class="tags"><span class="tag">dictionary learning</span><span class="tag purple">superposition</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A model has only ~3000 neurons yet must represent tens of thousands of concepts—its trick is to <b>pack multiple concepts into the same dimension</b>, like bit-packing several boolean flags into one int, or hashing infinite keys into finite buckets. The cost: a single neuron becomes <b>polysemantic</b>—one neuron fires for "DNA sequences," "Arabic script," and "French" at once, and you can't read it. An SAE is the <b>unpacker</b>: it "decompresses" the packed representation back into a set of <b>sparse, monosemantic</b> named fields—each representing exactly one concept.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>This "packing" phenomenon has a name: <strong>superposition</strong>. Anthropic's <b>Toy Models of Superposition</b> (2022) proved that when features are "numerous and sparse," the network <b>deliberately</b> packs n features into a space far smaller than n dimensions, tolerating collisions because the features rarely co-activate—a lossy compression, and the very reason neurons are unreadable.</p>
+    <p style="margin-top:8px">The SAE mechanism is <b>dictionary learning</b>: train a very wide autoencoder that encodes the d-dimensional activation vector <b>x</b> into a feature vector that is <b>much wider than d but almost all zeros</b>, then decodes it back to <b>x</b>. Mathematically, minimize:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">L = ‖x − x̂‖²&nbsp;&nbsp;+&nbsp;&nbsp;λ · ‖f‖₁</b><br><br>
+<span style="color:#8b92a8">·&nbsp;<b>‖x − x̂‖²</b> (reconstruction error): the unpacked form must restore the original activation—no information lost<br>
+·&nbsp;<b>λ‖f‖₁</b> (L1 sparsity penalty): forces <b>most dimensions of f = 0</b>, only a few fire each time<br>
+·&nbsp;larger λ → sparser, more monosemantic, but worse reconstruction; this is the core trade-off</span>
+</div>
+
+    <p style="margin-top:14px">Why does the L1 penalty force monosemanticity? Because "only a few dimensions may activate" is equivalent to forcing each dimension to <b>claim an independent, reusable concept</b> instead of sharing with others. Anthropic's <strong>Towards Monosemanticity</strong> (2023) trained a 16×-wide SAE on a small model, yielding nearly 15,000 features of which human raters judged about <strong>70% cleanly map to a single concept</strong>; the 2024 <strong>Scaling Monosemanticity</strong> scaled it to production-grade Claude 3 Sonnet and found the famous "<b>Golden Gate Bridge feature</b>"—clamp its activation to 10× max and the model goes all-in on the Golden Gate Bridge, even <b>identifying as</b> the bridge. This shows features aren't just correlational but <b>causally steerable</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># pip install sae-lens — load a community-pretrained SAE, no need to train one</span>
+<span class="kw">from</span> sae_lens <span class="kw">import</span> SAE
+<span class="kw">from</span> transformer_lens <span class="kw">import</span> HookedTransformer
+
+model = HookedTransformer.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-small"</span>)
+sae, cfg, _ = SAE.<span class="fn">from_pretrained</span>(<span class="str">"gpt2-small-res-jb"</span>, <span class="str">"blocks.7.hook_resid_pre"</span>)
+
+_, cache = model.<span class="fn">run_with_cache</span>(model.<span class="fn">to_tokens</span>(<span class="str">"The Golden Gate Bridge is"</span>))
+acts = cache[<span class="str">"blocks.7.hook_resid_pre"</span>]      <span class="cmt"># layer-7 residual-stream activation</span>
+
+features = sae.<span class="fn">encode</span>(acts)                    <span class="cmt"># unpack into a very wide sparse feature vector</span>
+top = features[0, -1].<span class="fn">topk</span>(5)               <span class="cmt"># top-5 features on the last token</span>
+<span class="fn">print</span>(top.indices, top.values)             <span class="cmt"># each index maps to an interpretable concept</span>
+<span class="cmt"># look up what these indices mean on Neuronpedia: neuronpedia.org</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + use case</div>
+    <div class="tip">"Every feature an SAE finds is a clean human concept"—don't be that optimistic. About 30% of features remain vague or hard to interpret; SAEs are also subject to the <b>reconstruction-vs-sparsity trade-off</b>—different λ yields different dictionaries—plus known issues like "feature splitting" (one concept fractured into several near-synonym features). An SAE is the <b>best unpacker we have, but not a perfect dictionary</b>.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real-life scenario: superposition is a superb cross-disciplinary metaphor—how does a capacity-limited system carry information far beyond its capacity? Brains, language, even a day's worth of your attention all "superpose." It's the same family of ideas as hash collisions, lossy compression, and "dimensional collapse" in complexity science—each illuminates the others.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Neurons are unreadable because concepts are "superposed" into a few dimensions; SAEs use dictionary learning + L1 sparsity to unpack them into monosemantic features.<br>🤔 If a feature can be clamped to change a model's behavior (Golden Gate Bridge), how far—in principle—is "editing a model's beliefs" from "editing a person's beliefs"?</div>
+  </div>
+</div>
+
+<!-- 3. Feature Circuits -->
+<div class="card">
+  <h2>Feature Circuits<span class="en">Feature Circuits</span></h2>
+  <div class="tags"><span class="tag">call graph</span><span class="tag purple">causal</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A single feature is like a microservice; a <b>feature circuit</b> is the <b>call chain / DAG</b> they form: an early-layer feature "detects this is a person's name" → a mid-layer feature "this is a French place" → a late-layer feature "output French." Features are nodes, weights are edges, and the whole graph is an <b>attribution graph</b>—the same thing as the microservice dependency graphs and Spark DAGs you've drawn. The ultimate goal of mech interp is to reduce a model behavior to <b>one readable, verifiable circuit</b>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>Knowing "which features exist" (what SAEs do) is just a parts list, not understanding the circuit. To understand behavior you need to know <b>how features connect</b> and who triggers whom. The core method for validating connections is <strong>activation patching</strong> (a.k.a. causal tracing)—a clean causal experiment:</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">Activation patching: A/B perfusion for causal ablation</b><br><br>
+1. Run a "clean" input <span class="box g">clean</span>, cache a component's activation<br>
+2. Run a "corrupt" input <span class="box r">corrupt</span> (answer broken)<br>
+3. Transplant <b>one</b> clean activation into the corrupt forward pass<br>
+4. See how much the output recovers <span class="arrow">→</span> more recovery = more causally critical<br><br>
+<span style="color:#8b92a8">= swapping components one-by-one in a distributed system to find "which hop actually decided the result"</span>
+</div>
+
+    <p style="margin-top:14px">This beats "which neuron activated most": high activation is merely <b>correlation</b>, whereas patching is <b>active intervention</b>—directly answering "if we remove/replace this hop, does the result change?" Validate every edge this way and you reconstruct an attribution graph. Anthropic's 2025 "<b>circuit tracing / attribution graphs</b>" work applied this to production-grade Claude, mapping the real circuits behind multi-step reasoning, poetry rhyming, and mental math—finding that the model sometimes <b>plans ahead</b> (picks the rhyme first when writing poetry, then works backward to the line), something self-report cannot see at all.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># use activation patching to find "which layer matters most for the right answer"</span>
+<span class="kw">import</span> torch
+clean = model.<span class="fn">to_tokens</span>(<span class="str">"The Eiffel Tower is in the city of"</span>)
+corrupt = model.<span class="fn">to_tokens</span>(<span class="str">"The Colosseum is in the city of"</span>)
+ans = model.<span class="fn">to_single_token</span>(<span class="str">" Paris"</span>)
+
+_, clean_cache = model.<span class="fn">run_with_cache</span>(clean)
+
+<span class="kw">def</span> <span class="fn">patch_layer</span>(corrupt_act, hook, layer):
+    <span class="cmt"># transplant the clean residual stream into the corrupt forward pass</span>
+    corrupt_act[:] = clean_cache[<span class="str">"resid_post"</span>, layer]
+    <span class="kw">return</span> corrupt_act
+
+<span class="kw">for</span> L <span class="kw">in</span> <span class="fn">range</span>(model.cfg.n_layers):
+    logits = model.<span class="fn">run_with_hooks</span>(corrupt, fwd_hooks=[
+        (<span class="fn">f</span><span class="str">"blocks.{L}.hook_resid_post"</span>, <span class="kw">lambda</span> a,h: <span class="fn">patch_layer</span>(a,h,L))])
+    <span class="fn">print</span>(L, logits[0,-1,ans].<span class="fn">item</span>())   <span class="cmt"># the layer whose patch spikes "Paris" = key layer</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + use case</div>
+    <div class="tip">"Drawing one circuit means I fully understand the model"—don't overclaim. Existing circuits mostly recover <b>narrow tasks</b> (indirect-object identification, specific fact recall) locally; we're orders of magnitude from "reading the whole model," and circuits also <b>superpose and interfere</b>. It's real progress, but far from "full decompilation." Honestly: what we can read is still only a few parts of this machine.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real-life scenario: the activation-patching mindset—"to know if a hop is truly causal, transplant/replace it and see if the result changes"—maps directly onto <b>decision retros</b>: instead of arguing "did X cause the outcome," design a small experiment that <b>counterfactually swaps X</b>. It's distributed-systems chaos engineering applied to cognition.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Features are parts; circuits are the program. Only causal ablation via activation patching upgrades "correlation" into a "circuit."<br>🤔 If a model is proven to "plan the rhyme ahead" when writing poetry, how much implicit planning hides beneath its token-by-token appearance that we assume isn't there?</div>
+  </div>
+</div>
+
+<!-- 4. Probing -->
+<div class="card">
+  <h2>Probing<span class="en">Probing</span></h2>
+  <div class="tags"><span class="tag">read-only probe</span><span class="tag orange">diagnostic</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A probe is a <b>read-only APM probe</b> attached to a running system: tap into a model layer's activations, train a <b>very lightweight linear classifier</b>, and ask "does this layer's internal state <b>encode</b> some information (part-of-speech? sentiment? truthfulness?)." The probe doesn't change the model or join training—it's pure post-hoc tapping of the bus, exactly like attaching a packet sniffer to an internal message bus to see "does this data flow carry field X."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Problem it solves + how it works</div>
+    <p>SAEs and circuits are heavy and research-grade; probing is the most <b>lightweight, earliest, most practical</b> interpretability tool, originating in Alain &amp; Bengio's <strong>Understanding intermediate layers using linear classifier probes</strong> (2016). The mechanism is minimal: freeze the model, take layer-ℓ activations as features, train a <b>linear</b> classifier to predict the attribute you care about. <strong>The key constraint is "linear"</strong>:</p>
+    <ul>
+      <li>If a <b>simple linear</b> probe can read "sentiment" out of some layer, that layer already encodes sentiment <b>linearly separably</b>—the information is "ready to use";</li>
+      <li>If you need a deep nonlinear probe to read it out, it's likely the <b>probe itself learned it</b>, and you can't claim the model "represented" it.</li>
+    </ul>
+    <p style="margin-top:8px">Alain &amp; Bengio swept linear probes across ResNet and found <b>linear separability rises monotonically with depth</b>—low layers hold edges and textures, higher layers grow more abstract. This gave a quantifiable evidence that deep nets "refine representations layer by layer."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+<span class="kw">import</span> numpy as np
+
+<span class="cmt"># collect each sentence's layer-6, last-token activation, paired with a sentiment label</span>
+X, y = [], []
+<span class="kw">for</span> text, label <span class="kw">in</span> dataset:          <span class="cmt"># label: 1=positive 0=negative</span>
+    _, cache = model.<span class="fn">run_with_cache</span>(model.<span class="fn">to_tokens</span>(text))
+    X.<span class="fn">append</span>(cache[<span class="str">"resid_post"</span>, 6][0, -1].<span class="fn">numpy</span>())
+    y.<span class="fn">append</span>(label)
+
+<span class="cmt"># linear probe: readable linearly = this layer already encodes sentiment "ready to use"</span>
+probe = LogisticRegression(max_iter=1000).<span class="fn">fit</span>(np.<span class="fn">array</span>(X), y)
+<span class="fn">print</span>(<span class="str">"linear separability (probe accuracy):"</span>, probe.<span class="fn">score</span>(np.<span class="fn">array</span>(X), y))
+<span class="cmt"># repeat across layers → see at which layer sentiment "crystallizes"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + use case</div>
+    <div class="tip">"If a probe can read X, the model <b>uses</b> X to decide"—the classic trap. A probe only proves the information <b>exists</b> in the activations (correlation), not that the model <b>actually uses</b> it in the forward pass (causation). "This layer can read out syntax" doesn't mean prediction depends on syntax—to test causation, go back to card 3's <b>activation patching</b>. Probing answers "is it there," patching answers "was it used"—don't conflate the two jobs.</div>
+    <div class="exercise" style="margin-top:8px">📌 Real-life scenario: a probe is the most cost-effective diagnostic starting point. To know whether some open model "actually understands legal entities / medical concepts" internally, don't dissect circuits—first train a few linear probes across layers; 10 lines of code give a quick checkup ("this info barely exists / only crystallizes at layer N"), then decide whether to fine-tune or switch models.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 A probe is a read-only tap: using "linear separability" as the bar, it quantifies "does a layer already encode some information"—light and fast, but tests correlation only, not causation.<br>🤔 The gap between "information exists" and "information is used"—does it happen daily in systems you know (a field is in the logs ≠ the business logic reads it)?<br><a href="https://cissy0802.github.io/super-individual-weekly/hallucination-day10.html" style="color:#7b61ff">Engineering counterpart → super-individual D10: Hallucination mitigation</a></div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://transformer-circuits.pub/2021/framework/index.html" target="_blank">A Mathematical Framework for Transformer Circuits (Anthropic, 2021)</a> — foundational work on residual stream &amp; the circuit view</li>
+      <li><a href="https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html" target="_blank">In-context Learning and Induction Heads (Anthropic, 2022)</a> — the causal link between induction heads and ICL</li>
+      <li><a href="https://transformer-circuits.pub/2023/monosemantic-features" target="_blank">Towards Monosemanticity (Anthropic, 2023)</a> — pioneering use of SAEs for dictionary learning</li>
+      <li><a href="https://transformer-circuits.pub/2024/scaling-monosemanticity/" target="_blank">Scaling Monosemanticity (Anthropic, 2024)</a> — scaled to Claude 3 Sonnet, the Golden Gate Bridge feature</li>
+      <li><a href="https://arxiv.org/abs/1610.01644" target="_blank">Alain &amp; Bengio 2016 — Linear Classifier Probes</a> — the origin of the probing method</li>
+      <li><a href="https://www.neelnanda.io/mechanistic-interpretability/getting-started" target="_blank">Neel Nanda — Mech Interp getting started &amp; TransformerLens</a> — the best place to start running experiments</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Probing, SAEs, and activation patching all aim to "understand the model." Where does each sit on the correlation-vs-causation axis, and how should you combine them?</summary><div>This is the key thread of the day. The three form a pipeline <b>from correlation to causation, coarse to fine</b>. <b>Probing</b> is cheapest, answering "does a layer <b>encode</b> X"—pure <b>correlation</b>, proving information exists but not that it's used (a probe reading syntax ≠ the model using syntax). <b>SAEs</b> solve the superposition problem of unreadable neurons, unpacking activations into <b>monosemantic features</b>—a <b>nameable parts list</b>, finer than probing's "is it there," but feature activation alone is still correlational. <b>Activation patching</b> rises to <b>causation</b>: actively transplanting/ablating a hop to answer "remove it, does the result change." In practice: first use probes to <b>quickly sweep layers</b> and locate "roughly which layer the info crystallizes" (10-line checkup) → at the key layer, use an SAE to <b>unpack candidate features</b> → use patching to <b>verify which features/components are truly causal</b> (assembling a circuit). Remember it as: probing asks "where," SAEs ask "what," patching asks "did it do it." Your distributed intuition transfers directly—this is the cognitive version of tracing (where's the signal) → service teardown (what is it) → chaos injection (was it the cause).</div></details>
+
+    <details><summary>2. Anthropic repeatedly finds that "a model's self-explanation (CoT / self-report) diverges from its real circuit." What does this mean for governance approaches like "make the AI explain itself"?</summary><div>It means <b>treating self-report as audit evidence is dangerous</b>. When a model generates "I answered this because…," it's <b>generating plausible-looking explanation text</b>, not <b>reading and reporting its real computation</b>—architecturally these are not the same thing. Circuit tracing has direct cases: a model says it reasons by some steps while the circuit takes another path (in mental math it says "carry the digit" while the circuit uses a set of parallel approximate lookup features). Three implications: (1) <b>alignment and safety</b> can't rely on "make the model confess"—a model that can deceive can also fabricate its "confession"; mechanistic interpretability is one of the few tools that can <b>bypass self-narration and autopsy directly</b>, which is why it's critical AI-safety infrastructure; (2) <b>CoT is still useful</b>—it genuinely <b>improves</b> computation (more intermediate tokens = more compute), but "CoT text" ≠ "a faithful internal log," and the gap itself must be monitored; (3) a direct lesson for anti-hallucination engineering (see the D10 counterpart): rather than having the model "self-assess for hallucination," use externally verifiable means (retrieval grounding, consistency sampling, future feature-level monitoring)—don't hand the verdict to the defendant.</div></details>
+
+    <details><summary>3. Superposition says "a capacity-limited system is forced to superpose excess information into few dimensions." Does this hold for brains, language, organizations? Is it a bug or a feature?</summary><div>Most likely a <b>universal principle</b>, and a feature, not a bug. Superposition's preconditions are very general: <b>concepts far outnumber available dimensions, and those concepts rarely co-occur (sparse)</b>—satisfy both and any finite system will "rationally" choose to superpose, trading "minimal collisions" for "high capacity." <b>Brains</b>: neuron counts are far too few for "one concept per neuron," so distributed, superposed coding is nearly inevitable—explaining why single-electrode recordings struggle to read individual neurons (isomorphic to a model's polysemantic neurons). <b>Language</b>: a finite vocabulary expressing infinite meaning via polysemy + context disambiguation—that's superposition at the semantic layer, and SAE "feature splitting/merging" has a direct counterpart in semantics. <b>Organizations</b>: one person wearing many hats, one process carrying many goals—also superposition under capacity limits, with the same cost ("hard to read what a role is actually doing"). Why call it a feature: superposition is the <b>optimal compromise between capacity and separability</b>—as long as collisions are sparse, the gains far exceed occasional interference. It turns into a bug the moment "the sparsity assumption breaks" (concepts start co-occurring frequently) and collisions explode—corresponding to cognitive overload in brains, role conflict in organizations, feature interference in models. A deep reminder for the "AI super-individual": the more roles you superpose on yourself, the more you must keep the precondition "they rarely fire simultaneously," or you slide from high capacity into high interference.</div></details>
+
+    <details><summary>4. If one day we could fully decompile every circuit of a frontier model, what good and bad things follow? Is "full interpretability" a pure blessing?</summary><div>The upsides are obvious: <b>auditability</b> (spot deception, backdoors, dangerous-capability circuits in advance), <b>precise editing</b> (point-edit beliefs like Golden Gate Bridge, debias or fix errors without full retraining), <b>alignment verification</b> (directly see whether a model "wants" to do something, not just what it says). But "full interpretability" is no pure blessing—at least three tensions: (1) <b>capability-risk symmetry</b>—a tool that point-edits beliefs can also point-<b>inject</b> them; a method that reads out dangerous capabilities can also help <b>extract</b> them. Interpretability is dual-use. (2) <b>decompilers get adversaries</b>—once "readable circuits" becomes the audit standard, you get "models trained to resist interpretability" (hiding dangerous circuits in deeper superposition); it's an arms race, not an endgame. (3) <b>philosophical discomfort</b>—if "belief = an externally clampable feature" holds for models, the metaphor for human minds unsettles many: the boundaries of free will, persuasion, and brainwashing get re-litigated. My take: interpretability is <b>net positive and a necessity</b> (you can't safely deploy strong models without understanding them), but it's not a "switch that makes things safe"—it transforms safety from "black-box trust" into a <b>governance question of who may read and write these circuits</b>. Technology solves "can we look"; "who may change it, and to what" is the harder social choice afterward.</div></details>
+
+    <details><summary>5. Port mech interp's methodology (distrust self-report, find decomposable causal circuits, validate with counterfactual intervention) onto "understanding your own cognition." What do you get?</summary><div>You get a counterintuitive but powerful <b>self-knowledge discipline</b>. Mapping point by point: (1) <b>distrust self-report</b> → your post-hoc explanation of "why I decided this" likely diverges from the real "circuit" driving you—just like a model's CoT. Admitting this is the first step out of self-deception: the reason you give is a <b>rationalization</b>, not necessarily the <b>cause</b>. (2) <b>find decomposable causal circuits</b> → rather than describing yourself with a vague "I'm just anxious," ask "is there a nameable trigger chain" (a specific context feature → a thought → a behavior). This is isomorphic to splitting "model behavior" into a "feature circuit," and echoes the Buddhist notion of dependent origination—everything is a chain of conditions aggregating, not a single essence. (3) <b>validate with counterfactual intervention</b> → don't stop at introspection (correlation); run an activation-patching-style mini-experiment: <b>remove/replace a condition</b> and see whether the behavior changes—only then do you know the real cause. That's chaos engineering applied to the mind. Deeper insight: mech interp and introspection/mindfulness are strikingly aligned—both refuse to trust surface narratives, both observe "the process itself" directly, both treat "the self" as a <b>decomposable aggregate of processes</b> rather than an indivisible black box. The only difference is tooling: one uses patching and SAEs, the other sustained awareness. For someone pursuing the "AI super-individual," both paths point to the same thing—<b>turning any black box (a model or yourself) into a readable, verifiable, intervenable system</b>.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 27 · 2026-06-13</footer>
+
+</div>
+
+</body>
+</html>
