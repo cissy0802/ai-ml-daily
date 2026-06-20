@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：前沿架构 — Day 34</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：前沿架构</h1>
+  <div class="meta">Day 34 · 2026-06-20</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    工程对应 → super-individual D16: Cost（MoE/长上下文的推理成本权衡）
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#7b61ff;background:#11162a">
+  <div class="section" style="margin-top:0">
+    <div class="label">本期主线</div>
+    <p>标准 Transformer 有两个「先天病」：<strong>注意力是 O(n²)</strong>（序列翻倍，计算翻 4 倍），以及<strong>稠密计算</strong>（每个 token 都激活全部参数）。今天 4 个概念是学术界对这两个病的两条攻击路线——<strong>MoE</strong> 攻「稠密」让参数变大但计算不变；<strong>SSM / Mamba</strong> 攻「O(n²)」用 RNN 思想换回线性复杂度；<strong>长上下文</strong>则是「在不换架构的前提下，怎么把 n 撑大」。它们回答的都是同一个问题：<strong>当我们想要更大、更长，硬件账单怎么办？</strong></p>
+  </div>
+</div>
+
+<!-- 1. MoE -->
+<div class="card">
+  <h2>混合专家<span class="en">Mixture of Experts · MoE</span></h2>
+  <div class="tags"><span class="tag">稀疏激活</span><span class="tag purple">条件计算</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>MoE 就是给神经网络做<strong>数据库分库分表 + 查询路由</strong>。稠密模型像一台单机数据库，每个请求都扫全表；MoE 把一个巨大的前馈层（FFN）拆成 N 个「专家分片」，再放一个<strong>路由器（router）</strong>，按 token 内容只把请求转发给最相关的 1-2 个分片。<strong>总容量随分片数线性涨，单次查询的计算量却几乎不变</strong>——这正是分库分表的核心收益：用空间换吞吐，不用算力换容量。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：模型变强最直接的办法是堆参数，但稠密模型里<strong>参数量和计算量是绑死的</strong>——参数翻倍，每个 token 的浮点运算（FLOPs）也翻倍，推理成本线性爆炸。我们想要「容量大但算得便宜」，这二者在稠密架构里不可兼得。</p>
+    <p style="margin-top:8px">MoE 的机制是<strong>条件计算（conditional computation）</strong>：把 Transformer 每层的 FFN 替换成 N 个并列的小 FFN（专家），加一个轻量路由器。每个 token 进来，路由器算出一个分数分布，<strong>只选 top-k 个专家</strong>（通常 k=1 或 2）激活，其余专家这一步完全不参与运算。于是：</p>
+    <ul>
+      <li><strong>总参数（容量）</strong>= N × 单专家大小 —— 可以堆到上万亿；</li>
+      <li><strong>激活参数（成本）</strong>= k × 单专家大小 —— 只和 k 有关，与 N 无关。</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">一个 token 穿过 MoE 层（N=8 专家, top-2）</b><br><br>
+token <span class="arrow">→</span> <span class="box p">Router 打分</span> <span class="arrow">→</span> 选出得分最高的 2 个<br><br>
+<span class="box g">E1 ✓</span><span class="box">E2</span><span class="box">E3</span><span class="box g">E4 ✓</span><span class="box">E5</span><span class="box">E6</span><span class="box">E7</span><span class="box">E8</span><br>
+<span style="color:#5a6378">└ 只有 E1、E4 被激活并加权求和，其余 6 个分片本步零计算 ┘</span><br><br>
+<span style="color:#8b92a8">容量 = 8 份参数　|　成本 ≈ 2 份参数</span>
+</div>
+
+    <p style="margin-top:14px">关键设计难点是<strong>负载均衡</strong>：路由器若总把 token 发给同几个「明星专家」，剩下的专家训不动、显存还白占。Shazeer 等人 2017 年的奠基论文引入了辅助的均衡损失（auxiliary loss）来惩罚这种倾斜；Switch Transformer（2021）进一步把 k 简化到 1，证明<strong>单专家路由也能保质量、还更省路由开销</strong>。2024 年的 Mixtral 8×7B 把这套思想做成了开源旗舰：8 个专家、每 token 激活 2 个。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+<span class="cmt"># 极简 MoE 层：N 个专家 + top-k 路由（理解机制用，非生产实现）</span>
+<span class="kw">class</span> <span class="fn">MoE</span>(torch.nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, d=512, n_exp=8, k=2):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.k = k
+        self.router  = torch.nn.<span class="fn">Linear</span>(d, n_exp)        <span class="cmt"># 路由器：token → 每个专家的分数</span>
+        self.experts = torch.nn.<span class="fn">ModuleList</span>([torch.nn.<span class="fn">Linear</span>(d, d) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n_exp)])
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):                          <span class="cmt"># x: [tokens, d]</span>
+        scores = self.<span class="fn">router</span>(x)                       <span class="cmt"># 每个 token 对所有专家打分</span>
+        w, idx = scores.<span class="fn">topk</span>(self.k, dim=-1)        <span class="cmt"># 只取 top-k 个专家</span>
+        w = F.<span class="fn">softmax</span>(w, dim=-1)                     <span class="cmt"># 在被选中的 k 个里归一化权重</span>
+        out = torch.<span class="fn">zeros_like</span>(x)
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(self.k):                      <span class="cmt"># 加权求和被激活的专家输出</span>
+            <span class="kw">for</span> e <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(self.experts)):
+                m = idx[:, j] == e                    <span class="cmt"># 路由到专家 e 的 token 掩码</span>
+                <span class="kw">if</span> m.<span class="fn">any</span>(): out[m] += w[m, j:j+1] * self.experts[e](x[m])
+        <span class="kw">return</span> out                                    <span class="cmt"># N=8 容量，但每 token 只算 2 个专家</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「MoE 把任务按领域分给专家——数学专家、代码专家、写诗专家」。<strong>错</strong>。路由是在 token 粒度、隐空间里学出来的，专家的分工<strong>不可解释、不对应人类领域</strong>，研究发现路由更多和语法/表层模式相关，而非「学科」。把专家想象成「DB 分片的哈希桶」而不是「按业务划分的微服务」更准确。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：你在挑开源模型自建工作流时，看到「Mixtral 8×7B」别误读成「56B 稠密模型」。它<strong>总参数约 47B、但每 token 只激活约 13B</strong>——意味着它的<strong>显存占用按 47B 算、推理速度按 13B 算</strong>。理解这个「容量/成本解耦」，你才能正确估算单卡能不能跑、吞吐量有多少。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 MoE 的本质是把「参数容量」和「计算成本」解耦——和分库分表用空间换吞吐是同一个工程哲学。<br>🤔 你的分布式经验里，「按 key 路由到分片」最大的坑是热点（hot shard）。MoE 的「明星专家」就是同一个病——你会怎么设计均衡机制？<br><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">工程对应 → super-individual D16 (Cost：MoE 的推理成本账)</a></div>
+  </div>
+</div>
+
+<!-- 2. State Space Models -->
+<div class="card">
+  <h2>状态空间模型<span class="en">State Space Models · SSM / S4</span></h2>
+  <div class="tags"><span class="tag">线性复杂度</span><span class="tag purple">序列建模</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>SSM 处理序列的方式，本质是<strong>一个带固定大小内存的流式处理器（streaming processor）</strong>。Transformer 像把整个日志文件读进内存再两两比对（O(n²)）；SSM 像 Kafka 消费者——<strong>逐条读入，把历史压缩进一个固定维度的「状态变量」</strong>，读完一条就更新状态、丢弃原文。内存不随流长度增长，这正是流式系统对批处理的核心优势。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：Transformer 的注意力要存所有历史 token 的 Key/Value（KV cache 随长度线性涨），计算两两相关性（O(n²)）。序列到几万、几十万 token 时，又慢又吃显存。能不能像 RNN 一样「O(n) 线性、内存恒定」，又不丢 Transformer 的并行训练能力？</p>
+    <p style="margin-top:8px">SSM 借自控制论的经典方程。核心是维护一个隐状态 <strong>h</strong>，每来一个输入 <strong>x<sub>t</sub></strong> 就更新一次：</p>
+    <div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">SSM 的递推核心（两行方程）</b><br><br>
+h<sub>t</sub> = <span style="color:#00d4ff">A</span>·h<sub>t-1</sub> + <span style="color:#7ed6a0">B</span>·x<sub>t</sub> &nbsp;&nbsp;<span style="color:#5a6378"># 新状态 = 旧状态衰减 + 当前输入注入</span><br>
+y<sub>t</sub> = <span style="color:#ffb450">C</span>·h<sub>t</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378"># 输出 = 从状态里读出</span>
+    </div>
+    <p style="margin-top:10px">直觉：<strong>A 是「遗忘/保留矩阵」</strong>——决定旧记忆怎么衰减；<strong>B 是「写入门」</strong>——决定当前输入注入多少；<strong>C 是「读出门」</strong>——决定从状态里提取什么。这和 LSTM 的门控思想一脉相承，但 SSM 的妙处在于：当 A、B、C 与输入无关（线性时不变）时，整个递推<strong>可以数学上展开成一个卷积</strong>，于是训练时能像 CNN 一样<strong>全序列并行</strong>，推理时又能像 RNN 一样<strong>逐步 O(1) 更新</strong>——鱼和熊掌兼得。</p>
+    <p style="margin-top:10px">难点是：naive 的 A 矩阵在长序列上数值会爆炸或消失（和 RNN 的梯度问题同源）。Gu 等人 2021 年的 <strong>S4</strong> 论文用一种特殊的结构化 A 矩阵（基于 HiPPO 理论的初始化 + 低秩修正）解决了这个稳定性问题，让 SSM 第一次在长序列基准（Long Range Arena）上<strong>全面超过 Transformer</strong>，并把生成速度做到快几十倍。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># SSM 的「循环模式」——展示恒定内存的流式更新（教学版，非 S4 完整实现）</span>
+<span class="kw">def</span> <span class="fn">ssm_scan</span>(x, A, B, C):
+    <span class="cmt"># x: [seq_len, d]  A,B,C 是学到的状态矩阵</span>
+    h = torch.<span class="fn">zeros</span>(A.shape[0])          <span class="cmt"># 隐状态：固定维度，不随 seq_len 变</span>
+    ys = []
+    <span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(x.shape[0]):         <span class="cmt"># 逐 token 流式处理</span>
+        h = A @ h + B @ x[t]            <span class="cmt"># 旧状态衰减 + 新输入写入</span>
+        ys.<span class="fn">append</span>(C @ h)                <span class="cmt"># 从状态读出当前输出</span>
+    <span class="kw">return</span> torch.<span class="fn">stack</span>(ys)
+<span class="cmt"># 关键：无论 seq_len 是 1k 还是 1M，h 的大小不变 → 内存 O(1)</span>
+<span class="cmt"># 训练时这个递推可数学展开成卷积，从而全序列并行（此处省略）</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「SSM 线性复杂度，所以处处吊打 Transformer」。<strong>不全对</strong>。固定大小的状态是把双刃剑——它把全部历史<strong>有损压缩</strong>进一个向量，对「精确召回某个远处具体 token」（比如大海捞针、上下文里的精确复制）天然弱于能逐 token 回看的注意力。这是下个概念 Mamba 要修补的核心短板。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：当你评估「超长序列」任务（基因序列、长音频、整本书）该选什么底座时，记住这个分界：<strong>需要全局精确检索→注意力强；需要高效流式处理超长信号→SSM 强</strong>。这和你选「批处理 vs 流处理」框架的判断逻辑完全同构。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 SSM 用「固定状态 + 流式更新」把 O(n²) 打回 O(n)，代价是把历史有损压缩——这是经典的「内存恒定 vs 精确回看」权衡。<br>🤔 把隐状态 h 看成数据库的「物化视图（materialized view）」：它持续增量更新、不存原始事件。什么场景下物化视图够用，什么场景必须回查原始日志？</div>
+  </div>
+</div>
+
+<!-- 3. Mamba -->
+<div class="card">
+  <h2>Mamba / 选择性 SSM<span class="en">Mamba · Selective SSM</span></h2>
+  <div class="tags"><span class="tag">输入依赖</span><span class="tag purple">选择性</span><span class="tag orange">2023</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>S4 的状态矩阵是<strong>静态配置</strong>——像一个写死规则的缓存策略，不管来什么数据都用同一套「保留/丢弃」规则。Mamba 把它升级成<strong>内容感知的动态缓存</strong>：让「写入门 B、读出门 C、遗忘步长」都<strong>变成当前输入的函数</strong>。等于缓存策略能根据数据自己判断「这条重要，多留一会儿；那条是废话，赶紧忘」——从固定 TTL 升级成<strong>自适应 TTL</strong>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：上一节说 SSM 的硬伤是「无差别压缩历史」。因为 A、B、C 是固定的，模型<strong>没法根据内容决定该记住谁、忽略谁</strong>——这叫缺乏「内容感知推理（content-based reasoning）」。比如做「跳过所有空格、只记实词」这种任务，固定 SSM 做不到。</p>
+    <p style="margin-top:8px">Mamba（Gu &amp; Dao, 2023）的核心创新叫<strong>选择性机制（selection mechanism）</strong>：把 SSM 的参数 <strong>B、C 以及离散化步长 Δ 改成由输入 x<sub>t</sub> 现算的函数</strong>。这样每个 token 都能动态控制——「我要往状态里写多少、读多少、把旧记忆衰减多快」。直觉上，模型获得了<strong>选择性记忆</strong>的能力：遇到关键信息就重置/强写状态，遇到噪声就让它流过去。</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">S4 vs Mamba：参数是否随输入变化</b><br><br>
+<span class="box">S4</span>　A,B,C 固定 <span class="arrow">→</span> 对每个 token <span style="color:#ff8e8e">一视同仁</span>地更新状态<br>
+<span class="box g">Mamba</span>　B,C,Δ = f(x<sub>t</sub>) <span class="arrow">→</span> 每个 token <span style="color:#7ed6a0">自己决定</span>写多少/记多久<br><br>
+<span style="color:#8b92a8">代价：参数随输入变 → 卷积展开失效 → 无法直接并行</span>
+</div>
+
+    <p style="margin-top:14px">但这里有个工程悖论：<strong>参数一旦依赖输入，就不再是「线性时不变」，那套「展开成卷积来并行训练」的技巧就失效了</strong>。Mamba 的第二个贡献是<strong>硬件感知的并行扫描（parallel scan）算法</strong>——用一种类似前缀和的并行原语，配合精心设计的 GPU 显存读写（思路类似 FlashAttention，把中间状态留在高速 SRAM 里），让这个「输入依赖的递推」依然能在 GPU 上高效并行。论文报告 Mamba 在语言建模上<strong>吞吐量约为同规模 Transformer 的 5 倍</strong>，并随序列长度线性扩展、可处理到百万级长度。</p>
+    <p style="margin-top:10px">2024 年起的实践共识是<strong>混合架构</strong>：把少量注意力层和大量 Mamba 层交替堆叠，用注意力补「精确召回」短板，用 Mamba 拿「长序列效率」——取两者之长。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># 官方实现：pip install mamba-ssm（需 CUDA）</span>
+<span class="kw">import</span> torch
+<span class="kw">from</span> mamba_ssm <span class="kw">import</span> Mamba
+
+batch, seq_len, dim = 2, 4096, 512
+x = torch.<span class="fn">randn</span>(batch, seq_len, dim).<span class="fn">to</span>(<span class="str">"cuda"</span>)
+
+model = <span class="fn">Mamba</span>(
+    d_model=dim,     <span class="cmt"># 输入/输出维度</span>
+    d_state=16,      <span class="cmt"># 隐状态维度——固定大小，与 seq_len 无关</span>
+    d_conv=4,        <span class="cmt"># 局部卷积窗口（捕捉短程模式）</span>
+    expand=2,        <span class="cmt"># 内部扩张倍数</span>
+).<span class="fn">to</span>(<span class="str">"cuda"</span>)
+
+y = <span class="fn">model</span>(x)           <span class="cmt"># 输出与输入同形 [2, 4096, 512]</span>
+<span class="fn">print</span>(y.shape)        <span class="cmt"># B、C、Δ 在内部由 x 现算 → 选择性记忆</span>
+<span class="cmt"># 序列再长 d_state 也是 16，靠并行扫描在 GPU 上高效跑</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「Mamba 出来了，Transformer 要被淘汰了」。<strong>言过其实</strong>。2024-2025 的实证是：纯 Mamba 在需要精确上下文检索（如 in-context learning、复制长串）的任务上仍弱于注意力，主流前沿模型走的是<strong>混合路线</strong>而非全盘替换。把它当成「工具箱里多了一件趁手的兵器」，而不是「银弹」。</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：跨学科思考时，Mamba 的「选择性」是个漂亮的<strong>认知隐喻</strong>——人脑的注意力也是「选择性写入长期记忆」，绝大多数感官输入被即时遗忘。当你设计自己的「信息流过滤系统」（每天读什么、记什么、忘什么）时，Mamba 的 Δ（自适应遗忘步长）就是一个可借鉴的设计变量。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 Mamba = 给 SSM 装上「内容感知的选择性记忆」+「硬件感知的并行扫描」，第一次让线性架构在语言上逼近注意力。<br>🤔 注意力是「无损保留全部历史、按需检索」，Mamba 是「选择性压缩历史、流式更新」。这像不像数据库里「保留全量明细 vs 维护聚合状态」之争？两种范式会长期共存还是某一方终将胜出？</div>
+  </div>
+</div>
+
+<!-- 4. Long Context -->
+<div class="card">
+  <h2>长上下文<span class="en">Long Context</span></h2>
+  <div class="tags"><span class="tag">外推</span><span class="tag purple">位置编码</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>「把上下文从 4K 撑到 1M」不是简单调一个配置参数，更像<strong>给一个为小数据量设计的系统做水平扩展</strong>：你不能只改一行 <code>max_length</code>，得同时解决<strong>算力（O(n²) 爆炸）</strong>、<strong>显存（KV cache 线性涨）</strong>、和<strong>泛化（模型没见过这么远的位置）</strong>三件事——就像数据库从单机扩到分布式，索引、缓存、一致性全都要重做。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：原始 Transformer 在固定长度（如 2K、4K）上训练，想直接喂 100K token 会出现三重障碍。长上下文是一组工程技术的合集，分别攻击这三个：</p>
+    <ul>
+      <li><strong>① 算力墙（O(n²)）</strong>：注意力本身随长度平方增长。解法是<strong>高效注意力 kernel</strong>（如 FlashAttention，靠分块计算 + 不落地中间矩阵，把显存从 O(n²) 降到 O(n)），以及前面讲的 SSM/Mamba 这类线性架构。</li>
+      <li><strong>② 显存墙（KV cache）</strong>：每个历史 token 的 Key/Value 都要常驻显存。解法是<strong>GQA / MQA</strong>（多个注意力头共享同一份 K/V，把 cache 缩小数倍）、KV cache 量化等。</li>
+      <li><strong>③ 泛化墙（位置外推）</strong>：模型训练时没见过「第 50 万个位置」，位置编码会失效。这是最微妙的一环——下面展开。</li>
+    </ul>
+    <p style="margin-top:8px">第三点的主流解法围绕 <strong>RoPE（旋转位置编码）</strong>展开（Day 13 详讲过其机制）。RoPE 把位置信息编码成「旋转角度」，频率越高的维度转得越快。直接外推到训练没见过的长度时，高频维度「转过头」导致模型懵掉。<strong>位置插值（Position Interpolation）</strong>的巧思是：与其让模型见识没见过的大角度，不如<strong>把所有位置等比例「压缩」回训练见过的范围</strong>——好比把一把为 30cm 设计的尺子，重新标刻度让它量 3 米，刻度变密但范围都在「认识的区间」内，只需少量微调即可适配。</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">长上下文的三道墙与对策</b><br><br>
+<span class="box r">① 算力 O(n²)</span> <span class="arrow">→</span> FlashAttention / SSM 线性架构<br>
+<span class="box o">② 显存 KV cache</span> <span class="arrow">→</span> GQA/MQA 共享 K/V · cache 量化<br>
+<span class="box p">③ 位置外推</span> <span class="arrow">→</span> RoPE + 位置插值 / NTK 缩放<br><br>
+<span style="color:#5a6378">撑长上下文 = 同时翻过这三道墙，缺一不可</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># 位置插值的核心思想：把超长位置「压缩」回训练长度区间</span>
+train_len   = 4096        <span class="cmt"># 模型原始训练长度</span>
+target_len  = 32768       <span class="cmt"># 想扩展到的目标长度</span>
+scale = train_len / target_len     <span class="cmt"># 缩放因子 = 1/8</span>
+
+pos = torch.<span class="fn">arange</span>(target_len).<span class="fn">float</span>()
+<span class="cmt"># 关键一步：位置 ×scale → 把 [0, 32768) 压回 [0, 4096) 的"已知区间"</span>
+pos_interpolated = pos * scale     <span class="cmt"># 模型只需"认识"它见过的位置范围</span>
+
+<span class="cmt"># 这些插值后的位置再喂给 RoPE 计算旋转角度（RoPE 机制见 Day 13）</span>
+<span class="cmt"># 实践中：插值后用少量长文本微调，即可稳定适配新长度</span>
+<span class="fn">print</span>(pos_interpolated.max())   <span class="cmt"># ≈ 4095，全落在训练见过的范围内</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <div class="tip">误区：「支持 1M 上下文 = 能用好 1M 上下文」。<strong>分清两件事</strong>：架构「能装下」是物理容量，模型「真的看得见中间」是有效利用率——后者受 Day 8 讲的 <strong>Lost in the Middle</strong> 制约，长上下文中段的召回率会显著下降。「最大窗口」是规格上限，不是实际可用质量。<em>（注：怎么排布上下文、何时该用 RAG 替代是工程话题，见 super-individual。）</em></div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat 场景：当你看到模型发布会喊「200 万 token 上下文」，你现在能拆解这背后的工程成本：算力按 O(n²) 或线性、显存按 KV cache 涨、位置靠插值外推。这让你在选型时问对问题——「<strong>有效</strong>长度多少？长输入的延迟和单价多少？」而非被规格数字唬住。</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + 思考题</div>
+    <div class="takeaway">💡 长上下文不是单一技术，是「高效注意力 + KV 压缩 + 位置外推」的合奏——任何一道墙没翻过，长度都撑不起来。<br>🤔 三道墙里，MoE 解决的是「参数容量成本」、SSM 解决的是「序列计算成本」、长上下文解决的是「序列长度成本」。如果你只能在自己的产品里押注一条路线，你怎么根据业务的「序列特征」来选？<br><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.html" style="color:#7b61ff">工程对应 → super-individual D16 (Cost：长上下文的成本与延迟账)</a></div>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1701.06538" target="_blank">Shazeer et al. 2017 — Outrageously Large Neural Networks (Sparsely-Gated MoE)</a> — MoE 的奠基论文，条件计算思想的起点</li>
+      <li><a href="https://arxiv.org/abs/2101.03961" target="_blank">Fedus et al. 2021 — Switch Transformers</a> — 把 MoE 路由简化到 top-1、推向万亿参数的代表作</li>
+      <li><a href="https://arxiv.org/abs/2111.00396" target="_blank">Gu et al. 2021 — Efficiently Modeling Long Sequences (S4)</a> — 结构化状态空间模型，SSM 现代复兴的起点</li>
+      <li><a href="https://arxiv.org/abs/2312.00752" target="_blank">Gu &amp; Dao 2023 — Mamba: Selective State Spaces</a> — 选择性机制 + 硬件感知扫描，必读</li>
+      <li><a href="https://arxiv.org/abs/2401.04088" target="_blank">Mixtral of Experts 2024</a> — 开源 MoE 旗舰的技术报告，可对照理解工程落地</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. MoE 和 SSM/Mamba 攻击的是 Transformer 的两个不同「病灶」——它们能叠加吗？</summary><div>能，这正是前沿方向之一。两者<strong>正交</strong>：MoE 优化「<strong>每层宽度方向</strong>」——把稠密 FFN 换成稀疏专家，让容量和计算解耦；SSM/Mamba 优化「<strong>序列长度方向</strong>」——把 O(n²) 换成 O(n) 递推。一个管「单步算多少参数」，一个管「序列怎么扫」，互不冲突。已有研究把 MoE 塞进 Mamba/混合架构：容量大、序列长、单步还便宜。对你的分布式直觉：这就像「分库分表（MoE）」叠加「流式处理（SSM）」——两种扩展策略本就该组合用，而非二选一。难点在两者的负载均衡和硬件 kernel 要同时调好。</div></details>
+
+    <details><summary>2. 为什么是「混合架构」（少量注意力 + 大量 Mamba）成了主流，而不是纯 Mamba？</summary><div>核心是<strong>能力互补</strong>：Mamba 的固定状态对「精确召回远处具体 token」天生弱，而注意力擅长「无损回看 + 按需检索」。实证反复显示纯 SSM 在 in-context learning、大海捞针类任务上掉点。混合架构用少量注意力补短板、大量 Mamba 拿效率。这个「少量但关键的组件撑起整体质量」模式随处可见：少量索引覆盖大部分查询、少量热点缓存命中大部分请求、少量协调节点管大量数据节点。深层洞见：<strong>异构往往优于同构</strong>——把不同代价/能力的组件按其擅长处摆放，比「全用一种万能组件」更经济。</div></details>
+
+    <details><summary>3. SSM「有损压缩」历史，注意力「无损保留」历史。从信息论角度（Day 33）看，无损一定更好吗？</summary><div>本质是<strong>信息瓶颈（information bottleneck）</strong>权衡。无损不一定更好：(1) <strong>真实序列高度冗余</strong>——多数 token 对未来预测无用，无损保留是浪费，有损压缩反像一种隐式去噪/正则；(2) <strong>认知类比</strong>：人脑也激进有损，绝大多数感官输入被即时丢弃，这不是缺陷而是<strong>特征</strong>——遗忘让我们抽象、泛化。关键从来不是「无损 vs 有损」，而是「<strong>丢的是不是该丢的</strong>」——这正是 Mamba 选择性机制的价值：让「丢什么」变成可学习、内容感知的。做信息流设计时同理：目标不是「记住一切」，而是「智能地决定记住什么」。</div></details>
+
+    <details><summary>4. MoE 的路由「不可解释、不对应人类领域」——我们该接受「有效但不可解释」的机制吗？</summary><div>务实立场分场景：(1) <strong>能力层面</strong>——只要均衡机制保证它工作良好，「不可解释的有效分工」可接受，正如我们用了几十年不完全理解的随机梯度下降；(2) <strong>高风险层面</strong>——医疗、司法、对齐场景下不可解释是真风险，需 Day 27 的机制可解释性工具事后探查。更深的问题：<strong>「可解释」是否一种人类中心的执念？</strong>人类自己的神经元分工也不对应「学科」，强求 AI 用人类范畴思考反而可能限制能力。健康的态度或许是：<strong>追求「可监督、可干预」而非「完全可理解」</strong>——能在它出错时纠正，比讲清它每步为什么，更现实也更重要。</div></details>
+
+    <details><summary>5. 退一步看，架构创新和「Scaling Law 暴力堆算力」（Day 14）是什么关系？谁更重要？</summary><div>它们是<strong>互补的两条腿</strong>。Scaling Law 是「同架构下加算力/数据稳定提升」——沿既定路径走更远；架构创新（MoE/Mamba/长上下文）改变<strong>路径的斜率</strong>——提高「每分算力换多少能力」的兑换率。scaling 是引擎，架构是变速箱。当稠密 scaling 的边际成本撞墙（算力/能耗/显存），MoE 这类创新就成续命关键——用稀疏性/线性性<strong>买回更多 scaling 空间</strong>。当下（2026）是两条腿一起走。对「超级个体」的隐喻：「在现有方法上更努力」和「换更高效的方法」都需要，但当你边际收益递减时，往往是该<strong>换架构</strong>而非「再加把劲」的信号。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 34 · 2026-06-20</footer>
+
+</div>
+
+</body>
+</html>

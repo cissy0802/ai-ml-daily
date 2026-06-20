@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: Frontier Architectures — Day 34</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: Frontier Architectures</h1>
+  <div class="meta">Day 34 · 2026-06-20</div>
+  <div class="audience">For: engineers with coding experience, non-AI background</div>
+</header>
+
+<div class="cross-ref" style="margin: 24px auto; max-width: 760px; padding: 14px 18px; border-left: 3px solid #7b61ff; background: rgba(123,97,255,0.10); border-radius: 4px; font-size: 0.92rem;">
+  <a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.en.html" style="color: #7b61ff; text-decoration: none; font-weight: 500;">
+    Engineering counterpart → super-individual D16: Cost (inference-cost trade-offs of MoE / long context)
+  </a>
+</div>
+
+<div class="card" style="border-left-color:#7b61ff;background:#11162a">
+  <div class="section" style="margin-top:0">
+    <div class="label">The thread of today</div>
+    <p>The standard Transformer has two congenital ailments: <strong>attention is O(n²)</strong> (double the sequence, quadruple the compute) and <strong>dense computation</strong> (every token activates every parameter). Today's four concepts are academia's two lines of attack on these ailments — <strong>MoE</strong> attacks "dense," growing parameters while holding compute fixed; <strong>SSM / Mamba</strong> attacks "O(n²)" by borrowing RNN ideas to recover linear complexity; <strong>long context</strong> asks "how do we stretch n without changing the architecture?" They all answer the same question: <strong>when we want bigger and longer, what about the hardware bill?</strong></p>
+  </div>
+</div>
+
+<!-- 1. MoE -->
+<div class="card">
+  <h2>Mixture of Experts<span class="en">MoE</span></h2>
+  <div class="tags"><span class="tag">sparse activation</span><span class="tag purple">conditional compute</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>MoE is <strong>database sharding + query routing</strong> for a neural net. A dense model is like a single-node database that scans the whole table on every request; MoE splits one giant feed-forward layer (FFN) into N "expert shards" and adds a <strong>router</strong> that forwards each token only to its 1–2 most relevant shards. <strong>Total capacity grows linearly with shard count, while per-query compute stays roughly fixed</strong> — exactly sharding's core payoff: trade space for throughput, not compute for capacity.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem + how it works</div>
+    <p>Pain point: the most direct way to a stronger model is more parameters, but in a dense model <strong>parameter count and compute are welded together</strong> — double the params, double the FLOPs per token, and inference cost explodes linearly. We want "huge capacity but cheap to run," and a dense architecture can't have both.</p>
+    <p style="margin-top:8px">MoE's mechanism is <strong>conditional computation</strong>: replace each Transformer layer's FFN with N parallel small FFNs (experts) plus a lightweight router. For each token, the router computes a score distribution and <strong>activates only the top-k experts</strong> (usually k=1 or 2); the rest do zero work this step. So:</p>
+    <ul>
+      <li><strong>Total params (capacity)</strong> = N × per-expert size — can scale to trillions;</li>
+      <li><strong>Active params (cost)</strong> = k × per-expert size — depends only on k, not N.</li>
+    </ul>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">One token through an MoE layer (N=8 experts, top-2)</b><br><br>
+token <span class="arrow">→</span> <span class="box p">Router scores</span> <span class="arrow">→</span> pick the 2 highest<br><br>
+<span class="box g">E1 ✓</span><span class="box">E2</span><span class="box">E3</span><span class="box g">E4 ✓</span><span class="box">E5</span><span class="box">E6</span><span class="box">E7</span><span class="box">E8</span><br>
+<span style="color:#5a6378">└ only E1, E4 are activated &amp; weighted-summed; the other 6 shards do zero compute ┘</span><br><br>
+<span style="color:#8b92a8">capacity = 8 sets of params　|　cost ≈ 2 sets of params</span>
+</div>
+
+    <p style="margin-top:14px">The key design difficulty is <strong>load balancing</strong>: if the router keeps sending tokens to a few "star experts," the rest never train yet still occupy memory. Shazeer et al.'s foundational 2017 paper introduced an auxiliary balancing loss to penalize this skew; Switch Transformer (2021) further simplified k to 1, showing <strong>single-expert routing preserves quality and cuts routing overhead</strong>. The 2024 Mixtral 8×7B turned this into an open-source flagship: 8 experts, 2 activated per token.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+<span class="cmt"># Minimal MoE layer: N experts + top-k routing (for intuition, not production)</span>
+<span class="kw">class</span> <span class="fn">MoE</span>(torch.nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, d=512, n_exp=8, k=2):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.k = k
+        self.router  = torch.nn.<span class="fn">Linear</span>(d, n_exp)        <span class="cmt"># router: token → score per expert</span>
+        self.experts = torch.nn.<span class="fn">ModuleList</span>([torch.nn.<span class="fn">Linear</span>(d, d) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n_exp)])
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):                          <span class="cmt"># x: [tokens, d]</span>
+        scores = self.<span class="fn">router</span>(x)                       <span class="cmt"># score every token against all experts</span>
+        w, idx = scores.<span class="fn">topk</span>(self.k, dim=-1)        <span class="cmt"># keep only top-k experts</span>
+        w = F.<span class="fn">softmax</span>(w, dim=-1)                     <span class="cmt"># normalize weights over the chosen k</span>
+        out = torch.<span class="fn">zeros_like</span>(x)
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(self.k):                      <span class="cmt"># weighted sum of activated experts</span>
+            <span class="kw">for</span> e <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(self.experts)):
+                m = idx[:, j] == e                    <span class="cmt"># mask of tokens routed to expert e</span>
+                <span class="kw">if</span> m.<span class="fn">any</span>(): out[m] += w[m, j:j+1] * self.experts[e](x[m])
+        <span class="kw">return</span> out                                    <span class="cmt"># N=8 capacity, but each token computes only 2 experts</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">Misconception: "MoE splits tasks by domain — a math expert, a code expert, a poetry expert." <strong>Wrong</strong>. Routing is learned at token granularity in latent space; expert specialization is <strong>uninterpretable and does not map to human domains</strong> — research finds routing correlates more with syntax/surface patterns than with "subjects." Think of experts as "hash buckets of a DB shard," not "microservices split by business line."</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when picking an open model for your workflow, don't misread "Mixtral 8×7B" as a "56B dense model." It has <strong>~47B total params but only ~13B active per token</strong> — meaning <strong>its memory footprint is sized like 47B but its speed is like 13B</strong>. Grasping this "capacity/cost decoupling" is how you correctly estimate whether one GPU can run it and what throughput to expect.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 MoE's essence is decoupling "parameter capacity" from "compute cost" — the same engineering philosophy as sharding trading space for throughput.<br>🤔 In your distributed experience, the biggest pitfall of "route by key to a shard" is the hot shard. MoE's "star expert" is the same disease — how would you design the balancing mechanism?<br><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.en.html" style="color:#7b61ff">Engineering counterpart → super-individual D16 (Cost: the inference-cost ledger of MoE)</a></div>
+  </div>
+</div>
+
+<!-- 2. State Space Models -->
+<div class="card">
+  <h2>State Space Models<span class="en">SSM / S4</span></h2>
+  <div class="tags"><span class="tag">linear complexity</span><span class="tag purple">sequence modeling</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>An SSM processes a sequence like <strong>a streaming processor with a fixed-size memory</strong>. A Transformer reads the whole log into memory and compares everything pairwise (O(n²)); an SSM is like a Kafka consumer — <strong>read one record at a time, compress history into a fixed-dimension "state variable,"</strong> then update the state and drop the raw record. Memory does not grow with stream length — exactly streaming's core edge over batch.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem + how it works</div>
+    <p>Pain point: attention must store every past token's Key/Value (KV cache grows linearly with length) and compute pairwise correlations (O(n²)). At tens or hundreds of thousands of tokens it's both slow and memory-hungry. Can we be "O(n) linear, constant memory" like an RNN, yet keep the Transformer's parallel training?</p>
+    <p style="margin-top:8px">SSMs borrow classic equations from control theory. The core keeps a hidden state <strong>h</strong>, updated once per input <strong>x<sub>t</sub></strong>:</p>
+    <div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">The SSM recurrence (two lines)</b><br><br>
+h<sub>t</sub> = <span style="color:#00d4ff">A</span>·h<sub>t-1</sub> + <span style="color:#7ed6a0">B</span>·x<sub>t</sub> &nbsp;&nbsp;<span style="color:#5a6378"># new state = decayed old state + injected input</span><br>
+y<sub>t</sub> = <span style="color:#ffb450">C</span>·h<sub>t</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#5a6378"># output = read out from the state</span>
+    </div>
+    <p style="margin-top:10px">Intuition: <strong>A is the "forget/retain matrix"</strong> — how old memory decays; <strong>B is the "write gate"</strong> — how much of the current input is injected; <strong>C is the "read gate"</strong> — what to extract from the state. This echoes LSTM gating, but the beauty of SSMs is: when A, B, C are input-independent (linear time-invariant), the whole recurrence <strong>can be unrolled mathematically into a convolution</strong>, so training runs <strong>fully parallel like a CNN</strong>, while inference updates <strong>step-by-step O(1) like an RNN</strong> — best of both worlds.</p>
+    <p style="margin-top:10px">The difficulty: a naive A matrix numerically explodes or vanishes over long sequences (the same root as RNN gradient issues). Gu et al.'s 2021 <strong>S4</strong> paper used a specially structured A matrix (HiPPO-theory initialization + low-rank correction) to fix this stability, letting SSMs for the first time <strong>beat Transformers across long-sequence benchmarks</strong> (Long Range Arena) and generate dozens of times faster.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># The SSM "recurrent mode" — showing constant-memory streaming (teaching version, not full S4)</span>
+<span class="kw">def</span> <span class="fn">ssm_scan</span>(x, A, B, C):
+    <span class="cmt"># x: [seq_len, d]  A,B,C are learned state matrices</span>
+    h = torch.<span class="fn">zeros</span>(A.shape[0])          <span class="cmt"># hidden state: fixed dim, does not grow with seq_len</span>
+    ys = []
+    <span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(x.shape[0]):         <span class="cmt"># streaming, token by token</span>
+        h = A @ h + B @ x[t]            <span class="cmt"># decay old state + write new input</span>
+        ys.<span class="fn">append</span>(C @ h)                <span class="cmt"># read current output from the state</span>
+    <span class="kw">return</span> torch.<span class="fn">stack</span>(ys)
+<span class="cmt"># Key: whether seq_len is 1k or 1M, h's size is unchanged → O(1) memory</span>
+<span class="cmt"># In training this recurrence unrolls into a convolution → fully parallel (omitted)</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">Misconception: "SSMs are linear, so they beat Transformers everywhere." <strong>Not quite</strong>. A fixed-size state is a double-edged sword — it <strong>lossily compresses</strong> all history into one vector, so it's inherently weaker at "exactly recalling a specific distant token" (needle-in-a-haystack, verbatim copying) than attention, which can look back token by token. This is exactly the weakness the next concept, Mamba, fixes.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when evaluating "very long sequence" tasks (genomic sequences, long audio, whole books), remember this divide: <strong>need globally precise retrieval → attention wins; need efficient streaming over very long signals → SSM wins</strong>. The logic is isomorphic to your "batch vs stream processing" framework choice.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 SSMs beat O(n²) back to O(n) with "fixed state + streaming update," at the cost of lossily compressing history — the classic "constant memory vs precise look-back" trade-off.<br>🤔 Think of hidden state h as a database "materialized view": continuously updated incrementally, storing no raw events. When is a materialized view enough, and when must you query the raw log?</div>
+  </div>
+</div>
+
+<!-- 3. Mamba -->
+<div class="card">
+  <h2>Mamba / Selective SSM<span class="en">Mamba</span></h2>
+  <div class="tags"><span class="tag">input-dependent</span><span class="tag purple">selectivity</span><span class="tag orange">2023</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>S4's state matrices are a <strong>static config</strong> — like a hard-coded cache policy that applies the same "keep/drop" rule regardless of the data. Mamba upgrades it to a <strong>content-aware dynamic cache</strong>: it makes the "write gate B, read gate C, and forget step" all <strong>functions of the current input</strong>. The cache policy can now judge for itself "this one matters, keep it longer; that one's noise, forget it fast" — upgrading from a fixed TTL to an <strong>adaptive TTL</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem + how it works</div>
+    <p>Pain point: the last section noted SSMs' Achilles' heel — "indiscriminate compression of history." Because A, B, C are fixed, the model <strong>cannot decide by content whom to remember and whom to ignore</strong> — this is the lack of "content-based reasoning." A task like "skip all whitespace, keep only content words" is impossible for a fixed SSM.</p>
+    <p style="margin-top:8px">Mamba's (Gu &amp; Dao, 2023) core innovation is the <strong>selection mechanism</strong>: it makes the SSM's <strong>B, C, and discretization step Δ functions computed from input x<sub>t</sub></strong>. So every token can dynamically control "how much I write into the state, how much I read, how fast I decay old memory." Intuitively, the model gains <strong>selective memory</strong>: reset/strongly-write the state on key info, let noise flow past.</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">S4 vs Mamba: do parameters vary with input?</b><br><br>
+<span class="box">S4</span>　A,B,C fixed <span class="arrow">→</span> updates state <span style="color:#ff8e8e">identically</span> for every token<br>
+<span class="box g">Mamba</span>　B,C,Δ = f(x<sub>t</sub>) <span class="arrow">→</span> each token <span style="color:#7ed6a0">decides</span> how much/how long to keep<br><br>
+<span style="color:#8b92a8">cost: params vary with input → convolution unroll fails → no direct parallelism</span>
+</div>
+
+    <p style="margin-top:14px">But here's the engineering paradox: <strong>once parameters depend on input, the system is no longer "linear time-invariant," so the "unroll into a convolution for parallel training" trick stops working</strong>. Mamba's second contribution is a <strong>hardware-aware parallel scan algorithm</strong> — a prefix-sum-like parallel primitive plus carefully designed GPU memory I/O (in the spirit of FlashAttention, keeping intermediate state in fast SRAM) — so this "input-dependent recurrence" still runs efficiently in parallel on a GPU. The paper reports Mamba reaching <strong>~5× the throughput of a same-size Transformer</strong> in language modeling, scaling linearly with sequence length up to million-length sequences.</p>
+    <p style="margin-top:10px">Since 2024 the practical consensus is <strong>hybrid architectures</strong>: interleave a few attention layers with many Mamba layers — use attention to patch the "precise recall" weakness and Mamba for "long-sequence efficiency," taking the best of both.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Official implementation: pip install mamba-ssm (needs CUDA)</span>
+<span class="kw">import</span> torch
+<span class="kw">from</span> mamba_ssm <span class="kw">import</span> Mamba
+
+batch, seq_len, dim = 2, 4096, 512
+x = torch.<span class="fn">randn</span>(batch, seq_len, dim).<span class="fn">to</span>(<span class="str">"cuda"</span>)
+
+model = <span class="fn">Mamba</span>(
+    d_model=dim,     <span class="cmt"># input/output dimension</span>
+    d_state=16,      <span class="cmt"># hidden-state dim — fixed, independent of seq_len</span>
+    d_conv=4,        <span class="cmt"># local conv window (captures short-range patterns)</span>
+    expand=2,        <span class="cmt"># internal expansion factor</span>
+).<span class="fn">to</span>(<span class="str">"cuda"</span>)
+
+y = <span class="fn">model</span>(x)           <span class="cmt"># output same shape as input [2, 4096, 512]</span>
+<span class="fn">print</span>(y.shape)        <span class="cmt"># B, C, Δ are computed from x internally → selective memory</span>
+<span class="cmt"># However long the sequence, d_state stays 16, run efficiently via parallel scan</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">Misconception: "Mamba is out, the Transformer is obsolete." <strong>Overstated</strong>. The 2024–2025 evidence: pure Mamba still trails attention on tasks needing precise in-context retrieval (in-context learning, copying long strings); leading frontier models take a <strong>hybrid route</strong>, not a wholesale replacement. Treat it as "a handy new weapon in the toolbox," not a silver bullet.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: in cross-disciplinary thinking, Mamba's "selectivity" is a lovely <strong>cognitive metaphor</strong> — the brain's attention is also "selective writing to long-term memory," with the vast majority of sensory input forgotten instantly. When you design your own "information-flow filter" (what to read, keep, forget each day), Mamba's Δ (adaptive forget step) is a borrowable design variable.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Mamba = giving SSMs "content-aware selective memory" + "hardware-aware parallel scan," letting a linear architecture approach attention on language for the first time.<br>🤔 Attention is "losslessly keep all history, retrieve on demand"; Mamba is "selectively compress history, update streaming." Isn't this the database debate of "keep full detail vs maintain an aggregate state"? Will both paradigms coexist long-term, or will one win?</div>
+  </div>
+</div>
+
+<!-- 4. Long Context -->
+<div class="card">
+  <h2>Long Context<span class="en">Long Context</span></h2>
+  <div class="tags"><span class="tag">extrapolation</span><span class="tag purple">position encoding</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>"Stretch context from 4K to 1M" is not flipping a config flag; it's more like <strong>horizontally scaling a system designed for small data</strong>: you can't just change one <code>max_length</code> line — you must simultaneously solve <strong>compute (O(n²) blowup)</strong>, <strong>memory (KV cache grows linearly)</strong>, and <strong>generalization (the model never saw positions this far out)</strong> — just as scaling a database from single-node to distributed redoes indexing, caching, and consistency all at once.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem + how it works</div>
+    <p>Pain point: the original Transformer trains at a fixed length (e.g. 2K, 4K); feeding it 100K tokens directly hits three barriers. Long context is a collection of techniques, each attacking one:</p>
+    <ul>
+      <li><strong>① Compute wall (O(n²))</strong>: attention grows quadratically with length. Solutions: <strong>efficient attention kernels</strong> (e.g. FlashAttention, which tiles the computation and never materializes the intermediate matrix, cutting memory from O(n²) to O(n)), plus linear architectures like the SSM/Mamba above.</li>
+      <li><strong>② Memory wall (KV cache)</strong>: every past token's Key/Value must stay resident in memory. Solutions: <strong>GQA / MQA</strong> (multiple attention heads share one set of K/V, shrinking the cache several-fold), KV cache quantization, etc.</li>
+      <li><strong>③ Generalization wall (position extrapolation)</strong>: the model never saw "the 500,000th position" during training, so position encoding fails. This is the subtlest one — expanded below.</li>
+    </ul>
+    <p style="margin-top:8px">The mainstream fix for the third revolves around <strong>RoPE (Rotary Position Embedding)</strong> (Day 13 covered its mechanism). RoPE encodes position as a "rotation angle"; higher-frequency dimensions rotate faster. Extrapolating directly to unseen lengths makes high-frequency dimensions "over-rotate," confusing the model. <strong>Position Interpolation</strong>'s trick: rather than show the model unseen large angles, <strong>compress all positions proportionally back into the trained range</strong> — like re-marking a ruler designed for 30cm so it measures 3 meters: the ticks get denser but all stay within the "known interval," needing only a little fine-tuning.</p>
+
+<div class="diagram" style="margin-top:8px">
+<b style="color:#7b61ff">The three walls of long context and their counters</b><br><br>
+<span class="box r">① Compute O(n²)</span> <span class="arrow">→</span> FlashAttention / linear SSM architectures<br>
+<span class="box o">② Memory KV cache</span> <span class="arrow">→</span> GQA/MQA shared K/V · cache quantization<br>
+<span class="box p">③ Position extrapolation</span> <span class="arrow">→</span> RoPE + position interpolation / NTK scaling<br><br>
+<span style="color:#5a6378">long context = clear all three walls at once, none can be skipped</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># Core idea of position interpolation: "compress" very long positions back into the trained range</span>
+train_len   = 4096        <span class="cmt"># model's original training length</span>
+target_len  = 32768       <span class="cmt"># length we want to extend to</span>
+scale = train_len / target_len     <span class="cmt"># scaling factor = 1/8</span>
+
+pos = torch.<span class="fn">arange</span>(target_len).<span class="fn">float</span>()
+<span class="cmt"># Key step: position ×scale → squeeze [0, 32768) back into the "known" [0, 4096)</span>
+pos_interpolated = pos * scale     <span class="cmt"># model only needs to "know" positions it has seen</span>
+
+<span class="cmt"># These interpolated positions feed RoPE to compute rotation angles (RoPE: see Day 13)</span>
+<span class="cmt"># In practice: after interpolating, fine-tune briefly on long text to adapt stably</span>
+<span class="fn">print</span>(pos_interpolated.max())   <span class="cmt"># ≈ 4095, all within the trained range</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + your scenario</div>
+    <div class="tip">Misconception: "Supports 1M context = can use 1M context well." <strong>Distinguish two things</strong>: "the architecture can fit it" is physical capacity; "the model actually sees the middle" is effective utilization — the latter is constrained by Day 8's <strong>Lost in the Middle</strong>, where recall drops sharply for the middle of a long context. "Max window" is a spec ceiling, not actual usable quality. <em>(Note: how to arrange context and when to use RAG instead are engineering topics — see super-individual.)</em></div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: when a launch event shouts "2M-token context," you can now unpack the engineering cost behind it: compute scaling O(n²) or linear, memory growing with KV cache, positions extrapolated via interpolation. This lets you ask the right questions when choosing — "what's the <strong>effective</strong> length? what's the latency and price for long inputs?" — rather than being bluffed by the spec number.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Long context isn't one technique; it's an ensemble of "efficient attention + KV compression + position extrapolation" — fail any one wall and the length won't hold.<br>🤔 Across the three walls: MoE solves "parameter-capacity cost," SSM solves "sequence-compute cost," and long context solves "sequence-length cost." If you could bet on only one line in your product, how would you choose based on your business's "sequence characteristics"?<br><a href="https://cissy0802.github.io/super-individual-weekly/cost-day16.en.html" style="color:#7b61ff">Engineering counterpart → super-individual D16 (Cost: the cost &amp; latency ledger of long context)</a></div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1701.06538" target="_blank">Shazeer et al. 2017 — Outrageously Large Neural Networks (Sparsely-Gated MoE)</a> — the foundational MoE paper, origin of conditional computation</li>
+      <li><a href="https://arxiv.org/abs/2101.03961" target="_blank">Fedus et al. 2021 — Switch Transformers</a> — simplified MoE routing to top-1, scaled toward trillion params</li>
+      <li><a href="https://arxiv.org/abs/2111.00396" target="_blank">Gu et al. 2021 — Efficiently Modeling Long Sequences (S4)</a> — structured state space models, the start of the modern SSM revival</li>
+      <li><a href="https://arxiv.org/abs/2312.00752" target="_blank">Gu &amp; Dao 2023 — Mamba: Selective State Spaces</a> — selection mechanism + hardware-aware scan, essential reading</li>
+      <li><a href="https://arxiv.org/abs/2401.04088" target="_blank">Mixtral of Experts 2024</a> — the open-source MoE flagship's technical report, a good engineering reference</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. MoE and SSM/Mamba attack two different "ailments" of the Transformer — can they stack?</summary><div>Yes, and this is a frontier direction. They're <strong>orthogonal</strong>: MoE optimizes the "<strong>per-layer width axis</strong>" — swapping a dense FFN for sparse experts, decoupling capacity from compute; SSM/Mamba optimizes the "<strong>sequence-length axis</strong>" — swapping O(n²) for O(n) recurrence. One governs "how many params per step," the other "how the sequence is scanned"; they don't conflict. Research already puts MoE inside Mamba/hybrid architectures: big capacity, long sequences, cheap steps. For your distributed intuition: it's "sharding (MoE)" stacked with "stream processing (SSM)" — two scaling strategies meant to combine, not to pick from. The difficulty is tuning both the load balancing and the hardware kernels together.</div></details>
+
+    <details><summary>2. Why did "hybrid architectures" (few attention + many Mamba) become mainstream rather than pure Mamba?</summary><div>The core is <strong>complementary capability</strong>: Mamba's fixed state is inherently weak at "precisely recalling a specific distant token," while attention excels at "lossless look-back + on-demand retrieval." Evidence repeatedly shows pure SSMs drop points on in-context learning and needle-in-a-haystack tasks. Hybrids use a few attention layers to patch the weakness and many Mamba layers for efficiency. This "a few critical components carry overall quality" pattern is everywhere: a few indexes cover most queries, a few hot caches serve most requests, a few coordination nodes govern many data nodes. The deeper insight: <strong>heterogeneity often beats homogeneity</strong> — placing components of different cost/ability where each excels is cheaper than "one universal component everywhere."</div></details>
+
+    <details><summary>3. SSMs "lossily compress" history; attention "losslessly keeps" it. From an information-theory view (Day 33), is lossless always better?</summary><div>The essence is an <strong>information bottleneck</strong> trade-off. Lossless isn't always better: (1) <strong>real sequences are highly redundant</strong> — most tokens are useless for future prediction, so keeping them losslessly is waste, and lossy compression acts like implicit denoising/regularization; (2) <strong>cognitive analogy</strong>: the brain is also aggressively lossy, discarding most sensory input instantly — not a defect but a <strong>feature</strong>; forgetting enables abstraction and generalization. The real question is never "lossless vs lossy" but "<strong>is what's dropped the right thing to drop</strong>" — exactly the value of Mamba's selection mechanism: it makes "what to drop" learnable and content-aware. Same for designing your info flow: the goal isn't "remember everything" but "intelligently decide what to remember."</div></details>
+
+    <details><summary>4. MoE routing is "uninterpretable, not mapped to human domains" — should we accept "effective but uninterpretable" mechanisms?</summary><div>A pragmatic stance splits by context: (1) <strong>capability level</strong> — as long as balancing mechanisms keep it working well, "uninterpretable but effective specialization" is acceptable, just as we used not-fully-understood stochastic gradient descent for decades; (2) <strong>high-risk level</strong> — in medicine, justice, alignment, uninterpretability is real risk, needing Day 27's mechanistic-interpretability tools for post-hoc probing. The deeper question: <strong>is "interpretability" a human-centric obsession?</strong> Human neurons don't map to "subjects" either, and forcing AI to think in human categories may limit ability. The healthy stance may be: <strong>pursue "supervisable and steerable" rather than "fully understandable"</strong> — being able to correct it when it errs matters more, and is more realistic, than explaining every step.</div></details>
+
+    <details><summary>5. Stepping back: how does architecture innovation relate to "Scaling Law's brute-force compute" (Day 14)? Which matters more?</summary><div>They're <strong>complementary legs</strong>. Scaling Law is "same architecture, add compute/data → steady gains" — going further along a fixed path; architecture innovation (MoE/Mamba/long context) changes <strong>the path's slope</strong> — raising the "ability per unit of compute" exchange rate. Scaling is the engine, architecture is the gearbox. When dense scaling's marginal cost hits the wall (compute/energy/memory), innovations like MoE become the lifeline — buying back more scaling room with sparsity/linearity. Currently (2026) it's both legs together. As a metaphor for the "super-individual": both "work harder with existing methods (scaling)" and "switch to a more efficient method (architecture innovation)" are needed — but when you feel diminishing returns, it's often the signal to <strong>switch architecture</strong> rather than "push harder."</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 34 · 2026-06-20</footer>
+
+</div>
+
+</body>
+</html>
