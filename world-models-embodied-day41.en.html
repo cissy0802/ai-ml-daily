@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: World Models & Embodied Intelligence — Day 41</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: World Models &amp; Embodied Intelligence</h1>
+  <div class="meta">Day 41 · 2026-06-27</div>
+  <div class="audience">For: engineers with coding experience, outside AI · Level: Advanced / Frontier</div>
+</header>
+
+<!-- 1. World Models -->
+<div class="card">
+  <h2>World Models<span class="en">World Models</span></h2>
+  <div class="tags"><span class="tag">Reinforcement Learning</span><span class="tag purple">Simulation</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A world model is the <b>"staging simulation environment"</b> an agent builds for itself. The real environment (prod) is expensive and risky to call — a real robot falling over once costs real money. So the agent first learns an internal model that predicts <b>"if I act this way, how does the world change,"</b> then runs thousands of rollouts inside that "dream" to train its policy. It's load-testing against a staging replica instead of hammering prod directly.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Reinforcement learning's weak spot is <b>sample efficiency</b>: trial-and-error in the real world is brutally expensive. The world-model idea is to compress the environment's <b>dynamics</b> into a neural network and let the agent train in imagination. Ha &amp; Schmidhuber's 2018 classic trio:</p>
+    <ul>
+      <li><b>V (Vision)</b>: a VAE compresses high-dimensional pixels into a low-dimensional <b>latent z</b> — dimensionality reduction, like hashing a screenshot into a feature fingerprint;</li>
+      <li><b>M (Memory)</b>: an RNN learns "given current z and action a, what is the next z" — this is the <b>predictive model</b> of the environment;</li>
+      <li><b>C (Controller)</b>: a tiny policy network that reads only the V+M outputs to decide.</li>
+    </ul>
+    <p style="margin-top:8px">Why compress to a latent and predict that, instead of predicting the next frame's pixels directly? Because most pixel detail (texture, lighting jitter) is irrelevant to decisions — forcing the model to predict it wastes capacity. This intuition gets pushed to its limit by JEPA in the second card. The counterintuitive payoff: an agent can <b>learn its whole policy inside the "dream" generated by M</b>, then transfer it back to the real environment and still succeed. DreamerV3 (Hafner 2023) scaled this up — one fixed set of hyperparameters beats specialized methods across 150+ tasks, and it was the <b>first to mine a diamond in Minecraft from scratch</b>, with no human demonstrations, and larger models give better data efficiency.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">World Model: pixels → latent imagination → decision</b><br><br>
+pixels <span class="arrow">→</span><span class="box">V encoder</span><span class="arrow">→</span> latent z <span class="arrow">→</span><span class="box p">M predictor</span><span class="arrow">→</span> ẑ<sub>next</sub><br>
+<span style="color:#5a6378">　　　　　　　　　　　　　　　　　　　　↓ feeds</span><br>
+<span class="box g">C controller</span><span class="arrow">→</span> action a <span class="arrow">↺ back to M (no real environment)</span><br><br>
+<span style="color:#8b92a8">"Dreaming" = rolling M→C→M→C in z-space, free trial-and-error, millions of times</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Schematic: the world model's "imagination rollout" loop (latent space, no real env)</span>
+<span class="kw">import</span> torch
+<span class="cmt"># Assume V/M/C are trained: encoder, dynamics, policy are all neural nets</span>
+
+z = encoder(obs)                       <span class="cmt"># V: real observation → latent z</span>
+total_reward = 0
+<span class="kw">for</span> t <span class="kw">in</span> <span class="fn">range</span>(horizon):       <span class="cmt"># roll forward H steps inside the "dream"</span>
+    a = policy(z)                      <span class="cmt"># C: decide from the latent only</span>
+    z, r = dynamics(z, a)              <span class="cmt"># M: predict next latent and reward — pure imagination</span>
+    total_reward = total_reward + r
+<span class="cmt"># Backprop through imagined returns — thousands of rollouts at near-zero cost</span>
+total_reward.<span class="fn">backward</span>()           <span class="cmt"># not a single real step taken, policy already updating</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">Misconception: "a world model = a bigger, more photorealistic generative model." Wrong. Its value isn't pretty frames but <b>accurate latent dynamics that support planning</b>. Video models like Sora produce stunning footage yet often break physics (water not conserved, objects clipping) — not necessarily a good world model.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: in decision support, the "world model" is a mindset — first build a lightweight predictive model (in your head or with AI), simulate "if I change this, how does the system evolve," pick the best rollout, instead of trial-and-error in reality.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 World models move "trial and error" out of costly reality and into cheap imagination — part of intelligence is rehearsing.<br>🤔 When you make an architecture decision, how accurate is your mental model that "predicts downstream effects"? Where does its prediction error mostly come from?</div>
+  </div>
+</div>
+
+<!-- 2. JEPA -->
+<div class="card">
+  <h2>Joint-Embedding Predictive Architecture<span class="en">JEPA</span></h2>
+  <div class="tags"><span class="tag">Self-supervised</span><span class="tag purple">Representation Learning</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>To compare two large files you don't go byte by byte (costly and pointless) — you compute a <b>semantic checksum</b> for each and compare those. JEPA does the same: when predicting the future it <b>does not predict every pixel</b> (that's generative); it predicts the other side's <b>embedding (semantic fingerprint)</b> — spending compute on "predictable structure" and discarding "unpredictable noise detail."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Generative self-supervision (e.g. reconstructing masked pixels) has a fundamental waste: much of an image's detail (leaf texture, noise) is inherently <b>unpredictable</b>, yet the model is forced to fit it pixel by pixel, burning capacity on nothing useful. LeCun's <b>JEPA</b> (Joint-Embedding Predictive Architecture) argues: <b>predict in an abstract representation space</b>. Take I-JEPA (Assran 2023):</p>
+    <ul>
+      <li>the <b>context encoder</b> encodes the visible part → context representation;</li>
+      <li>the <b>target encoder</b> (an <b>EMA — exponential moving average</b> copy of the context encoder) encodes the masked target blocks → target representation;</li>
+      <li>the <b>predictor</b> predicts the target representation from the context representation, with loss computed in <b>latent space</b>, not pixel space.</li>
+    </ul>
+    <p style="margin-top:8px">Why the <b>asymmetric</b> EMA + stop-gradient design? Otherwise the model "cheats": map every input to the <b>same constant vector</b>, the loss drops to zero but carries no information — this is <b>representation collapse</b>. The asymmetry blocks that shortcut. V-JEPA 2 (Meta 2025) extended this to video, pretrained on a million hours, and already does <b>zero-shot robot planning</b>.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Generative vs JEPA: which space is the loss in?</b><br><br>
+<span class="box r">Generative</span> predicts → <b>every pixel</b> <span class="arrow">⇒</span> forced to fit noise detail, wasted compute<br>
+<span class="box g">JEPA</span> predicts → <b>target embedding</b> <span class="arrow">⇒</span> captures only predictable semantic structure<br><br>
+<span style="color:#8b92a8">context <span class="arrow">→</span> predictor <span class="arrow">→</span> ↔ compare ↔ <span class="arrow">←</span> target(EMA)　loss is here (latent)</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Schematic: one I-JEPA training step (latent-space prediction + anti-collapse)</span>
+<span class="kw">import</span> torch, torch.nn.functional <span class="kw">as</span> F
+
+ctx = ctx_encoder(visible_patches)          <span class="cmt"># encode the visible blocks</span>
+<span class="kw">with</span> torch.no_grad():                       <span class="cmt"># stop-gradient on the target side</span>
+    tgt = tgt_encoder(masked_patches)       <span class="cmt"># EMA copy encodes the masked blocks</span>
+pred = predictor(ctx, mask_pos)             <span class="cmt"># predict target reps from context</span>
+
+loss = F.<span class="fn">smooth_l1_loss</span>(pred, tgt)       <span class="cmt"># loss in latent space, never touches pixels</span>
+loss.<span class="fn">backward</span>(); opt.<span class="fn">step</span>()
+<span class="cmt"># Key: no gradient flows to target; it slowly follows via EMA — breaks symmetry, prevents collapse</span>
+<span class="kw">for</span> p_t, p_c <span class="kw">in</span> <span class="fn">zip</span>(tgt_encoder.<span class="fn">parameters</span>(), ctx_encoder.<span class="fn">parameters</span>()):
+    p_t.data = 0.996 * p_t.data + 0.004 * p_c.data   <span class="cmt"># EMA update</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">Misconception: "lower JEPA loss means better representations." Wrong — under collapse the loss is also extremely low, but the representation is useless. Low loss only means something when paired with an <b>effective anti-collapse design</b> (EMA, stop-gradient, masking strategy).</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: for cross-disciplinary thinking, JEPA is a nice metaphor — grab the <b>embedding-level commonality</b> of concepts, not the surface wording. Buddhism's "dependent origination" and distributed systems' "causal consistency" are unrelated on the surface yet highly aligned in abstract representation space; the goal of learning is to build such transferable latent representations.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Predict semantics, not pixels — intelligence may lie in knowing <b>which details aren't worth predicting</b>.<br>🤔 When you learn a new field, are you memorizing "pixel-level detail" or building a transferable "latent representation"? Which one actually transfers?</div>
+  </div>
+</div>
+
+<!-- 3. Causal Representation Learning -->
+<div class="card">
+  <h2>Causal Representation Learning<span class="en">Causal Representation Learning</span></h2>
+  <div class="tags"><span class="tag">Causality</span><span class="tag orange">Generalization</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>"Cache fills up → error rate rises" in your monitoring is <b>correlation</b>; your microservice <b>dependency DAG</b> is <b>causation</b> — only the latter answers "what if I scale up service X." Correlation is fine while the distribution holds, but the moment someone <b>intervenes</b> on the system, only the causal graph survives. Causal representation learning = digging that causal graph (its variables) out of raw observations.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>Deep learning's hard limit is <b>out-of-distribution (OOD) generalization</b>: shift the training distribution and it breaks, because it learned correlation <b>P(Y|X)</b>, not causation <b>P(Y|do(X))</b>. The difference: <b>do(X)</b> means "actively set X" (intervention), which <b>severs X's own causes</b>; the conditional P(Y|X) only means "observed X." Classic example: a rooster's crow correlates strongly with sunrise, but <b>do(silence the rooster)</b> won't stop the sun — correlated in observation, useless under intervention.</p>
+    <p style="margin-top:8px">Schölkopf et al. 2021 proposed causal representation learning: <b>discover high-level causal variables from low-level pixels</b>, satisfying the <b>ICM</b> (Independent Causal Mechanisms) principle — the real world is assembled from a set of mutually independent, <b>separately intervenable</b> mechanisms. Learn that kind of representation and a model becomes robust to interventions and new environments. This is exactly the missing piece a world model needs to <b>predict the consequences of intervention</b>.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">Correlation vs causation: who survives an intervention</b><br><br>
+observed: rooster crows <span class="arrow">~</span> sunrise <span style="color:#5a6378">(strong correlation)</span><br>
+<span class="box r">do(silence)</span> <span class="arrow">→</span> sunrise <b>unchanged</b>　<span style="color:#ff8e8e">correlation breaks</span><br>
+real cause: <span class="box g">Earth's rotation</span> <span class="arrow">→</span> sunrise, and <span class="arrow">→</span> crow <span style="color:#5a6378">(common cause)</span><br><br>
+<span style="color:#8b92a8">P(sunrise | see crow) high　≠　P(sunrise | do(crow)) unchanged</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Runnable: a minimal SCM showing "observe" ≠ "intervene"</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+rng = np.random.<span class="fn">default_rng</span>(0)
+
+rotation = rng.<span class="fn">normal</span>(size=10000)            <span class="cmt"># common cause: Earth's rotation</span>
+crow   = rotation + 0.1*rng.<span class="fn">normal</span>(size=10000)  <span class="cmt"># rotation → rooster crow</span>
+sunrise= rotation + 0.1*rng.<span class="fn">normal</span>(size=10000)  <span class="cmt"># rotation → sunrise</span>
+
+<span class="cmt"># Observe: where crow is large, sunrise is large too — strong correlation</span>
+<span class="fn">print</span>(np.<span class="fn">corrcoef</span>(crow, sunrise)[0,1])     <span class="cmt"># ≈ 0.98</span>
+
+<span class="cmt"># Intervene do(crow=5): sever its causes; sunrise still set by rotation</span>
+sunrise_do = rotation + 0.1*rng.<span class="fn">normal</span>(size=10000)
+<span class="fn">print</span>(sunrise_do.<span class="fn">mean</span>())                   <span class="cmt"># ≈ 0, the crow intervention has no effect on sunrise</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">Misconception: "with enough data, correlation converges to causation." Wrong — no amount of observational data distinguishes "crow causes sunrise" from the reverse; you need <b>intervention</b> (experiment / A-B test) or <b>structural assumptions</b> to orient the arrows. Big data amplifies correlation; it does not manufacture causation.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: in investment / business judgment, deliberately separate "two metrics rise together" (correlation) from "will moving A actually push B" (causation) — only the latter guides action; the former is often a <b>common-cause trap</b> (an unseen "rotation" behind both).</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Correlation is for prediction, causation is for decisions — for a world model to "plan," it must understand causality.<br>🤔 Your most recent "data-driven" decision — did it rest on correlation or causation? Did you verify the intervention effect, or just assume correlation was causation?</div>
+  </div>
+</div>
+
+<!-- 4. Embodied Intelligence -->
+<div class="card">
+  <h2>Embodied Intelligence<span class="en">Embodied Intelligence</span></h2>
+  <div class="tags"><span class="tag">Robotics</span><span class="tag purple">Grounding</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>A pure text LLM is like a <b>side-effect-free pure function</b> that only reads and writes documents; embodied intelligence wires in <b>sensors</b> (read the real world) and <b>actuators</b> (write the real world), closing the "perception–action" loop. The difference is a read-only API service vs a <b>stateful system</b> that actually operates physical devices — where every action has a real side effect and the environment responds instantly.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">What problem it solves + how it works</div>
+    <p>The core pain point is <b>grounding</b>: an LLM knows every usage of the word "apple" yet has never "touched" one — its knowledge floats at the symbolic layer. Embodied intelligence argues that <b>intelligence arises from a body's interaction loop with the physical world</b>. <b>Moravec's paradox</b> names the counterintuitive part — for AI, proving theorems is easy and picking up a cup is extraordinarily hard; <b>sensorimotor skills</b> are the truly hard bone.</p>
+    <p style="margin-top:8px">The modern mainline is <b>VLA</b> (Vision-Language-Action) models: PaLM-E (2023) blends images, state, and text into a single <b>"multimodal sentence"</b> fed into an LLM that directly outputs robot plans, and it demonstrates <b>positive transfer</b> from internet vision-language knowledge into embodied reasoning — commonsense learned from web images and text helps a robot take fewer wrong turns in real scenes. Looking ahead, world models (learn the policy in a dream) + JEPA (efficient physical representations) + causality (understand intervention) are converging on one mainline: <b>an agent that can act in the physical world</b>.</p>
+
+<div class="diagram" style="margin-top:14px">
+<b style="color:#7b61ff">The heart of embodiment: closing the perception–action loop</b><br><br>
+<span class="box">sensor</span><span class="arrow">→</span><span class="box p">world model / perception</span><span class="arrow">→</span><span class="box g">plan / policy</span><span class="arrow">→</span><span class="box o">actuator</span><br>
+<span style="color:#5a6378">　↑　　　　　　　　　　　　　　　　　　　　　　　　　　↓</span><br>
+<span style="color:#8b92a8">　└──────────── physical world changes, feedback returns ←────────┘</span><br><br>
+<span style="color:#8b92a8">A pure LLM has only the top row (open loop); embodiment = adding this feedback edge (closed loop)</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># Schematic: the perception–action loop of a VLA / embodied agent (pseudo-skeleton)</span>
+obs = env.<span class="fn">reset</span>()                       <span class="cmt"># sensor: get RGB image + proprioceptive state</span>
+<span class="kw">while</span> <span class="kw">not</span> done:
+    <span class="cmt"># multimodal sentence: image + state + instruction, fed into VLA (PaLM-E style)</span>
+    action = vla_model(image=obs.rgb,
+                       state=obs.proprio,
+                       text=<span class="str">"put the blue block in the box"</span>)
+    obs, reward, done = env.<span class="fn">step</span>(action)  <span class="cmt"># actuator acts on the real world</span>
+    <span class="cmt"># the environment immediately returns a new observation — this feedback edge is the key to "embodiment"</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common misconception + practical scenario</div>
+    <div class="tip">Misconception: "the LLM is strong enough, bolt on a robot arm and you have embodied intelligence." Wrong — offline text intelligence ≠ real-time closed-loop control. The physical world has <b>latency, noise, and irreversible actions</b>, demanding dedicated world models and control policies; a language model's next-token prediction alone can't handle live feedback.</div>
+    <div class="exercise" style="margin-top:8px">📌 BigCat scenario: as an "AI super-individual," embodiment is a metaphor worth borrowing — don't let AI stop at "giving advice" (a pure function); wire it into the real workflow's <b>execute + feedback loop</b> (run automatically, observe results, then adjust). Value lives in the loop, not the single output.</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Takeaway + question</div>
+    <div class="takeaway">💡 Intelligence isn't only symbols in a head — it lives in the <b>closed-loop interaction</b> with the world, the direction all four concepts point toward.<br>🤔 Is your AI workflow a "document read/write pure function," or a real "embodied" system with a feedback loop? Which link is missing?</div>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://arxiv.org/abs/1803.10122" target="_blank">World Models (Ha &amp; Schmidhuber, 2018)</a> — the foundational V-M-C trio and "train in the dream"; the interactive web version reads beautifully</li>
+      <li><a href="https://arxiv.org/abs/2301.04104" target="_blank">Mastering Diverse Domains through World Models / DreamerV3 (Hafner, 2023)</a> — one hyperparameter set across 150+ tasks, first to mine diamonds with no demos</li>
+      <li><a href="https://arxiv.org/abs/2301.08243" target="_blank">I-JEPA (Assran et al., 2023)</a> — a flagship for predicting in representation space with anti-collapse design</li>
+      <li><a href="https://arxiv.org/abs/2506.09985" target="_blank">V-JEPA 2 (Meta, 2025)</a> — JEPA extended to video, enabling zero-shot robot planning</li>
+      <li><a href="https://arxiv.org/abs/2102.11107" target="_blank">Towards Causal Representation Learning (Schölkopf et al., 2021)</a> — the programmatic survey of causality × representation learning</li>
+      <li><a href="https://arxiv.org/abs/2303.03378" target="_blank">PaLM-E (Driess et al., 2023)</a> — a multimodal-sentence-driven embodied language model, a flagship of the VLA route</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Do today's large language models (GPT/Claude) count as "world models"? How do they differ from what Ha/LeCun mean?</summary><div>They overlap but aren't equivalent. Trained on vast text, an LLM does <b>implicitly</b> absorb plenty of world regularities (objects fall, causes precede effects) — in a sense it's "a world model projected through language." But two key gaps remain: (1) <b>modality</b> — it learns text statistics, with no continuous visual/physical/proprioceptive sensing, so it has zero grounding for sensorimotor acts like "carry a cup of water"; (2) <b>plannability</b> — a classic world model's (Dreamer's) latent is designed for "rolling forward to plan," with action-conditioned transitions, whereas an LLM's next-token isn't a clean state-transition function, making long-horizon physical planning in its latent unreliable. That's exactly why LeCun pushes the non-generative JEPA + world-model route to supply the physical prediction and planning that LLMs lack.</div></details>
+
+    <details><summary>2. Are JEPA's "predict in representation space" and causal representation learning's "discover causal variables" really the same thing in two phrasings?</summary><div>Same direction, different constraint strength. Both want to extract a few <b>high-level, stable, transferable</b> variables from raw pixels rather than grinding on pixel detail. But JEPA mainly shapes representations via a <b>predictive + anti-collapse</b> self-supervised objective; it <b>does not guarantee</b> the learned dimensions correspond to true causal mechanisms — they may just be "predictable correlational structure." Causal representation learning demands more: the learned variables should be intervenable and mechanism-independent (ICM); in other words, able to answer do(·) questions. Read it as: JEPA gives a "good compressed representation," and causal representation learning then asks "which of these dimensions are the true causal knobs." Joining the two (imposing causal/intervention constraints on a JEPA latent) is exactly an active research direction.</div></details>
+
+    <details><summary>3. "Train the policy in a dream" sounds lovely, but the world model itself makes errors. How do those prediction errors hurt the agent? What engineering problem does this resemble?</summary><div>This is the deadliest failure mode of world models, called <b>compounding error / model exploitation</b>: M's per-step prediction has tiny errors, which accumulate the longer the rollout, and the agent will <b>seek out the model's flaws</b> — finding a high-reward "bug" in the dream that doesn't exist in reality (a model-hallucinated shortcut), training a policy that only works in the dream and collapses back in the real environment. This is almost exactly <b>"writing tests against an overfit mock"</b>: when mock and prod diverge, all tests pass but it dies on deploy; it's also like a stale cache causing a dirty read. The engineering remedies share the same roots: cap the imagination horizon (don't roll too far), reduce trust where the model is uncertain (ensembles / uncertainty estimates), and periodically correct the world model with real-environment data (cache invalidation and write-back). The Dreamer series holds this down precisely with short horizons + continuous real interaction.</div></details>
+
+    <details><summary>4. Stitched together, what route toward "physical-world AI" do these four concepts (world models / JEPA / causality / embodiment) point to? How does it relate to pure-text scaling?</summary><div>Read it as a progressive argument: to build an agent that can act in the physical world, you first need it to <b>predict the world</b> (world models); to learn that prediction efficiently without drowning in pixel noise, <b>predict in representation space</b> (JEPA); for the representation to survive interventions and new environments and support planning, <b>capture causal structure</b> (causal representation learning); finally, wire this prediction-planning ability <b>into a perception-action loop</b> grounded in a real body (embodiment). This route (LeCun is its standard-bearer) both competes with and complements the mainstream "just scale text/multimodal Transformers" route: scaling sweeps language, knowledge, and reasoning, but isn't necessarily optimal for <b>sample-efficient physical prediction and real-time control</b>. The 2025 progress of V-JEPA 2, various VLAs, and world models is a bet that "intelligence in the physical world needs a different inductive bias." Which route wins — or how the two fuse — is the open question of the decade most worth watching.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML Daily · Day 41 · 2026-06-27</footer>
+
+</div>
+
+</body>
+</html>
