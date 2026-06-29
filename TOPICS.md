@@ -1,6 +1,9 @@
 # Topics Roadmap
 
-源是仓库中的文件本身（`ls *-{day,week,book,issue}*.html`）。本文件只是主题查找表：N → 主题。超过现有编号时 routine 会 append 新主题。
+源是仓库中的文件本身（`ls *-{day,week,book,issue}*.html`）。本文件是主题查找表：N → 主题。
+
+**本路线图已收口：Day 1–53 封顶，不再自动续写。** Phase 1–5（Day 1–49）为 AI/ML 学术概念全集；Phase 6（Day 50–53）是 cross-ref super-individual 后补齐的概念缺口（对抗鲁棒 / 公平偏见 / 持续学习 / 音频模型）——工程归 super，本 routine 只讲机制。
+（注：仅改本文件不阻止 routine 在 day53 之后再 append；停止续写需在 routine prompt / cron 侧设上限或暂停。）
 
 **定位**：学术 / 概念 / 机制。讲「X 是什么、为什么发明、怎么工作」。**不教工程 tactics**——那些归 super-individual-weekly。
 
@@ -64,3 +67,9 @@
 - Day 47: 对齐失败机制 — Reward Hacking, Deceptive Alignment, Sycophancy 机制, 目标错误泛化(Goal Misgeneralization), Specification Gaming（区别于 Day 26 的对齐数学）
 - Day 48: 幻觉与校准机制 — 为什么模型自信地编, calibration, 知识边界, RLHF 为何损害校准（机制向；工程治理见 super-individual Day 11）
 - Day 49: 知识存储与模型编辑 — 知识在参数中的定位(knowledge neurons), 模型编辑(ROME/MEMIT), 知识冲突与更新, 编辑的副作用
+
+## Phase 6 — 经典研究缺口补齐：鲁棒 · 公平 · 持续学习 · 音频（cross-ref super-individual 后补）
+- Day 50: 对抗样本与鲁棒性 — FGSM/PGD 攻击, 对抗训练, 扰动的迁移性, 为何神经网络脆弱, 认证鲁棒性（机制向；越狱/护栏工程防御见 super-individual Day 50）
+- Day 51: 公平、偏见与去偏 — 偏见来源(数据/标签/目标), 公平性度量(机会均等 vs 人口均等), 公平的不可能定理, 去偏方法与因果公平
+- Day 52: 持续学习与灾难性遗忘 — 灾难性遗忘机制, EWC/正则化, 重放与生成重放, 参数隔离, 稳定性-可塑性权衡（区别于 Day 49 知识编辑）
+- Day 53: 音频与语音模型 — STT(Whisper/wav2vec/CTC), TTS 架构(自回归/diffusion/神经声码器), 音频 codec 与离散化, 实时与流式机制（语音工程见 super-individual Day 46）
