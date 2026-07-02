@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML Explained: AI for Science — Day 46</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML Explained: AI for Science</h1>
+  <div class="meta">Day 46 · 2026-07-02</div>
+  <div class="audience">For: engineers with coding experience, outside the AI field</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff;background:#12172a">
+  <div class="section">
+    <p style="color:#cfd3df">The first 45 issues dissected "how AI systems work internally." Today, a shift of perspective: <strong>AI as a scientific instrument</strong>—how it turns century-old puzzles like "what does a protein look like," "which new material is stable," "what's a faster algorithm" into search-and-prediction problems that machine learning can chew on. The four concepts span biology, physics, chemistry, and math, with one shared idea: <strong>replace "expensive real experiments / numerical simulation" with "a cheap neural-network forward pass," or replace "a human flash of insight" with "verifiable automated search."</strong></p>
+  </div>
+</div>
+
+<!-- 1. AlphaFold -->
+<div class="card">
+  <h2>Protein Structure Prediction<span class="en">AlphaFold</span></h2>
+  <div class="tags"><span class="tag">Structural Biology</span><span class="tag purple">Geometric Attention</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Protein folding = <strong>inferring the final 3D memory layout from a 1D sequence</strong>. Like reverse-engineering, from a protobuf schema definition, what object graph it will finally coil into in memory—except here the "layout rule" is physical energy minimization. The most elegant move is <strong>evolutionary information</strong>: the same protein has "variant copies" across thousands of species (MSA, multiple sequence alignment). Which two positions <strong>always mutate together</strong> tells you they sit close in 3D space and constrain each other—exactly the reasoning that in distributed systems "two nodes that always fail over together are probably in the same availability zone."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: a protein's function is determined by its 3D shape, but measuring structure experimentally (X-ray crystallography, cryo-EM) takes months to years and hundreds of thousands of dollars each. Sequence is easy to read, shape is hard—this gap stalled biology for 50 years.</p>
+    <p style="margin-top:8px"><strong>AlphaFold2</strong> (DeepMind, 2021) works in three stages: ① feed in the target sequence plus its MSA evolutionary family; ② the core <strong>Evoformer</strong> uses attention to exchange information back and forth between the "sequence dimension" and the "residue-pair dimension"—essentially inferring "which amino-acid pairs are spatially coupled"; ③ the <strong>structure module</strong> uses "invariant point attention" to directly output each atom's 3D coordinates, invariant to global translation and rotation (shape shouldn't change with the coordinate frame). At the CASP14 blind test it pushed accuracy to near-experimental levels—a leap almost no one expected in that decade.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">AlphaFold2 data flow (1D sequence → 3D coordinates)</span><br>
+<span class="box">target seq</span> + <span class="box p">MSA family</span>
+<span class="arrow">→</span> <span class="box o">Evoformer</span> <span style="color:#5a6378;font-size:0.76rem">(48 attention layers, infers residue-pair coupling)</span><br>
+<span class="arrow">↓</span><br>
+<span class="box o">structure module</span> <span style="color:#5a6378;font-size:0.76rem">(invariant point attention, translation/rotation invariant)</span>
+<span class="arrow">→</span> <span class="box g">3D atom coords + pLDDT confidence</span>
+</div>
+    <p style="margin-top:12px">Key byproduct: <strong>pLDDT</strong>—a 0–100 self-assessed confidence per residue, honestly flagging "which part I'm unsure about" (often intrinsically disordered regions). With it, you can dare to treat a prediction as a hypothesis.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> requests
+<span class="cmt"># AlphaFold DB has released 200M+ predicted structures; query by UniProt ID</span>
+uid = <span class="str">"P00533"</span>  <span class="cmt"># human EGFR receptor (cancer target)</span>
+meta = requests.<span class="fn">get</span>(<span class="fn">f</span><span class="str">"https://alphafold.ebi.ac.uk/api/prediction/{uid}"</span>).<span class="fn">json</span>()[<span class="str">0</span>]
+
+pdb = requests.<span class="fn">get</span>(meta[<span class="str">"pdbUrl"</span>]).text  <span class="cmt"># download the 3D structure file</span>
+<span class="cmt"># each PDB line = one atom: ATOM idx name residue chain xyz ... B-factor(holds pLDDT)</span>
+atoms = [l <span class="kw">for</span> l <span class="kw">in</span> pdb.<span class="fn">splitlines</span>() <span class="kw">if</span> l.<span class="fn">startswith</span>(<span class="str">"ATOM"</span>)]
+<span class="fn">print</span>(<span class="str">"atom count:"</span>, <span class="fn">len</span>(atoms))
+<span class="cmt"># B-factor column = pLDDT: >90 high confidence, &lt;50 likely flexible/disordered</span>
+plddt = [<span class="fn">float</span>(l[<span class="str">60</span>:<span class="str">66</span>]) <span class="kw">for</span> l <span class="kw">in</span> atoms]
+<span class="fn">print</span>(<span class="str">"mean confidence pLDDT:"</span>, <span class="fn">sum</span>(plddt) / <span class="fn">len</span>(plddt))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <p class="tip"><strong>Pitfall</strong>: treating AlphaFold as an "experiment replacement." It gives a <strong>high-quality hypothesis of a single static conformation</strong>, not the truth—it often struggles with disordered proteins, conformational changes, mutation effects, and the dynamics of protein complexes; low-pLDDT regions especially warrant caution. It <strong>accelerates but does not replace</strong> experimental validation.</p>
+    <p style="margin-top:10px"><strong>BigCat scenario</strong>: this is the archetype of "AI makes the infeasible feasible." In your cross-disciplinary thinking, use it as an anchor for a meta-question: a field stuck for half a century was rewritten overnight by the "sequence→structure" mapping. Transpose it to your own domains—which "hard-to-measure but rich in indirect signals (like evolutionary redundancy)" problems are also awaiting an AlphaFold moment?</p>
+  </div>
+
+  <div class="section">
+    <div class="label">One-line takeaway + question</div>
+    <p class="takeaway">AlphaFold's core isn't "a bigger network," it's <strong>treating evolutionary redundancy (MSA) as a free constraint signal</strong>—nature already wrote the answer in cross-species covariation. 💭 Which of your hard problems already has "redundant copies that vary together" quietly leaking the answer?</p>
+  </div>
+</div>
+
+<!-- 2. Neural Operators -->
+<div class="card">
+  <h2>Neural Operators & Scientific Surrogates<span class="en">Neural Operators</span></h2>
+  <div class="tags"><span class="tag">Scientific Computing</span><span class="tag purple">PDE Solving</span><span class="tag orange">GraphCast</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>Materializing an <strong>extremely slow numerical simulator into a single forward pass</strong>—like building a <strong>materialized view</strong> for an expensive real-time query: precompute once, then queries are nearly free. Traditional weather/fluid simulation iterates a partial differential equation (PDE) step by step on a supercomputer; a neural operator instead learns the <strong>whole "input field → output field" mapping</strong>, bypassing step-by-step iteration to output in one shot.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: climate, fluids, and material stress are described by PDEs; numerical solving is exact but <strong>slow and expensive</strong>—a global forecast can take an hour on a supercomputer. And classical solvers "solve one instance at a time"—change the initial condition and you start over.</p>
+    <p style="margin-top:8px">The key insight is <strong>learning an "operator," not a "function"</strong>: a function maps numbers to numbers; <strong>an operator maps an entire function to an entire function</strong> (a whole temperature field → the whole field 6 hours later). The <strong>Fourier Neural Operator (FNO)</strong> (Li et al., 2020) has an elegant trick: FFT the physical field into the frequency domain, multiply learnable weights only on the <strong>low-frequency modes</strong> (low frequency = large-scale structure), then transform back. Because the weights live in the frequency domain and are independent of grid resolution, it enables <strong>zero-shot super-resolution</strong>—train low-res, infer high-res.</p>
+    <p style="margin-top:8px"><strong>GraphCast</strong> (DeepMind, 2023, Science) is the flagship of this path: a graph neural network learns global weather evolution, producing a 10-day forecast in <strong>under a minute</strong>, beating top traditional numerical forecast systems on most verification metrics. This isn't "a bit more accurate"—it's <strong>cost dropping by orders of magnitude</strong>, making ensemble forecasting cheap for the first time.</p>
+    <p style="margin-top:8px" class="tip"><strong>Honest boundary</strong>: a surrogate model is an <strong>interpolator, not an extrapolator</strong>—blazing and accurate in-distribution, but it can fail on extreme cases never seen in training (a record-breaking storm). Industry practice is broadly <strong>surrogate model + traditional solver hybrid</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># Core of a Fourier layer: a linear transform in frequency = one operator over the whole field</span>
+<span class="kw">def</span> <span class="fn">spectral_conv</span>(x, weights):
+    <span class="cmt"># x: (batch, channels, grid) physical field, e.g. a temperature/pressure grid</span>
+    x_ft = torch.fft.<span class="fn">rfft</span>(x)                 <span class="cmt"># to frequency domain: one complex coeff per frequency</span>
+    modes = weights.shape[-<span class="str">1</span>]                 <span class="cmt"># keep only the first k low frequencies (large-scale structure)</span>
+    out_ft = torch.<span class="fn">zeros_like</span>(x_ft)
+    out_ft[..., :modes] = x_ft[..., :modes] * weights  <span class="cmt"># pointwise mult in freq = global conv</span>
+    <span class="kw">return</span> torch.fft.<span class="fn">irfft</span>(out_ft, n=x.shape[-<span class="str">1</span>])  <span class="cmt"># back to physical space</span>
+<span class="cmt"># Key: weights live in frequency, decoupled from grid resolution → zero-shot super-resolution</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <p class="tip"><strong>Pitfall</strong>: assuming a neural operator "understands physics." It learns <strong>statistical regularities in the data</strong>, not conservation laws. So it can violate energy conservation and drift in long rollouts. Don't mistake interpolation for understanding.</p>
+    <p style="margin-top:10px"><strong>BigCat scenario</strong>: this "replace expensive computation with one forward pass" pattern transfers directly to engineering intuition—whenever "the same slow logic runs repeatedly over different inputs," ask: can I train a surrogate? Your familiar caching / materialized-view idea wears a new mathematical coat in scientific computing, but the skeleton is the same: <strong>trade space and one-time training cost for query-time speed</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">One-line takeaway + question</div>
+    <p class="takeaway">A neural operator learns a <strong>mapping between function spaces</strong>, so one training run generalizes to a whole family of problems, not a single instance. 💭 Which "slow logic" in your system is actually solving the same problem family every time with only the parameters changing—ripe to be "materialized" by a surrogate model?</p>
+  </div>
+</div>
+
+<!-- 3. Materials Discovery -->
+<div class="card">
+  <h2>Materials Discovery<span class="en">GNoME</span></h2>
+  <div class="tags"><span class="tag">Computational Chemistry</span><span class="tag purple">Graph Neural Networks</span><span class="tag orange">Active Learning</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>The chemical combination space is astronomically large; validating each candidate with first-principles calculation (DFT) is like <strong>running an exact full-table scan</strong>—accurate but hopelessly slow. GNoME's idea is to first use a <strong>cheap GNN predictor as a Bloom filter</strong>: quickly reject candidates almost certainly unstable, and only send the few "possible hits" to expensive DFT calculation. Cheap pre-filter + expensive verification—a standard <strong>funnel filter</strong>.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: new materials (batteries, superconductors, catalysts) hide in a vast elemental combination space. Judging whether a hypothetical crystal is <strong>stable</strong> requires quantum-mechanical DFT—hours of CPU per candidate, making brute force hopeless. Historically humans guessed via chemical intuition—narrow coverage.</p>
+    <p style="margin-top:8px"><strong>GNoME</strong> (DeepMind, 2023, Nature) models a crystal as a <strong>graph</strong> (atoms = nodes, bonds = edges); the GNN learns to predict "formation energy" and <strong>distance above the energy convex hull</strong> (e_above_hull, ≈0 means stable). The real engine is an <strong>active-learning loop</strong>: the GNN filters promising candidates → DFT verifies → new results are <strong>fed back into the training set</strong> → the GNN gets stronger → the next round filters more accurately. This self-reinforcing loop identified about <strong>380,000</strong> new stable crystal structures, many beyond human chemical intuition.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">GNoME active-learning loop (cheap filter → expensive verify → feedback)</span><br>
+<span class="box p">massive candidates</span> <span class="arrow">→</span> <span class="box">GNN fast stability filter</span> <span class="arrow">→</span> <span class="box g">few promising candidates</span><br>
+<span class="arrow">↓</span> <span style="color:#5a6378;font-size:0.76rem">send to verify</span><br>
+<span class="box o">DFT quantum verification</span> <span class="arrow">→</span> <span class="box r">new stable materials + labels</span>
+<span class="arrow">↺</span> <span style="color:#5a6378;font-size:0.76rem">feed back into training set, GNN sharper next round</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="cmt"># GNoME idea: GNN quickly predicts stability to reject most, then DFT verifies (funnel)</span>
+<span class="kw">from</span> pymatgen.core <span class="kw">import</span> Composition
+
+candidates = [<span class="str">"Li3PO4"</span>, <span class="str">"Na2FeO3"</span>, <span class="str">"CaTiO3"</span>, <span class="str">"Xe2Fe"</span>]  <span class="cmt"># a sliver of many candidates</span>
+
+<span class="kw">def</span> <span class="fn">gnn_stability</span>(formula):
+    comp = <span class="fn">Composition</span>(formula)  <span class="cmt"># real GNoME eats crystal graphs; placeholder score to show the flow</span>
+    <span class="cmt"># e_above_hull: distance above the energy convex hull (eV/atom), closer to 0 = more stable</span>
+    <span class="kw">return</span> {<span class="str">"formula"</span>: formula, <span class="str">"e_above_hull"</span>: <span class="str">0.02</span> * <span class="fn">len</span>(comp)}
+
+<span class="cmt"># Cheap pre-filter: only candidates &lt;0.03 eV/atom enter the expensive DFT stage</span>
+to_verify = [c[<span class="str">"formula"</span>] <span class="kw">for</span> f <span class="kw">in</span> candidates
+             <span class="kw">if</span> (c := <span class="fn">gnn_stability</span>(f))[<span class="str">"e_above_hull"</span>] &lt; <span class="str">0.03</span>]
+<span class="fn">print</span>(<span class="str">"candidates sent to DFT:"</span>, to_verify)  <span class="cmt"># converge from many to few</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <p class="tip"><strong>Pitfall</strong>: equating "predicted stable" with "synthesizable and useful." GNoME gives a <strong>thermodynamic-stability hypothesis</strong>, no guarantee of being synthesizable or having a target property—later independent work questioned the novelty and synthesizability of this batch. Computational discovery is the funnel's <strong>entrance</strong>, not its end.</p>
+    <p style="margin-top:10px"><strong>BigCat scenario</strong>: this "cheap pre-filter + expensive verify + feed back results" active-learning loop is the general skeleton for any <strong>large-scale screening decision</strong>—investment screening, resume triage, ranking experiment candidates. The core: don't let the expensive stage chew the full set; let a fast model narrow the funnel first.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">One-line takeaway + question</div>
+    <p class="takeaway">GNoME's power isn't a single GNN but the <strong>active-learning loop</strong>: predict → verify → feed back spirals the model and dataset up together. 💭 In your workflow, is there a "verification result" that could clearly be fed back but is simply discarded, never making the next screening sharper?</p>
+  </div>
+</div>
+
+<!-- 4. Algorithm & Math Discovery -->
+<div class="card">
+  <h2>Algorithm & Math Discovery<span class="en">AlphaTensor · FunSearch</span></h2>
+  <div class="tags"><span class="tag">Discrete Search</span><span class="tag purple">Reinforcement Learning</span><span class="tag orange">LLM Evolution</span></div>
+
+  <div class="section">
+    <div class="label">One-line analogy</div>
+    <p>The first three concepts are AI <strong>accelerating</strong> science; this one is AI <strong>producing new knowledge</strong>—discovering algorithms and mathematical objects humans hadn't found. The trick is recasting "discovery" as a <strong>search problem</strong>: AlphaTensor turns "find a faster matrix multiplication" into a game of <strong>AlphaZero-style solitaire</strong>; FunSearch treats an LLM as a <strong>mutation operator</strong> and an evaluator as a <strong>fitness function + anti-hallucination gate</strong> for evolutionary search. Like a genetic algorithm, but the "mutation" is intelligently produced by a code-writing LLM.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">The problem it solves + how it works</div>
+    <p>Pain point: finding new algorithms / mathematical constructions has always relied on a genius's flash of insight—unscalable, irreproducible. Can a machine search systematically? The difficulty is that <strong>the search space is discrete and astronomical</strong>, and most candidates are wrong.</p>
+    <p style="margin-top:8px"><strong>AlphaTensor</strong> (DeepMind, 2022, Nature): matrix multiplication is equivalent to a <strong>tensor decomposition</strong>; fewer multiplications in the decomposition means a faster algorithm. It turns this into a single-player game—state = the tensor not yet decomposed, action = pick a rank-1 term to eliminate—and plays it with AlphaZero's Monte Carlo tree search, <strong>finding for 4×4 matrices the first scheme in 50 years to beat Strassen's classic algorithm</strong>.</p>
+    <p style="margin-top:8px"><strong>FunSearch</strong> (DeepMind, 2024, Nature; the name = searching in function space): a pretrained LLM continually generates candidate <strong>programs</strong> (not answers directly), paired with a <strong>deterministic evaluator</strong> that scores them. The beauty—<strong>the LLM hallucinates, but the evaluator runs the code to verify</strong>, so wrong candidates automatically score low and get culled. It thereby found a new solution to the cap set problem in combinatorics and better heuristics for online bin packing.</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">FunSearch evolution loop (LLM mutates + evaluator guards)</span><br>
+<span class="box g">current best program</span> <span class="arrow">→</span> <span class="box p">LLM generates variant</span> <span style="color:#5a6378;font-size:0.76rem">(source of creativity)</span><br>
+<span class="arrow">↓</span><br>
+<span class="box o">deterministic evaluator</span> <span style="color:#5a6378;font-size:0.76rem">(runs code, scores; hallucination filtered here)</span>
+<span class="arrow">→</span> <span class="box r">keep if better</span> <span class="arrow">↺</span>
+</div>
+    <p style="margin-top:12px"><strong>Key design</strong>: the output is a <strong>verifiable program/construction</strong>, not a natural-language assertion—correctness is guaranteed by an external evaluator, not by the LLM's own say-so, which is why such systems can be "trusted."</p>
+  </div>
+
+  <div class="section">
+    <div class="label">Code example</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = <span class="fn">Anthropic</span>()  <span class="cmt"># needs ANTHROPIC_API_KEY</span>
+<span class="cmt"># FunSearch skeleton: LLM as "mutation operator", evaluator as "anti-hallucination gate"</span>
+
+<span class="kw">def</span> <span class="fn">evaluate</span>(code):        <span class="cmt"># deterministic scoring: run the code, verify correctness, return a score</span>
+    ...                    <span class="cmt"># guarantee: the LLM hallucinates, but wrong candidates score low and are culled</span>
+    <span class="kw">return</span> score
+
+best = <span class="str">"def priority(item): return 0"</span>  <span class="cmt"># initial seed program</span>
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="str">100</span>):       <span class="cmt"># evolution loop</span>
+    msg = client.messages.<span class="fn">create</span>(model=<span class="str">"claude-opus-4-8"</span>, max_tokens=<span class="str">512</span>,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+            <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"Improve this heuristic function, return code only:\n{best}"</span>}])
+    cand = msg.content[<span class="str">0</span>].text
+    <span class="kw">if</span> <span class="fn">evaluate</span>(cand) &gt; <span class="fn">evaluate</span>(best):   <span class="cmt"># keep only if genuinely better</span>
+        best = cand</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">Common pitfall + practical scenario</div>
+    <p class="tip"><strong>Pitfall</strong>: thinking "the LLM discovered the math on its own." The truth—<strong>creativity (LLM generation) and correctness (evaluator verification) are decoupled</strong>. Without that deterministic evaluator, the LLM's pile of "looks-right" outputs are all hallucination. Credit goes to the architecture, not the bare model.</p>
+    <p style="margin-top:10px"><strong>BigCat scenario</strong>: this "LLM boldly generates + program strictly verifies" decoupling is the golden template for any <strong>creative-but-must-be-correct</strong> work with AI—let the model generate freely, and gate it with a deterministic checker you trust (tests, type checking, fact-checking). Don't let the LLM be both athlete and referee.</p>
+  </div>
+
+  <div class="section">
+    <div class="label">One-line takeaway + question</div>
+    <p class="takeaway">AI's secret to discovering new knowledge is <strong>decoupling creation from verification</strong>: let the model "guess boldly" and a deterministic evaluator "verify strictly"—hallucination is blocked at the verification gate. 💭 When you use AI, have you handed "generation" and "verification" to the same party, effectively letting it grade itself?</p>
+  </div>
+</div>
+
+<!-- Further Reading -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>Further Reading<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">Jumper et al. 2021 — Highly accurate protein structure prediction with AlphaFold (Nature)</a> — the original AlphaFold2 paper, a watershed in structural biology</li>
+      <li><a href="https://www.nature.com/articles/s41586-023-06735-9" target="_blank">Merchant et al. 2023 — Scaling deep learning for materials discovery (Nature)</a> — GNoME, active learning finding 380k stable materials</li>
+      <li><a href="https://www.nature.com/articles/s41586-022-05172-4" target="_blank">Fawzi et al. 2022 — Discovering faster matrix multiplication algorithms with RL (Nature)</a> — AlphaTensor, beating Strassen</li>
+      <li><a href="https://deepmind.google/blog/funsearch-making-new-discoveries-in-mathematical-sciences-using-large-language-models/" target="_blank">FunSearch (DeepMind, 2024, Nature)</a> — LLM + evaluator evolutionary search, first LLM-driven mathematical discovery</li>
+      <li><a href="https://arxiv.org/abs/2212.12794" target="_blank">Lam et al. — GraphCast: Learning skillful medium-range global weather forecasting (arXiv 2212.12794 / Science 2023)</a> — the GNN weather-forecasting flagship</li>
+      <li><a href="https://arxiv.org/abs/2010.08895" target="_blank">Li et al. 2020 — Fourier Neural Operator for Parametric PDEs (arXiv 2010.08895)</a> — the foundational neural-operator work learning PDE mappings in the frequency domain</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Deep Questions -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>Deep Questions<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. Of these four cases, AlphaFold/GNoME/GraphCast "accelerate" science (getting faster what humans could in principle compute), while FunSearch/AlphaTensor "discover" new knowledge (what humans hadn't found). What is this distinction, fundamentally?</summary><div>The distinction lies in <strong>the availability of verification</strong>. "Acceleration" problems have a clear <strong>ground truth to compare against</strong> (a real protein structure, real weather, exact DFT); AI approximates an already-defined mapping, essentially <strong>compressing/interpolating expensive computation</strong>—fast, but it produces nothing outside the defined domain. "Discovery" problems have a solution space that is <strong>discrete, combinatorially explosive, yet has a cheap deterministic verifier</strong> (whether an algorithm is correct, whether a construction satisfies constraints—known in one run). It's precisely this "verification is cheap, search is expensive" asymmetry that lets search-based AI genuinely produce what humans hadn't reached: it needn't understand why, only find a point in an astronomical space that passes verification. So the key criterion is: <strong>does your problem have a cheap, reliable verifier?</strong> Yes → you can let AI "discover"; no → AI can only "accelerate" over your existing labels. This also explains why "verifiable" fields like math/algorithms/material stability fell first, while "what makes a good scientific theory," lacking a cheap verifier, still belongs to humans.</div></details>
+
+    <details><summary>2. AlphaFold uses "evolutionary redundancy (MSA)," GNoME uses "active-learning feedback," FunSearch uses "evaluator gating." Abstract these three mechanisms into general engineering patterns—what familiar systems do they map to?</summary><div>All three <strong>"use a cheap signal source to lever an expensive target,"</strong> but with different fulcrums. ① MSA is <strong>mining constraints from free redundant copies</strong>—mapping to inferring topology from the agreement/divergence of multiple replicas (who always changes with whom = who couples with whom), or reverse-engineering a service-dependency graph from log co-occurrence. ② Active-learning feedback is <strong>feeding verification results back into training so the filter self-evolves</strong>—mapping to adaptive caching / self-tuning: each miss's true cost is recorded and used to improve prefetching, getting sharper with use. ③ Evaluator gating is <strong>decoupling generation from verification</strong>—mapping to compiler type checks, CI test gates, financial reconciliation: let the high-throughput side produce freely, and block errors with a trusted but cheap gate. Together they form the general recipe for an "AI for X" system: <strong>a free weak signal (①) + a self-reinforcing loop (②) + a cheap reliable verifier (③)</strong>. Miss any one and the system degrades respectively into "no prior, terrible sample efficiency," "one-shot, non-evolving," "hallucination out of control, untrustworthy."</div></details>
+
+    <details><summary>3. Surrogate models are "fast but don't understand physics," violating conservation laws and drifting in long-range prediction. Is this the same class of problem as LLMs being "fluent but hallucinating"? What does it imply about how far to trust statistical models?</summary><div>They are <strong>isomorphic</strong>: both <strong>replace explicit underlying rules with high-dimensional statistical fitting</strong>, so both dazzle in-distribution and expose the fundamental flaw of "no real causal/conservation constraint" out-of-distribution or in long extrapolation. GraphCast's weather drift = an LLM's factual hallucination, both "an interpolator mistaken for a reasoner." Three implications: ① <strong>trust is bound to distribution</strong>—ask "how far is this input from the training distribution," not "how strong is the model"; far away, the statistical model's confidence is meaningless (echoing Day 48's calibration). ② <strong>Injecting hard constraints explicitly</strong>—physics-informed neural networks write conservation laws into the loss, just as RAG/tools/verifiers externalize factual constraints for LLMs; a pure statistical model won't grow constraints on its own. ③ <strong>Hybrid, not replacement</strong>—"surrogate explores + traditional solver backstops," just as "LLM generates + deterministic check." Deep consensus: <strong>statistical models handle breadth and speed, symbolic/physical rules handle correctness and extrapolation</strong>—complementary, not substitutable.</div></details>
+
+    <details><summary>4. "Recasting discovery as search" needs a cheap verifier. Which scientific problems naturally have one and which don't? Does this mean AI for Science systematically favors one kind of problem and neglects another?</summary><div>Have a cheap verifier: <strong>computable, formalizable, simulable problems</strong>—algorithm correctness (run it), math constructions (check constraints), protein structure (experimental/physical scoring), material stability (DFT). Lack one: <strong>problems that can only be falsified by expensive, long-cycle real-world experiments</strong>—a drug's long-term efficacy in humans, an economic policy's societal consequences, an ecological intervention's decade-long impact, "what is a better scientific paradigm." This does create <strong>systematic skew</strong>: progress concentrates in the "verification-cheap" quadrant, pulling those fields ahead while "verification-expensive / unformalizable" fields relatively stagnate—not because they matter less, but because search-based AI has no usable fitness function there. Two risks: ① <strong>metrics distort the research agenda</strong>—AI-accelerable problems soak up attention and funding, a "looking for keys under the lamppost" effect; ② <strong>the verifier's own bias gets amplified</strong>—if DFT or a scoring function has systematic error, AI efficiently overfits to the verifier's loopholes (echoing Day 47's reward hacking). Meta-lesson: to judge "will a field be quickly rewritten by AI," first ask not "is the model strong enough" but <strong>"is there a cheap, reliable verifier"</strong>—this predicts the order of transformation better than model capability.</div></details>
+
+    <details><summary>5. If "creation by AI, verification by deterministic systems" becomes the mainstream paradigm of scientific discovery, what is the irreplaceable role of human scientists? What shift in skill focus does this imply for pursuing the "AI super-individual"?</summary><div>When search and verification are automated, human value shifts up to three places <strong>outside the loop</strong>: ① <strong>posing the right question, defining the right verifier</strong>—AI only optimizes within the space and fitness function you give; <strong>choosing what to optimize is the highest-leverage human judgment</strong>, and a wrong verifier lets AI efficiently drive you toward the wrong goal. ② <strong>Cross-domain connection and taste</strong>—moving "evolutionary redundancy" from biology to your field, seeing an isomorphism across distant domains; such analogy and aesthetics are current AI's weak point, and your Buddhism × distributed systems × complexity-science combination is an advantage. ③ <strong>Owning unformalizable problems</strong>—value trade-offs, ethics, "should this be done at all," which have no cheap verifier and can only be borne by humans. The skill shift for the "AI super-individual": from "solving by hand" to "<strong>designing the solving system</strong>"—your core edge is no longer computing fast, but <strong>whether you can decompose a fuzzy problem into "weak signal + self-reinforcing loop + trusted verifier"</strong> and hold the objective function only a human can set. The more AI automates "search," the scarcer the human ability to "define what to search and what counts"—exactly where the super-individual should bet.</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 46 · 2026-07-02</footer>
+
+</div>
+
+</body>
+</html>

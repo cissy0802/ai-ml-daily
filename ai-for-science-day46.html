@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI/ML 详解：AI for Science — Day 46</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Display","Noto Sans SC","Segoe UI",Roboto,sans-serif;background:#0a0e1a;color:#e4e6eb;line-height:1.75}
+.container{max-width:860px;margin:0 auto;padding:24px 20px 60px}
+header{text-align:center;padding:48px 0 32px;border-bottom:1px solid #1f2740;margin-bottom:36px}
+header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#00d4ff 0%,#7b61ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px}
+header .meta{margin-top:10px;font-size:0.92rem;color:#8b92a8;font-family:"SF Mono",Menlo,monospace}
+header .audience{margin-top:8px;font-size:0.85rem;color:#7b61ff}
+.card{background:#141a2e;border-radius:14px;padding:28px;margin-bottom:24px;border-left:3px solid #00d4ff;box-shadow:0 2px 14px rgba(0,212,255,0.06)}
+.card h2{font-size:1.35rem;color:#e4e6eb;margin-bottom:6px}
+.card .en{color:#8b92a8;font-weight:400;font-size:1rem;margin-left:6px;font-family:"SF Mono",Menlo,monospace}
+.tags{margin:10px 0 18px}
+.tag{display:inline-block;background:rgba(0,212,255,0.12);color:#00d4ff;font-size:0.72rem;padding:3px 10px;border-radius:10px;margin-right:6px;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.5px}
+.tag.purple{background:rgba(123,97,255,0.14);color:#a48cff}
+.tag.orange{background:rgba(255,180,80,0.14);color:#ffb450}
+.section{margin-top:16px}
+.section .label{display:inline-block;font-size:0.78rem;color:#00d4ff;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;font-family:"SF Mono",Menlo,monospace}
+.section p{color:#cfd3df;font-size:0.96rem}
+.section ul{margin-left:18px;color:#cfd3df;font-size:0.95rem}
+pre{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:16px;overflow-x:auto;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.85rem;color:#cfd3df;line-height:1.6;margin-top:8px}
+pre .kw{color:#7b61ff}
+pre .str{color:#7ed6a0}
+pre .cmt{color:#5a6378;font-style:italic}
+pre .fn{color:#00d4ff}
+.tip{background:rgba(255,180,80,0.08);border-left:2px solid #ffb450;padding:12px 14px;border-radius:6px;color:#e4d4b8;font-size:0.92rem}
+.exercise{background:rgba(126,214,160,0.07);border-left:2px solid #7ed6a0;padding:12px 14px;border-radius:6px;color:#cfdcd0;font-size:0.92rem}
+.takeaway{background:rgba(0,212,255,0.06);border-left:2px solid #00d4ff;padding:12px 14px;border-radius:6px;color:#cfe9f5;font-size:0.92rem}
+.think details{background:rgba(126,214,160,0.06);border-left:2px solid #7ed6a0;border-radius:6px;margin-bottom:8px;overflow:hidden;transition:background 0.15s}
+.think details[open]{background:rgba(126,214,160,0.1)}
+.think details summary{cursor:pointer;padding:11px 14px;color:#cfdcd0;font-size:0.92rem;font-weight:600;list-style:none;user-select:none;transition:color 0.15s,background 0.15s}
+.think details summary::-webkit-details-marker{display:none}
+.think details summary::before{content:"▸";color:#7ed6a0;display:inline-block;margin-right:8px;transition:transform 0.15s;font-size:0.8rem}
+.think details[open] summary::before{transform:rotate(90deg)}
+.think details summary:hover{color:#fff;background:rgba(126,214,160,0.08)}
+.think details > div{padding:12px 16px 14px 30px;background:rgba(10,14,26,0.55);color:#cfd3df;font-size:0.9rem;line-height:1.75;border-top:1px solid rgba(126,214,160,0.15)}
+.diagram{background:#0a0e1a;border:1px solid #1f2740;border-radius:8px;padding:18px;margin-top:8px;overflow-x:auto;font-family:"SF Mono",Menlo,monospace;font-size:0.82rem;color:#cfd3df;line-height:1.7}
+.diagram .box{display:inline-block;border:1px solid #00d4ff;border-radius:6px;padding:4px 10px;margin:3px;color:#00d4ff}
+.diagram .box.p{border-color:#7b61ff;color:#a48cff}
+.diagram .box.g{border-color:#7ed6a0;color:#7ed6a0}
+.diagram .box.r{border-color:#ff6b6b;color:#ff8e8e}
+.diagram .box.o{border-color:#ffb450;color:#ffb450}
+.diagram .arrow{color:#5a6378;margin:0 4px}
+.bar{display:inline-block;background:linear-gradient(180deg,#00d4ff,#7b61ff);border-radius:3px;vertical-align:bottom;margin:0 2px}
+a{color:#00d4ff;text-decoration:none}
+a:hover{color:#7b61ff;text-decoration:underline}
+footer{text-align:center;padding:40px 0 0;font-size:0.82rem;color:#5a6378}
+@media(max-width:600px){
+  header h1{font-size:1.5rem}
+  .card{padding:20px}
+  .card h2{font-size:1.15rem}
+  pre{font-size:0.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>AI/ML 详解：AI for Science</h1>
+  <div class="meta">Day 46 · 2026-07-02</div>
+  <div class="audience">面向：有编程经验的非 AI 方向工程师</div>
+</header>
+
+<div class="card" style="border-left-color:#7b61ff;background:#12172a">
+  <div class="section">
+    <p style="color:#cfd3df">前 45 期拆的是「AI 系统自己怎么工作」。今天换视角：<strong>AI 作为科研工具</strong>——怎么把「蛋白质长什么样」「哪种新材料稳定」「更快的算法是什么」这些百年难题，变成机器学习能啃的搜索与预测问题。四个概念覆盖生物、物理、化学、数学，共同点一句话：<strong>把「昂贵的实验/数值模拟」换成「廉价的神经网络前向」，或把「人类的灵光一现」换成「可验证的自动搜索」</strong>。</p>
+  </div>
+</div>
+
+<!-- 1. AlphaFold -->
+<div class="card">
+  <h2>蛋白质结构预测<span class="en">AlphaFold</span></h2>
+  <div class="tags"><span class="tag">结构生物学</span><span class="tag purple">几何注意力</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>蛋白质折叠 = <strong>从一维序列反推最终的三维内存布局</strong>。像从一段 protobuf schema 定义，反推它在内存里最终会盘绕成什么样的对象图——只不过这里的「布局规则」是物理能量最小化。最妙的一步在<strong>进化信息</strong>：同一个蛋白在成千上万物种里都有「变体副本」（MSA，多序列比对）。哪两个位置<strong>总是一起变异</strong>，就说明它们在 3D 里靠得近、互相约束——正是「总是一起 failover 的两个节点，八成在同一可用区」的推理。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：蛋白质功能由 3D 形状决定，但实验测结构（X 射线晶体学、冷冻电镜）一个要花数月到数年、几十万美元。序列好测、形状难测——这个鸿沟卡了生物学 50 年。</p>
+    <p style="margin-top:8px"><strong>AlphaFold2</strong>（DeepMind, 2021）的机制分三段：① 把目标序列 + 它的 MSA 进化家族喂进去；② 核心的 <strong>Evoformer</strong> 用注意力在「序列维度」和「残基对维度」之间反复交换信息——本质是在推断「哪些氨基酸对在空间上耦合」；③ <strong>结构模块</strong>用「不变点注意力」直接吐出每个原子的三维坐标，且对整体平移旋转不变（形状不该因坐标系而变）。它在 CASP14 盲测里把预测精度推到接近实验水平，这是几乎没人预料会在那个十年发生的跳跃。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">AlphaFold2 数据流（一维序列 → 三维坐标）</span><br>
+<span class="box">目标序列</span> + <span class="box p">MSA 进化家族</span>
+<span class="arrow">→</span> <span class="box o">Evoformer</span> <span style="color:#5a6378;font-size:0.76rem">(48 层注意力，推断残基对耦合)</span><br>
+<span class="arrow">↓</span><br>
+<span class="box o">结构模块</span> <span style="color:#5a6378;font-size:0.76rem">(不变点注意力，平移旋转不变)</span>
+<span class="arrow">→</span> <span class="box g">3D 原子坐标 + pLDDT 置信度</span>
+</div>
+    <p style="margin-top:12px">关键副产品：<strong>pLDDT</strong>——每个残基一个 0-100 的自评置信度，诚实标出「哪段我拿不准」（往往是天然无序区）。有了它，你才敢把预测当假设用。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> requests
+<span class="cmt"># AlphaFold DB 已开放 2 亿+ 预测结构，用 UniProt ID 直接查</span>
+uid = <span class="str">"P00533"</span>  <span class="cmt"># 人类 EGFR 受体（癌症靶点）</span>
+meta = requests.<span class="fn">get</span>(<span class="fn">f</span><span class="str">"https://alphafold.ebi.ac.uk/api/prediction/{uid}"</span>).<span class="fn">json</span>()[<span class="str">0</span>]
+
+pdb = requests.<span class="fn">get</span>(meta[<span class="str">"pdbUrl"</span>]).text  <span class="cmt"># 下载 3D 结构文件</span>
+<span class="cmt"># PDB 每行一个原子：ATOM 序号 原子名 残基 链 xyz坐标 ... B因子(存pLDDT)</span>
+atoms = [l <span class="kw">for</span> l <span class="kw">in</span> pdb.<span class="fn">splitlines</span>() <span class="kw">if</span> l.<span class="fn">startswith</span>(<span class="str">"ATOM"</span>)]
+<span class="fn">print</span>(<span class="str">"原子数:"</span>, <span class="fn">len</span>(atoms))
+<span class="cmt"># B-factor 列即 pLDDT：>90 高可信，&lt;50 大概率是柔性无序区</span>
+plddt = [<span class="fn">float</span>(l[<span class="str">60</span>:<span class="str">66</span>]) <span class="kw">for</span> l <span class="kw">in</span> atoms]
+<span class="fn">print</span>(<span class="str">"平均置信度 pLDDT:"</span>, <span class="fn">sum</span>(plddt) / <span class="fn">len</span>(plddt))</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <p class="tip"><strong>误区</strong>：把 AlphaFold 当「实验替代品」。它给的是<strong>单一静态构象的高质量假设</strong>，不是真相——对无序蛋白、构象变化、突变效应、蛋白复合体的动态往往力不从心，pLDDT 低的区域尤其要当心。它<strong>加速但不取代</strong>实验验证。</p>
+    <p style="margin-top:10px"><strong>BigCat 场景</strong>：这是「AI 把不可行变可行」的范式样本。你做跨学科思考时，可把它当元问题的锚：一个卡了半世纪的领域，被「序列→结构」这个映射一朝改写。类比到你自己的领域——哪些「难测但有海量间接信号（如进化冗余）」的问题，也在等一个 AlphaFold 时刻？</p>
+  </div>
+
+  <div class="section">
+    <div class="label">一句话 takeaway + 思考题</div>
+    <p class="takeaway">AlphaFold 的核心不是「更大的网络」，而是<strong>把进化冗余（MSA）当免费的约束信号</strong>——自然界早把答案写在物种间的共变里。💭 你手头哪个难题，其实早有「一起变化的冗余副本」在偷偷泄露答案？</p>
+  </div>
+</div>
+
+<!-- 2. 神经算子 / 科学代理模型 -->
+<div class="card">
+  <h2>神经算子与科学代理模型<span class="en">Neural Operators</span></h2>
+  <div class="tags"><span class="tag">科学计算</span><span class="tag purple">PDE 求解</span><span class="tag orange">GraphCast</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>把一个<strong>跑得极慢的数值模拟器物化成一次前向传播</strong>——就像给昂贵的实时查询建了个<strong>物化视图（materialized view）</strong>：预计算一次，之后查询近乎免费。传统天气/流体模拟要在超算上一步步迭代偏微分方程（PDE），神经算子学的是<strong>「输入场 → 输出场」的整体映射</strong>，绕开逐步迭代，一把出结果。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：气候、流体、材料应力这些系统由 PDE 描述，数值求解精确但<strong>慢且贵</strong>——全球天气预报要在超算上算一小时。而且传统解法「一次只解一个实例」，换个初始条件就得从头再算。</p>
+    <p style="margin-top:8px">关键洞察是<strong>学「算子」而非「函数」</strong>：函数把数映到数，<strong>算子把整个函数映到整个函数</strong>（整张温度场 → 6 小时后的整张温度场）。<strong>傅里叶神经算子 FNO</strong>（Li et al., 2020）的招数很优雅：把物理场做 FFT 变到频域，只在<strong>低频模态</strong>上乘可学习权重（低频=大尺度结构），再变回来。因为权重活在频域、与网格分辨率无关，它能<strong>零样本超分辨率</strong>——低分辨率训练、高分辨率推理。</p>
+    <p style="margin-top:8px"><strong>GraphCast</strong>（DeepMind, 2023, Science）是这条路的旗舰：用图神经网络学全球天气演化，10 天预报在 <strong>1 分钟内</strong>算完，多数验证指标上超过顶级传统数值预报系统。这不是「更准一点」，是<strong>成本降了几个数量级</strong>，让集合预报第一次变得便宜。</p>
+    <p style="margin-top:8px" class="tip"><strong>诚实边界</strong>：代理模型是<strong>插值器不是外推器</strong>——分布内飞快又准，遇到训练里没见过的极端情形（破纪录风暴）可能失灵。产业界普遍是<strong>代理模型 + 传统求解器混合</strong>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">import</span> torch
+<span class="cmt"># 傅里叶层核心：在频域做线性变换 = 一次算子作用于整个场</span>
+<span class="kw">def</span> <span class="fn">spectral_conv</span>(x, weights):
+    <span class="cmt"># x: (batch, channels, grid) 物理场，如温度/气压网格</span>
+    x_ft = torch.fft.<span class="fn">rfft</span>(x)                 <span class="cmt"># 变到频域：每个频率一个复系数</span>
+    modes = weights.shape[-<span class="str">1</span>]                 <span class="cmt"># 只保留前 k 个低频（大尺度结构）</span>
+    out_ft = torch.<span class="fn">zeros_like</span>(x_ft)
+    out_ft[..., :modes] = x_ft[..., :modes] * weights  <span class="cmt"># 频域逐点相乘=全局卷积</span>
+    <span class="kw">return</span> torch.fft.<span class="fn">irfft</span>(out_ft, n=x.shape[-<span class="str">1</span>])  <span class="cmt"># 变回物理空间</span>
+<span class="cmt"># 关键：weights 活在频域，与网格分辨率解耦 → 可零样本超分辨率</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <p class="tip"><strong>误区</strong>：以为神经算子「理解了物理」。它学的是<strong>数据里的统计规律</strong>，不是守恒定律。所以它会违反能量守恒、在长时间滚动预测里漂移。别把插值当理解。</p>
+    <p style="margin-top:10px"><strong>BigCat 场景</strong>：这个「用一次前向替换昂贵计算」的模式高度可迁移——凡是「同一套慢逻辑要反复跑在不同输入上」，都值得问：能不能训个代理模型？你熟悉的缓存/物化视图思想在科学计算里换了个数学外衣，骨架一样：<strong>拿空间和一次性训练成本，换查询时的速度</strong>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">一句话 takeaway + 思考题</div>
+    <p class="takeaway">神经算子学的是<strong>函数空间之间的映射</strong>，所以一次训练泛化到一整族问题，而非一个实例。💭 你系统里哪段「慢逻辑」其实每次都在解同一族问题、只是换了参数，适合被代理模型「物化」掉？</p>
+  </div>
+</div>
+
+<!-- 3. 材料发现 GNoME -->
+<div class="card">
+  <h2>材料发现<span class="en">GNoME · Materials Discovery</span></h2>
+  <div class="tags"><span class="tag">计算化学</span><span class="tag purple">图神经网络</span><span class="tag orange">主动学习</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>化学组合空间大到天文数字，逐个用第一性原理精算（DFT）像<strong>对整张表做全表精确校验</strong>——准但慢到不可行。GNoME 的思路是先用一个<strong>廉价的 GNN 预测器当布隆过滤器（Bloom filter）</strong>：快速筛掉几乎肯定不稳定的候选，只把「可能命中」的少数送去做昂贵的 DFT 精算。廉价预筛 + 昂贵精验，标准的<strong>漏斗式过滤</strong>。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：新材料（电池、超导、催化剂）藏在巨大的元素组合空间里。判断一个假想晶体<strong>稳不稳定</strong>需要量子力学计算 DFT，一个候选几小时 CPU，穷举无望。历史上人类靠化学直觉猜——覆盖面窄。</p>
+    <p style="margin-top:8px"><strong>GNoME</strong>（DeepMind, 2023, Nature）把晶体建模成<strong>图</strong>（原子=节点，化学键=边），GNN 学着预测「形成能」和<strong>能量凸包上方距离</strong>（e_above_hull，≈0 才稳定）。真正的引擎是<strong>主动学习闭环</strong>：GNN 筛出候选 → DFT 精算验证 → 新结果<strong>回填训练集</strong> → GNN 变强 → 下一轮更准。这个自强化循环识别出约 <strong>38 万</strong>个新稳定晶体结构，很多是人类化学直觉想不到的。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">GNoME 主动学习闭环（廉价筛 → 昂贵验 → 回填变强）</span><br>
+<span class="box p">海量候选晶体</span> <span class="arrow">→</span> <span class="box">GNN 快速筛稳定性</span> <span class="arrow">→</span> <span class="box g">少量有希望候选</span><br>
+<span class="arrow">↓</span> <span style="color:#5a6378;font-size:0.76rem">送去精算</span><br>
+<span class="box o">DFT 量子力学验证</span> <span class="arrow">→</span> <span class="box r">新稳定材料 + 标注</span>
+<span class="arrow">↺</span> <span style="color:#5a6378;font-size:0.76rem">回填训练集，GNN 下一轮更准</span>
+</div>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="cmt"># GNoME 思路：GNN 快速预测稳定性筛掉大多数，再交给 DFT 精算（漏斗）</span>
+<span class="kw">from</span> pymatgen.core <span class="kw">import</span> Composition
+
+candidates = [<span class="str">"Li3PO4"</span>, <span class="str">"Na2FeO3"</span>, <span class="str">"CaTiO3"</span>, <span class="str">"Xe2Fe"</span>]  <span class="cmt"># 海量候选的一角</span>
+
+<span class="kw">def</span> <span class="fn">gnn_stability</span>(formula):
+    comp = <span class="fn">Composition</span>(formula)  <span class="cmt"># 真实 GNoME 吃晶体图，这里用占位分示意流程</span>
+    <span class="cmt"># e_above_hull：能量凸包上方距离(eV/atom)，越接近 0 越稳定</span>
+    <span class="kw">return</span> {<span class="str">"formula"</span>: formula, <span class="str">"e_above_hull"</span>: <span class="str">0.02</span> * <span class="fn">len</span>(comp)}
+
+<span class="cmt"># 廉价预筛：只让 &lt;0.03 eV/atom 的候选进入昂贵的 DFT 阶段</span>
+to_verify = [c[<span class="str">"formula"</span>] <span class="kw">for</span> f <span class="kw">in</span> candidates
+             <span class="kw">if</span> (c := <span class="fn">gnn_stability</span>(f))[<span class="str">"e_above_hull"</span>] &lt; <span class="str">0.03</span>]
+<span class="fn">print</span>(<span class="str">"送 DFT 精算的候选:"</span>, to_verify)  <span class="cmt"># 从海量收敛到少数</span></pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <p class="tip"><strong>误区</strong>：把「预测稳定」等同于「造得出、有用」。GNoME 给的是<strong>热力学稳定性假设</strong>，不保证能被合成、不代表有目标性能——后续有独立研究质疑这批新材料的新颖性与可合成性。计算发现是漏斗的<strong>入口</strong>，不是终点。</p>
+    <p style="margin-top:10px"><strong>BigCat 场景</strong>：这个「廉价预筛 + 昂贵验证 + 结果回填」的主动学习闭环，是任何<strong>大规模筛选型决策</strong>的通用骨架——投资初筛、简历海选、实验候选排序。核心：别让昂贵环节去啃全量，让快模型先把漏斗收窄。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">一句话 takeaway + 思考题</div>
+    <p class="takeaway">GNoME 的威力不在单个 GNN，而在<strong>主动学习闭环</strong>：预测→验证→回填让模型和数据集一起螺旋上升。💭 你的工作流里，有没有一个「验证结果」明明可以回填、却被白白丢掉的环节？</p>
+  </div>
+</div>
+
+<!-- 4. 算法与数学发现 -->
+<div class="card">
+  <h2>算法与数学发现<span class="en">AlphaTensor · FunSearch</span></h2>
+  <div class="tags"><span class="tag">离散搜索</span><span class="tag purple">强化学习</span><span class="tag orange">LLM 进化</span></div>
+
+  <div class="section">
+    <div class="label">一句话类比</div>
+    <p>前三个是 AI <strong>加速</strong>科学，这个是 AI <strong>产出新知识</strong>——发现人类没找到的算法与数学对象。做法是把「发现」重铸成<strong>搜索问题</strong>：AlphaTensor 把「找更快的矩阵乘法」变成一盘 <strong>AlphaZero 式单人棋</strong>；FunSearch 把 LLM 当<strong>变异算子</strong>、评估器当<strong>适应度函数 + 防幻觉门</strong>做进化搜索。像遗传算法，但「变异」由会写代码的 LLM 智能产生。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">它解决什么问题 + 工作机制</div>
+    <p>痛点：找新算法/数学构造历来靠天才的灵光一现，不可规模化、不可复现。能不能让机器系统地搜？难点在<strong>搜索空间是离散的天文数字</strong>，且大多数候选是错的。</p>
+    <p style="margin-top:8px"><strong>AlphaTensor</strong>（DeepMind, 2022, Nature）：矩阵乘法等价于<strong>张量分解</strong>，分解用的乘法次数越少算法越快。它把这变成单人游戏——状态=还没分解掉的张量，动作=选一个秩 1 项去消，用 AlphaZero 的蒙特卡洛树搜索来玩，<strong>对 4×4 矩阵找到了 50 年来第一个超越 Strassen 经典算法的方案</strong>。</p>
+    <p style="margin-top:8px"><strong>FunSearch</strong>（DeepMind, 2024, Nature，名字=在函数空间里搜索）：用预训练 LLM 不断生成候选<strong>程序</strong>（不是直接生成答案），配<strong>确定性评估器</strong>打分。妙在——<strong>LLM 会幻觉，但评估器跑代码验证</strong>，错候选自动得低分被淘汰。它由此在组合数学的 cap set 问题上找到新解，并给在线装箱问题找到更优启发式。</p>
+
+<div class="diagram" style="margin-top:14px">
+<span style="color:#8b92a8">FunSearch 进化循环（LLM 变异 + 评估器守门）</span><br>
+<span class="box g">当前最优程序</span> <span class="arrow">→</span> <span class="box p">LLM 生成变体</span> <span style="color:#5a6378;font-size:0.76rem">(创造力来源)</span><br>
+<span class="arrow">↓</span><br>
+<span class="box o">确定性评估器</span> <span style="color:#5a6378;font-size:0.76rem">(跑代码打分，幻觉在此被过滤)</span>
+<span class="arrow">→</span> <span class="box r">更优则保留</span> <span class="arrow">↺</span>
+</div>
+    <p style="margin-top:12px"><strong>关键设计</strong>：输出是<strong>可验证的代码/构造</strong>而非自然语言断言——正确性由外部评估器保证，不靠 LLM 自己说了算，这类系统才「信得过」。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">代码示例</div>
+<pre><span class="kw">from</span> anthropic <span class="kw">import</span> Anthropic
+client = <span class="fn">Anthropic</span>()  <span class="cmt"># 需要 ANTHROPIC_API_KEY</span>
+<span class="cmt"># FunSearch 骨架：LLM 当「变异算子」产候选，评估器当「防幻觉门」</span>
+
+<span class="kw">def</span> <span class="fn">evaluate</span>(code):        <span class="cmt"># 确定性打分：跑代码、验正确性、返回分数</span>
+    ...                    <span class="cmt"># 评估器保证：LLM 会幻觉，但错候选得低分被淘汰</span>
+    <span class="kw">return</span> score
+
+best = <span class="str">"def priority(item): return 0"</span>  <span class="cmt"># 初始种子程序</span>
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="str">100</span>):       <span class="cmt"># 进化循环</span>
+    msg = client.messages.<span class="fn">create</span>(model=<span class="str">"claude-opus-4-8"</span>, max_tokens=<span class="str">512</span>,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>,
+            <span class="str">"content"</span>: <span class="fn">f</span><span class="str">"改进这个启发式函数，只返回代码:\n{best}"</span>}])
+    cand = msg.content[<span class="str">0</span>].text
+    <span class="kw">if</span> <span class="fn">evaluate</span>(cand) &gt; <span class="fn">evaluate</span>(best):   <span class="cmt"># 只有真正更优才保留</span>
+        best = cand</pre>
+  </div>
+
+  <div class="section">
+    <div class="label">常见误区 + 实践场景</div>
+    <p class="tip"><strong>误区</strong>：以为「LLM 自己发现了数学」。真相是——<strong>创造力（LLM 生成）和正确性（评估器验证）被解耦</strong>。没有那个确定性评估器，LLM 生成的一堆「看着对」的东西全是幻觉。功劳属于这套架构，不是裸模型。</p>
+    <p style="margin-top:10px"><strong>BigCat 场景</strong>：这个「LLM 大胆生成 + 程序严格验证」的解耦范式，是用 AI 做任何<strong>创造性但要求正确</strong>工作的黄金模板——让模型放开产点子，用你信得过的确定性检查器（测试、类型检查、事实核对）当闸门。别让 LLM 既当运动员又当裁判。</p>
+  </div>
+
+  <div class="section">
+    <div class="label">一句话 takeaway + 思考题</div>
+    <p class="takeaway">AI 发现新知识的秘诀是<strong>解耦创造与验证</strong>：模型负责「大胆猜」，确定性评估器负责「严格验」——幻觉在验证关被挡住。💭 你用 AI 时，有没有把「生成」和「验证」交给了同一方，等于让它自己给自己打分？</p>
+  </div>
+</div>
+
+<!-- 深入资源 -->
+<div class="card" style="border-left-color:#7b61ff">
+  <h2>深入资源<span class="en">Further Reading</span></h2>
+  <div class="section">
+    <ul>
+      <li><a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">Jumper et al. 2021 — Highly accurate protein structure prediction with AlphaFold (Nature)</a> — AlphaFold2 原始论文，结构生物学分水岭</li>
+      <li><a href="https://www.nature.com/articles/s41586-023-06735-9" target="_blank">Merchant et al. 2023 — Scaling deep learning for materials discovery (Nature)</a> — GNoME，主动学习发现 38 万稳定材料</li>
+      <li><a href="https://www.nature.com/articles/s41586-022-05172-4" target="_blank">Fawzi et al. 2022 — Discovering faster matrix multiplication algorithms with RL (Nature)</a> — AlphaTensor，超越 Strassen</li>
+      <li><a href="https://deepmind.google/blog/funsearch-making-new-discoveries-in-mathematical-sciences-using-large-language-models/" target="_blank">FunSearch (DeepMind, 2024, Nature)</a> — LLM + 评估器进化搜索，首次用 LLM 做出数学新发现</li>
+      <li><a href="https://arxiv.org/abs/2212.12794" target="_blank">Lam et al. — GraphCast: Learning skillful medium-range global weather forecasting (arXiv 2212.12794 / Science 2023)</a> — 图神经网络天气预报旗舰</li>
+      <li><a href="https://arxiv.org/abs/2010.08895" target="_blank">Li et al. 2020 — Fourier Neural Operator for Parametric PDEs (arXiv 2010.08895)</a> — 神经算子在频域学 PDE 映射的奠基工作</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 深入思考 -->
+<div class="card think" style="border-left-color:#7ed6a0">
+  <h2>深入思考<span class="en">Deep Questions</span></h2>
+  <div class="section">
+    <details><summary>1. 这四个案例里，AlphaFold/GNoME/GraphCast 是「加速」科学（更快得到人类本可求的答案），FunSearch/AlphaTensor 是「发现」新知识（人类没找到的）。这个区别在本质上是什么？</summary><div>区别在<strong>验证的可得性</strong>。「加速」类有明确的<strong>真值可对照</strong>（真实蛋白结构、天气、DFT 精算），AI 逼近一个已定义的映射，本质是<strong>昂贵计算的压缩/插值</strong>——快，但不产出定义域外的新东西。「发现」类的解空间<strong>离散、组合爆炸、且有廉价的确定性验证器</strong>（算法对不对、构造是否满足约束，一跑便知）。正是「验证便宜、搜索昂贵」这个不对称，让搜索型 AI 能产出人类未及之物：不需要理解为什么，只需在天文数字空间里找到一个能通过验证的点。关键判据：<strong>你的问题有没有便宜又可靠的验证器？</strong>有 → 能让 AI 去「发现」；没有 → 只能在已有标注上「加速」。这也解释了为何数学/算法/材料稳定性等「可验证」领域最先被攻破，而「什么是好的科学理论」这类没有廉价验证器的问题仍属于人类。</div></details>
+
+    <details><summary>2. AlphaFold 用「进化冗余（MSA）」、GNoME 用「主动学习回填」、FunSearch 用「评估器守门」。把这三个机制抽象成通用的工程模式，各对应你熟悉的什么系统思想？</summary><div>三者都是<strong>「用便宜的信号源，撬动昂贵的目标」</strong>，撬点不同。① MSA 是<strong>免费的冗余副本挖约束</strong>——对应从多副本的一致/分歧推断拓扑（谁总和谁一起变=谁和谁耦合），或从日志共现反推服务依赖图。② 主动学习回填是<strong>把验证结果喂回训练、让筛选器自进化</strong>——对应自适应缓存/自调优：每次 miss 的真实代价被记录用来改进预取，越用越准。③ 评估器守门是<strong>生成与验证解耦</strong>——对应编译器类型检查、CI 测试门、金融对账：让高吞吐的一方自由产出，用可信但便宜的关卡挡错。合起来就是「AI for X」系统的通用配方：<strong>免费的弱信号（①）+ 自我强化的闭环（②）+ 便宜可靠的验证器（③）</strong>。缺哪个，系统就分别退化为「没先验、样本效率极低」「一次性、不进化」「幻觉失控、不可信」。</div></details>
+
+    <details><summary>3. 神经算子/代理模型「快但不理解物理」，会违反守恒定律、在长程预测里漂移。这和 LLM「流利但会幻觉」是同一类问题吗？对「该在多大程度上信任统计模型」有什么启发？</summary><div>是<strong>同构</strong>的问题：两者都是<strong>用高维统计拟合替代了显式的底层规则</strong>，因而在训练分布内惊艳、在分布外/长程外推时暴露「没有真正的因果/守恒约束」这一根本缺陷。GraphCast 的天气漂移 = LLM 的事实幻觉，都是「插值器被当成了推理器」。启发有三：① <strong>信任绑定分布</strong>——问「输入离训练分布多远」而非「模型多强」；离得远，统计模型的自信毫无意义（呼应 Day 48 校准）。② <strong>硬约束显式注入</strong>——物理信息神经网络把守恒律写进损失函数，正如给 LLM 套 RAG/工具/验证器外置事实约束；纯统计模型不会自己长出约束。③ <strong>混合而非替代</strong>——「代理模型探索 + 传统求解器兜底」，正如「LLM 生成 + 确定性检查」。深层共识：<strong>统计模型负责广度与速度，符号/物理规则负责正确性与外推</strong>，二者互补而非替代。</div></details>
+
+    <details><summary>4. 「把发现重铸成搜索」需要一个便宜的验证器。科学里哪些问题天然有这种验证器、哪些没有？这是否意味着 AI for Science 会系统性地偏向某类问题、而冷落另一类？</summary><div>有廉价验证器的：<strong>可计算、可形式化、可仿真的问题</strong>——算法正确性（跑一遍）、数学构造（查约束）、蛋白结构（有实验/物理打分）、材料稳定性（DFT）。没有的：<strong>需昂贵长周期真实实验才能证伪的问题</strong>——新药的长期疗效、经济政策的社会后果、生态干预的十年影响、「什么是更好的科学范式」。这会造成<strong>系统性偏斜</strong>：进展集中在「验证便宜」的象限，让这些领域加速拉开，而「验证昂贵/无法形式化」的领域相对停滞——不因它们不重要，而因搜索型 AI 在那里没有可用的适应度函数。两个风险：① <strong>度量扭曲议程</strong>——可被 AI 加速的问题吸走注意力和资金，「路灯下找钥匙」；② <strong>验证器偏差被放大</strong>——DFT 或打分函数若有系统误差，AI 会高效过拟合到它的漏洞（呼应 Day 47 reward hacking）。元启示：判断「某领域会不会被 AI 快速改写」，先问的不是「模型够不够强」，而是<strong>「有没有便宜可靠的验证器」</strong>——这比模型能力更能预测变革次序。</div></details>
+
+    <details><summary>5. 若「创造由 AI、验证由确定性系统」成为科学发现的主流范式，人类科学家的不可替代角色是什么？这对你追求「AI 超级个体」意味着什么样的能力重心转移？</summary><div>搜索与验证被自动化后，人类价值向搜索<strong>循环之外</strong>三处上移：① <strong>提出正确问题、定义正确验证器</strong>——AI 只在你给定的空间和适应度函数里最优化；<strong>选择优化什么是最高杠杆的人类判断</strong>，选错验证器，AI 会高效把你带向错误目标。② <strong>跨域连接与品味</strong>——把「进化冗余」从生物搬到你的领域、看出远领域的同构，这种类比与审美是当前 AI 的弱项，也是你佛学×分布式×复杂性科学的组合优势。③ <strong>为无法形式化的问题负责</strong>——价值权衡、伦理、「该不该做」，没有廉价验证器，只能由人承担。对「AI 超级个体」的能力重心转移：从「亲手求解」转向「<strong>设计求解系统</strong>」——核心竞争力不再是算得多快，而是<strong>会不会把模糊难题拆成「弱信号 + 自强化闭环 + 可信验证器」这套配方</strong>，并守住那个只有人能定的目标函数。AI 越能自动化「搜索」，人类「定义搜索什么、凭什么算数」的能力就越稀缺——这正是超级个体该押注的方向。</div></details>
+  </div>
+</div>
+
+<footer>BigCat · AI &amp; ML · Day 46 · 2026-07-02</footer>
+
+</div>
+
+</body>
+</html>
